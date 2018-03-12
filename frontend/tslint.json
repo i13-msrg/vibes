@@ -1,0 +1,14 @@
+{
+  "extends": ["tslint:latest", "tslint-config-airbnb", "tslint-react"],
+  "rules": {
+    "no-consecutive-blank-lines": false,
+    "import-name": false,
+    "max-line-length": [true, 120],
+    "jsx-no-lambda": false,
+    "jsx-no-multiline-js": false,
+    "align": false,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "array-type": [true, "array"]
+  }
+}

@@ -1,0 +1,16 @@
+.configuration {
+  max-width: 1024px;
+  margin: 48px auto auto;
+
+  @media (max-width: 1120px) {
+    margin: 48px;
+  }
+}
+
+.configuration__next {
+  float: right;
+}
+
+.configuration__back {
+  float: left;
+}

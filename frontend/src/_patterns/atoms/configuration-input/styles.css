@@ -1,0 +1,27 @@
+.configuration-input {
+  position: relative;
+}
+
+.configuration-input__input {
+  background-color: var(--blue);
+  width: 200px;
+  padding-left: 70px;
+  height: 51px;
+  border: none;
+  font-size: 14px;
+  font-weight: 300;
+  color: white;
+  appearance: none;
+
+  &::placeholder {
+    color: white;
+  }
+}
+
+.configuration-input__icon {
+  width: 24px;
+  color: white;
+  position: absolute;
+  top: 14px;
+  left: 14px;
+}

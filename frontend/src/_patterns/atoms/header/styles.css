@@ -1,0 +1,18 @@
+.header {
+  color: white;
+  text-align: center;
+}
+
+.header__title {
+  margin-top: 14px;
+  font-family: 'Montserrat';
+  font-size: 22px;
+  font-weight: 200;
+  text-transform: uppercase;
+}
+
+.header__subtitle {
+  font-family: Montserrat;
+  font-size: 18px;
+  margin-top: 10px;
+}

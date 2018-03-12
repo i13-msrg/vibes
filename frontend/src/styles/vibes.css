@@ -1,0 +1,46 @@
+@import 'normalize.css';
+@import '_colors.css';
+@import '_fonts.css';
+@import '_utils.css';
+@import '_input-range.css';
+
+@import '../_patterns/atoms/atoms.css';
+@import '../_patterns/molecules/molecules.css';
+@import '../_patterns/organisms/organisms.css';
+@import '../_patterns/pages/pages.css';
+
+:root {
+  --header-height: 90px;
+}
+
+
+html, body {
+  width: 100%;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.vibes__header {
+  height: var(--header-height);
+  background-color: var(--blue);
+  box-shadow: 0 3px 4px 0 rgba(92, 105, 123, 0.5);
+  display: flex;
+  justify-content: center;
+}
+
+.vibes__content {
+  position: absolute;
+  top: var(--header-height);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+}
+
+
+

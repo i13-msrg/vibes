@@ -1,0 +1,16 @@
+.home {
+  max-width: 1024px;
+  margin: 48px auto auto;
+
+  @media (max-width: 1120px) {
+    margin: 48px;
+  }
+}
+
+.home__next {
+  float: right;
+}
+
+.home__import {
+  float: left;
+}

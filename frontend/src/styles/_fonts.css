@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:200,400');
+
+:root {
+  --font-xs: 10px;
+  --font-s: 14px;
+  --font-m: 16px;
+  --font-l: 18px;
+  --font-xl: 20px;
+  --font-xxl: 24px;
+  --font-xxxl: 36px;
+}
+

@@ -1,0 +1,26 @@
+.events-range {
+  width: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5e6f82;
+}
+
+.events-range__input {
+  width: 100%;
+}
+
+.events-range__min-date {
+  float: left;
+  margin-top: 10px;
+}
+
+.events-range__max-date {
+  float: right;
+  margin-top: 10px;
+}
+
+.events-range__current-date {
+  text-align: center;
+  height: 25px;
+  color: #4083DB;
+}

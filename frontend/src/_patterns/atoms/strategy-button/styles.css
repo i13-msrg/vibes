@@ -1,0 +1,40 @@
+:root {
+  --button-height: 60px;
+}
+
+.strategy-button {
+  position: relative;
+  margin-top: 30px;
+  display: block;
+  cursor: pointer;
+}
+
+.strategy-button__button {
+  height: var(--button-height);
+  width: 400px;
+  color: #727D8B;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px 0 rgba(92, 105, 123, 0.5);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #E5E8ED;
+  transition: color 0.1s, background-color 0.1s;
+
+  &--selected {
+    color: white;
+    background-color: var(--blue);
+  }
+}
+
+.strategy-button__badge {
+  width: 17px;
+  height: var(--button-height);
+  border-radius: 0 8px 8px 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  background-color: #2c67b5;
+}

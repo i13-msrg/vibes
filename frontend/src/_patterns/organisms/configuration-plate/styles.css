@@ -1,0 +1,27 @@
+.configuration-plate {
+  min-height: 500px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.configuration-plate__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+}
+
+.configuration-plate__content {
+  margin-top: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.configuration-plate__grid {
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(2, 1fr);
+  grid-row-gap: 30px;
+  grid-column-gap: 20px;
+  margin-bottom: 50px;
+}

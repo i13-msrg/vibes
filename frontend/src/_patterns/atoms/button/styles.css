@@ -1,0 +1,30 @@
+.button {
+  width: 120px;
+  height: 45px;
+  background-color: #4083DB;
+  color: white;
+  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.1s, color 0.1s;
+
+  &:hover {
+    background-color: #2A5491;
+  }
+
+  &--inactive {
+    background-color: #E5E8ED;
+    color: #727D8B;
+    cursor: auto;
+
+    &:hover {
+      background-color: #E5E8ED;
+    }
+  }
+
+
+}
