@@ -84,7 +84,7 @@ object ReducerActor {
       }
 
     import java.text.DecimalFormat
-    val formatter = new DecimalFormat("#.###")
+    val formatter = new DecimalFormat("#,###") // this should be depending on the regional settings of the host pc. Point for Germany, comma for english speaking countries
 
     val timesSize = if (times.nonEmpty) times.size else 1
     val timesAvgWithOutliers = (formatter.format(timesWithOutliers._1 / timesSize).toFloat,
