@@ -30,7 +30,7 @@ export default class StrategyPlate extends React.Component<IStrategyPlateProps, 
           />
           <StrategyButton
             onClick={() => this.handleOnClickStrategy(Strategies.PROOF_OF_WORK)}
-            title="Proof of Work"
+            title="Bitcoin-like Proof of Work"
             selected={selectedStrategy === Strategies.PROOF_OF_WORK}
           />
           <StrategyButton

@@ -30,6 +30,7 @@ class Vibes extends React.Component<{}, IVibesState> {
   constructor(props: {}) {
     super(props);
 
+    // todo
     this.state = {
       strategy: Strategies.GENERIC_SIMULATION,
       page: Pages.HOME,

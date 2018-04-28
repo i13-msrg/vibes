@@ -31,7 +31,7 @@ export default class Home extends React.Component<IHomeProps, {}> {
           className="home__next"
           title="Next"
           onClick={this.handleNextClick}
-          active={strategy === Strategies.GENERIC_SIMULATION}
+          active={(strategy === Strategies.GENERIC_SIMULATION) || (strategy === Strategies.PROOF_OF_WORK)}
         />
       </div>
     );
@@ -40,7 +40,7 @@ export default class Home extends React.Component<IHomeProps, {}> {
   private handleNextClick() {
     const { strategy } = this.props;
 
-    if (strategy === Strategies.GENERIC_SIMULATION) {
+    if (strategy === Strategies.GENERIC_SIMULATION || strategy === Strategies.PROOF_OF_WORK) {
       this.props.onHomeNextClick();
     }
   }
