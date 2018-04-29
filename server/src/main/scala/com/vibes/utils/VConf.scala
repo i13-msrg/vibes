@@ -3,14 +3,6 @@ package com.vibes.utils
 import org.joda.time.DateTime
 
 object VConf {
-  /**
-    * 0 for Generic Blockchain Simulation
-    * 1 for Proof of Stake
-    * 2 for Proof of Work
-    * 3 for Hyperledger
-    */
-  var typeOfSimulation = 0
-
   var numberOfNodes = 10
   var blockTime = 600 // seconds
   var neighboursDiscoveryInterval = 3000 // seconds

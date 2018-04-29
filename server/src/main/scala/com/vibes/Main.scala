@@ -67,7 +67,9 @@ object Main extends App with FailFastCirceSupport {
                     'transactionSize.as[Int],
                     'throughput.as[Int],
                     'latency.as[Int],
-                    'neighboursDiscoveryInterval.as[Int]
+                    'neighboursDiscoveryInterval.as[Int],
+                    'blockSize.as[Int],
+                    'networkBandwidth.as[Int]
                   )) {
                   (blockTime,
                    numberOfNeighbours,
@@ -76,7 +78,9 @@ object Main extends App with FailFastCirceSupport {
                    transactionSize,
                    throughput,
                    latency,
-                   neighboursDiscoveryInterval) =>
+                   neighboursDiscoveryInterval,
+                   blockSize,
+                   networkBandwidth) =>
                     println(s"ATTEMPT START.......")
 
                     if (!lock) {
@@ -90,6 +94,8 @@ object Main extends App with FailFastCirceSupport {
                       VConf.throughPut = throughput
                       VConf.propagationDelay = latency
                       VConf.neighboursDiscoveryInterval = neighboursDiscoveryInterval
+                      VConf.blockSize = blockSize
+                      VConf.networkBandwidth = networkBandwidth
                       val masterActor = system.actorOf(MasterActor.props(), "Master")
                       // timeout for the ask pattern
                       implicit val timeout = Timeout(5000 seconds)
