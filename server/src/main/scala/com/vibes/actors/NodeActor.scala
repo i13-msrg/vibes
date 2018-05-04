@@ -89,7 +89,7 @@ class NodeActor(
       val exWorkRequest = transaction
         .createExecutableWorkRequest(self,
                                      neighbour,
-                                     timestamp.plusMillis(150),
+                                     timestamp.plusMillis(150), // todo
                                      VExecution.ExecutionType.PropagateTransaction)
       val value = () => {
         neighbour ! NodeActions.ReceiveTransaction(node, transaction, exWorkRequest.timestamp)

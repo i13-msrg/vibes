@@ -85,7 +85,9 @@ object Main extends App with FailFastCirceSupport {
 
                     if (!lock) {
                       lock = true
-                      println(s"START.......")
+                      println("=========================================================================================================")
+                      println("===============================================START=====================================================")
+                      println("=========================================================================================================")
                       VConf.blockTime = blockTime
                       VConf.numberOfNeighbours = numberOfNeighbours
                       VConf.numberOfNodes = numberOfNodes

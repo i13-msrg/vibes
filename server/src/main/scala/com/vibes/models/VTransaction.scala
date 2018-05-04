@@ -15,7 +15,7 @@ class VTransaction(
   val origin: ActorRef,
   val recipient: ActorRef,
   val amount: Int,
-  private val recipients: ListBuffer[VRecipient] // maybe use mutable sorted set instead
+  private val recipients: ListBuffer[VRecipient] // maybe use mutable sorted set instead todo
 ) {
   def canEqual(a: Any) = a.isInstanceOf[VTransaction]
   override def equals(that: Any): Boolean =

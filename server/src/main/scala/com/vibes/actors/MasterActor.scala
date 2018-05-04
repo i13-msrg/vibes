@@ -38,14 +38,14 @@ import scala.util.Random
   * Reset all the workRequests after an execution has taken place and ask all nodes for their workRequests once again
   * However, the MasterActor becomes the bottleneck because only 1 actor at a time can execute an operation,
   * while blocking all others. The current solution blocks only in particular cases, therefore is much faster,
-  * but messier
+  * but messier.
   */
 class MasterActor extends Actor {
   implicit val timeout: Timeout = Timeout(20.seconds)
 
   /**
-    * NodeActors ask for work permission and MastreActors issues them so that they can fast forward
-    * Only issue a permission once all currentNodeActors have voted
+    * NodeActors ask for work permission and MasterActors issues them, so that they can fast forward.
+    * Only issue a permission once all currentNodeActors have voted.
     */
   private var workRequests: SortedSet[VExecution.WorkRequest] = SortedSet.empty
 
