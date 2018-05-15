@@ -18,6 +18,6 @@ object Dependencies {
   val slf4jLog: ModuleID = "org.slf4j" % "log4j-over-slf4j" % "1.7.1" // for any java classes looking for this
 
   // Logging
-  val logback2: ModuleID = "ch.qos.logback" % "logback-classic" % "1.1.2"
-  val scalaLogging2: ModuleID = "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
+  val logback: ModuleID = "ch.qos.logback" % "logback-classic" % "1.1.2"
+  val scalaLogging: ModuleID = "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
 }

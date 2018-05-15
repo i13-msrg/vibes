@@ -39,9 +39,8 @@ lazy val server = (project in file("server"))
       Dependencies.scalaTest,
       Dependencies.slf4jApi,
       Dependencies.slf4jLog,
-
-      Dependencies.scalaLogging2,
-      Dependencies.logback2,
+      Dependencies.scalaLogging,
+      Dependencies.logback,
 
       "de.heikoseeberger" %% "akka-http-circe" % "1.20.0-RC1",
       "ch.megard" %% "akka-http-cors" % "0.2.2"
