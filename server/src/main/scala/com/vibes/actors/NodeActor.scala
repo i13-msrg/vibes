@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
 import com.vibes.models.{VBlock, VNode, VTransaction}
 import com.vibes.utils.{VConf, VExecution}
@@ -15,14 +16,14 @@ import scala.concurrent.duration._
 /**
   * A node in a blockchain network. Currently represents both miner & a full node
   */
-class NodeActor(
+class NodeActor (
   masterActor: ActorRef,
   nodeRepoActor: ActorRef,
   discoveryActor: ActorRef,
   reducerActor: ActorRef,
   lat: Double,
   lng: Double
-) extends Actor {
+) extends Actor with LazyLogging {
   implicit val timeout: Timeout = Timeout(20.seconds)
   private var node = new VNode(
     id = UUID.randomUUID().toString,
@@ -49,6 +50,7 @@ class NodeActor(
     val exWorkRequest = node.createExecutableWorkRequest(self, timestamp, VExecution.ExecutionType.MineBlock)
     val value = () => {
       println(s"BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
+      logger.debug(s"BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
       node = node.addBlock(VBlock.createWinnerBlock(node, timestamp))
       addExecutablesForPropagateOwnBlock(timestamp)
       nodeRepoActor ! NodeRepoActions.AnnounceNextWorkRequestAndMine(timestamp)
@@ -115,6 +117,7 @@ class NodeActor(
 
   override def preStart(): Unit = {
     println(s"NodeActor started ${self.path}")
+    logger.debug(s"NodeActor started ${self.path}")
 
     discoveryActor ! DiscoveryActions.ReceiveNode(node)
   }
@@ -126,6 +129,7 @@ class NodeActor(
   override def receive: Receive = {
     case NodeActions.StartSimulation(now) =>
       println(s"StartSimulation ${now} ${self}")
+      logger.debug(s"StartSimulation ${now} ${self}")
       addExecutablesForMineBlock(now)
 
       self ! NodeActions.CastNextWorkRequestOnly

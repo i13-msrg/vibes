@@ -1,18 +1,20 @@
 package com.vibes.actors
 
 import akka.actor.{Actor, ActorRef, Props}
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{MasterActions, ReducerActions}
 import com.vibes.models.{MinedBlock, TransferBlock, VEventType, VNode}
 import com.vibes.utils.VConf
 import org.joda.time._
 
 // Takes final RAW result of the simulator and converts it to a format processable by a client
-class ReducerActor(masterActor: ActorRef) extends Actor {
+class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
   private var nodes: Set[VNode] = Set.empty
   private var start             = DateTime.now
 
   override def preStart(): Unit = {
     start = DateTime.now
+    logger.debug(s"ReducerActor started ${self.path}")
     println(s"ReducerActor started ${self.path}")
   }
 
@@ -40,7 +42,7 @@ case class ReducerIntermediateResult(
   lastBlockNumberOfRecipents: Int
 )
 
-object ReducerActor {
+object ReducerActor extends LazyLogging {
   def props(masterActor: ActorRef): Props = Props(new ReducerActor(masterActor))
 
   def calculateResult(nodes: Set[VNode], start: DateTime): ReducerIntermediateResult = {
@@ -119,11 +121,30 @@ object ReducerActor {
     println(s"BLOCK PROPAGATION TIME 10% (NO OUTLIERS)... ${timesAvgNoOutliers._1} SECONDS")
     println(s"BLOCK PROPAGATION TIME 50% (NO OUTLIERS)... ${timesAvgNoOutliers._2} SECONDS")
     println(s"BLOCK PROPAGATION TIME 90% (NO OUTLIERS)... ${timesAvgNoOutliers._3} SECONDS")
+
+    // logging
+    logger.debug(s"SIMULATION TOOK... ${duration} SECONDS")
+    logger.debug(s"LONGEST CHAIN... ${longestChainLength} BLOCKS")
+    logger.debug(s"LONGEST CHAIN SIZE.... $longestChainSize KB")
+    logger.debug(s"LONGEST CHAIN NUMBER OF TRANSACTIONS... ${longestChainNumberTransactions}")
+    logger.debug(s"NUMBER OF BLOCKS FOR PROPAGATION TIME ${times.size}")
+    logger.debug(s"BLOCK PROPAGATION TIME 10%... ${timesAvgWithOutliers._1} SECONDS")
+    logger.debug(s"BLOCK PROPAGATION TIME 50%... ${timesAvgWithOutliers._2} SECONDS")
+    logger.debug(s"BLOCK PROPAGATION TIME 90%... ${timesAvgWithOutliers._3} SECONDS")
+
+    logger.debug(s"NUMBER OF BLOCKS FOR PROPAGATION TIME (NO OUTLIERS) ${timesNoOutliersFiltered.size}")
+    logger.debug(s"BLOCK PROPAGATION TIME 10% (NO OUTLIERS)... ${timesAvgNoOutliers._1} SECONDS")
+    logger.debug(s"BLOCK PROPAGATION TIME 50% (NO OUTLIERS)... ${timesAvgNoOutliers._2} SECONDS")
+    logger.debug(s"BLOCK PROPAGATION TIME 90% (NO OUTLIERS)... ${timesAvgNoOutliers._3} SECONDS")
+
     // +1 cause we don't count origin
     val firstBlockNumberOfRecipents = longestChain.last.numberOfRecipients + 1
     println(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipents}  OUT OF ${VConf.numberOfNodes} NODES")
+    logger.debug(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipents}  OUT OF ${VConf.numberOfNodes} NODES")
+
     val lastBlockNumberOfRecipents = longestChain.head.numberOfRecipients + 1
     println(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipents} OUT OF ${VConf.numberOfNodes} NODES")
+    logger.debug(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipents} OUT OF ${VConf.numberOfNodes} NODES")
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty

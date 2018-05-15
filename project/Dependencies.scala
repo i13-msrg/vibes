@@ -14,8 +14,10 @@ object Dependencies {
   // Tests
   val akkaTestkit: ModuleID = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
   val scalaTest: ModuleID = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-  val scalaLogging: ModuleID = "com.typesafe" %% "scalalogging-slf4j" % "1.0.1"
   val slf4jApi: ModuleID = "org.slf4j" % "slf4j-api" % "1.7.1"
   val slf4jLog: ModuleID = "org.slf4j" % "log4j-over-slf4j" % "1.7.1" // for any java classes looking for this
-  val logback: ModuleID = "ch.qos.logback" % "logback-classic" % "1.0.3"
+
+  // Logging
+  val logback2: ModuleID = "ch.qos.logback" % "logback-classic" % "1.1.2"
+  val scalaLogging2: ModuleID = "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
 }

@@ -2,15 +2,13 @@ package com.vibes.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
-import com.vibes.models.VBlock
 
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Actor {
-  implicit val timeout: Timeout                   = Timeout(20.seconds)
+class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Actor with LazyLogging{
+  implicit val timeout: Timeout = Timeout(20.seconds)
   private var registeredNodeActors: Set[ActorRef] = Set.empty
 
   override def preStart(): Unit = {
@@ -20,6 +18,7 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
   override def receive: Receive = {
     case NodeRepoActions.RegisterNode =>
       println(s"REGISTER NODE....... ${registeredNodeActors.size}")
+      logger.debug(s"REGISTER NODE....... ${registeredNodeActors.size}")
       val coordinates = NodeRepoActor.createCoordinatesOnLand()
       val actor = context.actorOf(
         NodeActor.props(context.parent, self, discoveryActor, reducerActor, coordinates._1, coordinates._2))
@@ -27,6 +26,7 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
 
     case NodeRepoActions.AnnounceStart(now) =>
       println("NodeRepoActions.AnnounceStart")
+      logger.debug("NodeRepoActions.AnnounceStart")
       registeredNodeActors.foreach(_ ! NodeActions.StartSimulation(now))
 
     case NodeRepoActions.AnnounceNextWorkRequestOnly =>
@@ -42,6 +42,8 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
 
 object NodeRepoActor {
   private val coordinateLimits = List(
+    // Some coordinates exist multiple times to increase their probability.
+
     // North America
     Coordinate(60, 68, -140, -120),
     Coordinate(51, 61, -127, -99),
@@ -95,9 +97,9 @@ object NodeRepoActor {
   }
 
   def props(
-    discoveryActor: ActorRef,
-    reducerActor: ActorRef
-  ): Props = Props(new NodeRepoActor(discoveryActor, reducerActor))
+             discoveryActor: ActorRef,
+             reducerActor: ActorRef
+           ): Props = Props(new NodeRepoActor(discoveryActor, reducerActor))
 }
 
 case class Coordinate(latStart: Int, latEnd: Int, lngStart: Int, lngEnd: Int)

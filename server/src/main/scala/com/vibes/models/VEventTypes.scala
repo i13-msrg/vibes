@@ -1,6 +1,5 @@
 package com.vibes.models
 
-import com.vibes.utils.VExecution.WorkRequest
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto._
 import org.joda.time.DateTime

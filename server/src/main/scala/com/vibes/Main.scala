@@ -2,8 +2,8 @@ package vibes
 
 import akka.actor.{ActorSystem, PoisonPill}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{StatusCodes, _}
 import akka.http.scaladsl.model.headers.{HttpOrigin, HttpOriginRange}
+import akka.http.scaladsl.model.{StatusCodes, _}
 import akka.http.scaladsl.server.{Directives, ExceptionHandler, RejectionHandler, Route}
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -17,13 +17,16 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.syntax._
 import org.joda.time.DateTime
 
+
+import com.typesafe.scalalogging.LazyLogging
+
 import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
 import scala.language.postfixOps
 import scala.util.Success
 
-object Main extends App with FailFastCirceSupport {
-  implicit val system       = ActorSystem("VSystem")
+object Main extends App with FailFastCirceSupport with LazyLogging {
+  implicit val system = ActorSystem("VSystem")
   implicit val materializer = ActorMaterializer()
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext = system.dispatcher
@@ -50,6 +53,9 @@ object Main extends App with FailFastCirceSupport {
     // Combining the two handlers only for convenience
     val handleErrors = handleRejections(rejectionHandler) & handleExceptions(exceptionHandler)
 
+    val timeoutResponse = HttpResponse(StatusCodes.EnhanceYourCalm,
+      entity = "Unable to serve response within time limit, please enchance your calm.")
+
     // Note how rejections and exceptions are handled *before* the CORS directive (in the inner route).
     // This is required to have the correct CORS headers in the response even when an error occurs.
     handleErrors {
@@ -57,7 +63,8 @@ object Main extends App with FailFastCirceSupport {
         handleErrors {
           path("vibe") {
             get {
-              withRequestTimeout(1000.seconds) {
+              // Timeout Browser Console Message: Uncaught (in promise) SyntaxError: Unexpected token < in JSON at position 0
+              withRequestTimeout(60.seconds, request => timeoutResponse) {
                 parameters(
                   (
                     'blockTime.as[Int],
@@ -108,8 +115,8 @@ object Main extends App with FailFastCirceSupport {
                       onComplete(reducerIntermediateResult.flatMap(promise =>
                         promise.future.map { intermediateResult =>
                           val json = intermediateResult.events.map {
-                            case event @ (_: MinedBlock)    => event.asJson
-                            case event @ (_: TransferBlock) => event.asJson
+                            case event@(_: MinedBlock) => event.asJson
+                            case event@(_: TransferBlock) => event.asJson
                           }
 
                           ReducerResult(
@@ -128,7 +135,7 @@ object Main extends App with FailFastCirceSupport {
                             intermediateResult.lastBlockNumberOfRecipents,
                             VConf.numberOfNodes
                           )
-                      })) { extraction =>
+                        })) { extraction =>
                         lock = false
                         extraction match {
                           case Success(result) =>
@@ -151,8 +158,8 @@ object Main extends App with FailFastCirceSupport {
       }
     }
   }
-
   val bindingFuture = Http().bindAndHandle(route, "localhost", 8082)
 
+  logger.debug("Server online at http://localhost:8082/\\nPress RETURN to stop...")
   println(s"Server online at http://localhost:8082/\nPress RETURN to stop...")
 }

@@ -2,19 +2,20 @@ package com.vibes.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{DiscoveryActions, NodeActions}
 import com.vibes.models.VNode
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.duration._
 import scala.util.Random
 
-class DiscoveryActor(numberOfNeighbours: Int) extends Actor {
+class DiscoveryActor(numberOfNeighbours: Int) extends Actor with LazyLogging {
   private var currentNodes: List[VNode] = List.empty
   implicit private val timeout: Timeout = Timeout(20.seconds)
 
   override def preStart(): Unit = {
     println(s"DisoveryActor started ${self.path}")
+    logger.debug(s"DisoveryActor started ${self.path}")
   }
 
   override def receive: Receive = {
@@ -26,11 +27,12 @@ class DiscoveryActor(numberOfNeighbours: Int) extends Actor {
   }
 }
 
-object DiscoveryActor {
+object DiscoveryActor extends LazyLogging {
   def props(numberOfNeighbours: Int): Props = Props(new DiscoveryActor(numberOfNeighbours))
 
   def announceNeighbours(currentNodes: List[VNode], numberOfNeighbours: Int): Unit = {
     println("Update neighbours table...")
+    logger.debug("Update neighbours table...")
     currentNodes.foreach(node =>
       node.actor ! NodeActions.ReceiveNeighbours(discoverNeighbours(currentNodes, node, numberOfNeighbours)))
   }

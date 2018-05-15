@@ -133,7 +133,7 @@ class MasterActor extends Actor {
 
           // have all workRequests been collected?
           if (workRequests.size == VConf.numberOfNodes) {
-            // number of actors that requested work should be the smae of number of nodes (aka each requested work once)
+            // number of actors that requested work should be the same of number of nodes (aka each requested work once)
             assert(currentNodeActors.size == VConf.numberOfNodes)
             // assert each requested work once, checked in an alternative way
             assert(workRequests.map(_.fromActor).toSet.size == workRequests.size)
