@@ -8,6 +8,17 @@ import com.vibes.utils.VConf
 import org.joda.time._
 
 // Takes final RAW result of the simulator and converts it to a format processable by a client
+
+/*
+* Once the simulation is over, the Reducer takes a set of all nodes as input and finds
+* the longest chain in the network (every Node holds a blockchain). The longest chain
+* contains a list of blocks with arrival times and recipients. Each block contains a list
+* of transaction with arrival times and recipients as well. Based on this information it is
+* trivial to compute the final output of the simulator.
+* The lists of recipient and arrival times are an implementation detail of VIBES that helps
+* us backtrack events in the network, they do not necessarily correspond to any entity in a
+* real blockchain network
+*/
 class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
   private var nodes: Set[VNode] = Set.empty
   private var start             = DateTime.now

@@ -7,6 +7,18 @@ import com.vibes.actions._
 
 import scala.concurrent.duration._
 
+/*
+* This actor is simply a helper to offload work from the Coordinator. The NodeRepoActor
+* serves as a repository for all Nodes in the network and occasionally broadcasts messages
+* addressed to all of them such as: AnnounceSimulationStart and AnnounceSimulationEnd.
+* More importantly, this Actor takes care to register or instantiate all Nodes in the network
+* with coordinates on land surface only. To achieve land-only instantiation, we have created
+* a list of rectangles represented by lat, lng coordinates on the world’s map that are only
+* within land surface and whenever we generate a Node, we pick a rectangle and randomly
+* instantiate the node within the coordinates of the rectangle.
+* A good opportunity for future work is to enable configuration of Nodes’ distribution on
+* the world map, as explained in VIBES Chapter 6.
+*/
 class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Actor with LazyLogging{
   implicit val timeout: Timeout = Timeout(20.seconds)
   private var registeredNodeActors: Set[ActorRef] = Set.empty

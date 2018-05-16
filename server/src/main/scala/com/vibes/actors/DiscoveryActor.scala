@@ -9,6 +9,17 @@ import com.vibes.models.VNode
 import scala.concurrent.duration._
 import scala.util.Random
 
+/*
+* The DiscoveryActor updates Nodes’ neighbour tables on regular intervals, based on
+* the configuration parameter - neighbourDiscoveryInterval. The DiscoveryActor simply
+* dispatches a message to each Node with a new set of randomly chosen neighbours every
+* neighbourDiscoveryInterval seconds. I believe there is no specific algorithm or heuristic
+* behind the neighbour discovery in a blockchain based network, but even if there is - it
+* is easy to exchange the current randomized one since the DiscoveryActor is the central
+* authority there. Why don’t Nodes update their own tables instead of being managed by
+* another Actor? Because I wanted to offload work from them firstly, and secondly, it is
+* now very easy to exchange discovery implementation.
+*/
 class DiscoveryActor(numberOfNeighbours: Int) extends Actor with LazyLogging {
   private var currentNodes: List[VNode] = List.empty
   implicit private val timeout: Timeout = Timeout(20.seconds)

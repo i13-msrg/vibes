@@ -13,9 +13,26 @@ import org.joda.time.DateTime
 import scala.collection.SortedMap
 import scala.concurrent.duration._
 
-/**
-  * A node in a blockchain network. Currently represents both miner & a full node
-  */
+/*
+* The NodeActor represents both a full Node and a miner in the blockchain network. As
+* described in Chapter 6, it is a good opportunity for future work to differentiate between
+* both.
+* In VIBES, each NodeActor has its own blockchain, pool of pending transactions
+* (candidates for the next block) and neighbours. It also works to solve the next block in
+* the chain. A Node has its own priority queue of executables and the next solution of
+* a block by this Node is represented by the first executable of type MineBlock in the queue.
+* As a reminder, a NodeActor’s executables types are either MineBlock, IssueTransaction,
+* PropagateTransaction or PropagateBlock.
+* A vote is represented by a best guess (timestamped work request) sent to the
+* Coordinator. The NodeActor sends votes to the Coordinator and is only allowed to
+* execute a piece of work once the Coordinator has granted a permission based on the votes.
+* Moreover, this Actor receives and propagates blocks from other Nodes in the network. If
+* a received block comes from a longer chain, the Actor takes care to follow synchronization
+* steps described in Section 2.7. The Node synchronizes its blockchain, pool of transactions,
+* rolls back any orphan blocks and adds any valid transactions from orphan blocks back
+* to the transaction pool if they are not already included in the chain. Besides blocks, the
+* NodeActor also takes care to propagate and create transactions in the network.
+*/
 class NodeActor (
   masterActor: ActorRef,
   nodeRepoActor: ActorRef,
@@ -39,7 +56,7 @@ class NodeActor (
   /**
     * Every node has a priority queue of executables, current implementation utilizes TreeMap / SortedMap instead
     * because I'd also need to filter the Queue by criteria later. Node workRequest with those executables to the MasterActor
-    * and the Node with the smallest timestamp for workRequestd executable receives the right to fast-forward the network
+    * and the Node with the smallest timestamp for workRequested executable receives the right to fast-forward the network
     * aka run the executable and its Queue. The executable is then removed from the Queue, then the appropriate Nodes
     * recompute their Queues and workRequest again recursively
     */
@@ -124,6 +141,7 @@ class NodeActor (
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     println(s"PRERESTART.... ${self.path}")
+    logger.debug(s"PRERESTART.... ${self.path}")
   }
 
   override def receive: Receive = {
