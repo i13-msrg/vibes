@@ -3,8 +3,8 @@ export enum Strategies {
   PROOF_OF_STAKE = 'PROOF_OF_STAKE',
   PROOF_OF_WORK = 'PROOF_OF_WORK',
   HYPERLEDGER = 'HYPERLEDGER',
+  BITCOIN_LIKE_BLOCKCHAIN = 'BITCOIN_LIKE_BLOCKCHAIN'
 }
-
 
 export interface INumberOfNodesConfiguration {
   numberOfNodes: number | null;
@@ -38,6 +38,22 @@ export interface INeighboursDiscoveryInterval {
   neighboursDiscoveryInterval: number | null;
 }
 
+export interface IMaxBlockSize {
+  maxBlockSize: number | null;
+}
+
+export interface IMaxBlockWeight {
+  maxBlockWeight: number | null;
+}
+
+export interface INetworkBandwidth {
+  networkBandwidth: number | null;
+}
+
+export interface IStrategy {
+    strategy: string | null;
+}
+
 export interface IConfiguration extends
   INumberOfNodesConfiguration,
   INumberOfNeighboursConfiguration,
@@ -46,9 +62,14 @@ export interface IConfiguration extends
   ISimulateUntil,
   IThroughput,
   ILatency,
+  IMaxBlockSize,
+  IMaxBlockWeight,
+  INetworkBandwidth,
+  IStrategy,
   INeighboursDiscoveryInterval {
-  [index: string]: number | null;
-}
+  [index: string]: any | null;
+  }
+
 
 export type ConfigurationEntity =
   INumberOfNodesConfiguration |

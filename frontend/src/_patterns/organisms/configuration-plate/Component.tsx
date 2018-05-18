@@ -61,18 +61,18 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       placeholder: 'Latency',
       title: 'Propagation delay for a block (in milliseconds)',
     },
-      {
-          configurationKey: 'blockSize',
-          icon: distanceIcon,
-          placeholder: 'Block size',
-          title: 'Block size in MBs',
-      },
-      {
-          configurationKey: 'networkBandwidth',
-          icon: wifiIcon,
-          placeholder: 'Network bandwidth',
-          title: 'Network bandwidth in MBs per second',
-      },
+    {
+      configurationKey: 'maxBlockSize',
+      icon: distanceIcon,
+      placeholder: 'Block size',
+      title: 'Block size in KBs',
+    },
+    {
+      configurationKey: 'networkBandwidth',
+      icon: wifiIcon,
+      placeholder: 'Network bandwidth',
+      title: 'Network bandwidth in MBs per second',
+    },
     {
       configurationKey: 'neighboursDiscoveryInterval',
       icon: wifiIcon,

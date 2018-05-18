@@ -15,7 +15,7 @@ object VEventType {
   implicit val OrderingVEventType: Ordering[VEventType] = Ordering.by(vote => (vote.timestamp, vote.eventType))
 }
 
-case class MinedBlock(origin: VNode, timestamp: DateTime, eventType: String = "MinedBlock") extends VEventType
+case class MinedBlock(origin: VNode, timestamp: DateTime, transactionPoolSize: Int, eventType: String = "MinedBlock") extends VEventType
 
 object MinedBlock {
   implicit val minedBlockEncoder: Encoder[MinedBlock] = new Encoder[MinedBlock] {
@@ -53,8 +53,8 @@ case class ReducerResult(
   timesNoOutliers10: Float,
   timesNoOutliers50: Float,
   timesNoOutliers90: Float,
-  firstBlockNumberOfRecipents: Int,
-  lastBlockNumberOfRecipents: Int,
+  firstBlockNumberOfRecipients: Int,
+  lastBlockNumberOfRecipients: Int,
   totalNumberOfNodes: Int,
 )
 

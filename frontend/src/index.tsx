@@ -44,8 +44,10 @@ class Vibes extends React.Component<{}, IVibesState> {
         throughput:  10,  // average number of transactions per blockTime
         latency: 900, // ms (latency + transfer + verification time),
         neighboursDiscoveryInterval: 3000, // seconds
-          blockSize: 1, // MB
-          networkBandwidth: 1, // MB per second
+        maxBlockSize: 1000, // KB
+        maxBlockWeight: 4000, // KB
+        networkBandwidth: 1, // MB per second
+        strategy: Strategies.GENERIC_SIMULATION.toString()
       },
     };
     this.handleStrategyChange = this.handleStrategyChange.bind(this);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { EventTypes, IBlockMine, IBlockTransfer } from '../../molecules/simmulation-events/types';
+import { EventTypes, IBlockMine, IBlockTransfer } from '../../molecules/simulation-events/types';
 
 
 interface IDataMapProps {

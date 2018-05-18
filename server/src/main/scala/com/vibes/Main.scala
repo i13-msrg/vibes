@@ -17,7 +17,6 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.syntax._
 import org.joda.time.DateTime
 
-
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
@@ -61,6 +60,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
     handleErrors {
       cors(corsSettings) {
         handleErrors {
+          // http://localhost:8082/vibe?blockTime=600&numberOfNeighbours=4&numberOfNodes=10&simulateUntil=1526647160712&transactionSize=250&throughput=10&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=1&maxBlockWeight=4&networkBandwidth=1&strategy=PROOF_OF_WORK
           path("vibe") {
             get {
               // Timeout Browser Console Message: Uncaught (in promise) SyntaxError: Unexpected token < in JSON at position 0
@@ -75,8 +75,9 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                     'throughput.as[Int],
                     'latency.as[Int],
                     'neighboursDiscoveryInterval.as[Int],
-                    'blockSize.as[Int],
-                    'networkBandwidth.as[Int]
+                    'maxBlockSize.as[Int],
+                    'networkBandwidth.as[Int],
+                    'strategy.as[String]
                   )) {
                   (blockTime,
                    numberOfNeighbours,
@@ -86,8 +87,10 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    throughput,
                    latency,
                    neighboursDiscoveryInterval,
-                   blockSize,
-                   networkBandwidth) =>
+                   maxBlockSize,
+                   networkBandwidth,
+                   strategy
+                  ) =>
                     println(s"ATTEMPT START.......")
 
                     if (!lock) {
@@ -103,8 +106,10 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       VConf.throughPut = throughput
                       VConf.propagationDelay = latency
                       VConf.neighboursDiscoveryInterval = neighboursDiscoveryInterval
-                      VConf.blockSize = blockSize
+                      VConf.maxBlockSize = maxBlockSize
                       VConf.networkBandwidth = networkBandwidth
+                      VConf.strategy = strategy
+                      logger.debug(s"Strategy: $strategy")
                       val masterActor = system.actorOf(MasterActor.props(), "Master")
                       // timeout for the ask pattern
                       implicit val timeout = Timeout(5000 seconds)
@@ -131,8 +136,8 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                             intermediateResult.timesAvgNoOutliers._1,
                             intermediateResult.timesAvgNoOutliers._2,
                             intermediateResult.timesAvgNoOutliers._3,
-                            intermediateResult.firstBlockNumberOfRecipents,
-                            intermediateResult.lastBlockNumberOfRecipents,
+                            intermediateResult.firstBlockNumberOfRecipients,
+                            intermediateResult.lastBlockNumberOfRecipients,
                             VConf.numberOfNodes
                           )
                         })) { extraction =>

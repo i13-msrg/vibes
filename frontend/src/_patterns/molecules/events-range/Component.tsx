@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IBlockMine, IBlockTransfer } from '../simmulation-events/types';
+import { IBlockMine, IBlockTransfer } from '../simulation-events/types';
 
 
 interface IEventsRangeProps {

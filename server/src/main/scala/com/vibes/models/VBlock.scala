@@ -2,8 +2,10 @@ package com.vibes.models
 
 import java.util.UUID
 
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.utils.VConf
 import org.joda.time.{DateTime, Duration}
+import vibes.Main.logger
 
 import scala.collection.mutable.ListBuffer
 
@@ -14,6 +16,7 @@ case class VBlock(
   level: Int,
   timestamp: DateTime,
   private val recipients: ListBuffer[VRecipient],
+  transactionPoolSize: Int,
 ) {
   def numberOfRecipients: Int = recipients.size
 
@@ -24,8 +27,9 @@ case class VBlock(
     level: Int = level,
     timestamp: DateTime = timestamp,
     recipients: ListBuffer[VRecipient] = recipients,
+    transactionPoolSize: Int = transactionPoolSize,
   ): VBlock = {
-    new VBlock(id, origin, transactions, level, timestamp, recipients)
+    new VBlock(id, origin, transactions, level, timestamp, recipients, transactionPoolSize)
   }
   def currentRecipients: List[VRecipient] = recipients.toList
 
@@ -74,15 +78,23 @@ case class VBlock(
   }
 }
 
-object VBlock {
+object VBlock extends LazyLogging {
   def createWinnerBlock(node: VNode, timestamp: DateTime): VBlock = {
+    // maxBlockWeight vs maxBlockSize
+    val maxTransactionsPerBlock : Int = Math.round(VConf.maxBlockSize / VConf.transactionSize)
+    // todo genesis block has no transactions, because transaction pool is zero
+    // todo ? after last block new transactions are added to the transaction pool
+    logger.debug(s"Maximum amount of transactions per block: $maxTransactionsPerBlock")
+    logger.debug(s"Transaction pool size: ${node.transactionPool.size}")
+
     VBlock(
       id = UUID.randomUUID().toString,
       origin = node,
-      transactions = node.transactionPool,
+      transactions = node.transactionPool.take(maxTransactionsPerBlock),
       level = node.blockchain.size,
       timestamp = timestamp,
-      recipients = ListBuffer.empty
+      recipients = ListBuffer.empty,
+      transactionPoolSize = node.transactionPool.size
     )
   }
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { IConfiguration } from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
-import SimulationEvents from '../../molecules/simmulation-events/Component';
+import SimulationEvents from '../../molecules/simulation-events/Component';
 import Button from '../../atoms/button/Component';
 import fetchEvents, { ISimulationPayload } from './fetchSimulationPayload';
 import EventsRange from '../../molecules/events-range/Component';
@@ -66,8 +66,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                 timesNoOutliers10={simulationPayload.timesNoOutliers10}
                 timesNoOutliers50={simulationPayload.timesNoOutliers50}
                 timesNoOutliers90={simulationPayload.timesNoOutliers90}
-                firstBlockNumberOfRecipents={simulationPayload.firstBlockNumberOfRecipents}
-                lastBlockNumberOfRecipents={simulationPayload.lastBlockNumberOfRecipents}
+                firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
+                lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                 totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
               />
             )}
@@ -108,6 +108,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
               <div className="u-loader">Loading...</div>
             </div>
           )}
+        </div>
+        <div className="simulation__pending_transactions">
+              asdfasdfasdf
         </div>
       </div>
     );

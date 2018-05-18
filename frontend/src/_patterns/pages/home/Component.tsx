@@ -4,7 +4,6 @@ import { Strategies } from '../../../common/types';
 import Button from '../../atoms/button/Component';
 import StrategyPlate from '../../organisms/strategy-plate/Component';
 
-
 interface IHomeProps {
   onStrategyChange: (strategy: Strategies) => void;
   onHomeNextClick: () => void;
@@ -31,7 +30,7 @@ export default class Home extends React.Component<IHomeProps, {}> {
           className="home__next"
           title="Next"
           onClick={this.handleNextClick}
-          active={(strategy === Strategies.GENERIC_SIMULATION) || (strategy === Strategies.PROOF_OF_WORK)}
+          active={(strategy === Strategies.GENERIC_SIMULATION) || (strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN)}
         />
       </div>
     );
@@ -40,7 +39,7 @@ export default class Home extends React.Component<IHomeProps, {}> {
   private handleNextClick() {
     const { strategy } = this.props;
 
-    if (strategy === Strategies.GENERIC_SIMULATION || strategy === Strategies.PROOF_OF_WORK) {
+    if (strategy === Strategies.GENERIC_SIMULATION || strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
       this.props.onHomeNextClick();
     }
   }

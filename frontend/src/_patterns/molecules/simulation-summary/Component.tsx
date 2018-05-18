@@ -12,8 +12,8 @@ interface ISimulationSummaryProps {
   timesNoOutliers10: number | null;
   timesNoOutliers50: number | null;
   timesNoOutliers90: number | null;
-  firstBlockNumberOfRecipents: number;
-  lastBlockNumberOfRecipents: number;
+  firstBlockNumberOfRecipients: number;
+  lastBlockNumberOfRecipients: number;
   totalNumberOfNodes: number;
 }
 
@@ -24,8 +24,8 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
       duration,
       longestChainLength,
       longestChainSize,
-      firstBlockNumberOfRecipents,
-      lastBlockNumberOfRecipents,
+      firstBlockNumberOfRecipients,
+      lastBlockNumberOfRecipients,
       totalNumberOfNodes,
       timesWithOutliers10,
       timesWithOutliers50,
@@ -76,7 +76,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
               First block received by
             </div>
             <div className="simulation-summary__result">
-              {firstBlockNumberOfRecipents} nodes
+              {firstBlockNumberOfRecipients} nodes
             </div>
           </li>
           <li className="simulation-summary__list-item">
@@ -84,7 +84,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
               Last block received by
             </div>
             <div className="simulation-summary__result">
-              {lastBlockNumberOfRecipents} nodes
+              {lastBlockNumberOfRecipients} nodes
             </div>
           </li>
           <li className="simulation-summary__list-item">

@@ -22,6 +22,7 @@ import org.joda.time._
 class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
   private var nodes: Set[VNode] = Set.empty
   private var start             = DateTime.now
+  private var transactionPool: Set[VTransaction] = Set.empty
 
   override def preStart(): Unit = {
     start = DateTime.now
@@ -35,7 +36,7 @@ class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
       nodes += node
 
       if (VConf.numberOfNodes == nodes.size) {
-        val events = ReducerActor.calculateResult(nodes, start)
+        val events = ReducerActor.calculateResult(nodes, start, transactionPool)
         masterActor ! MasterActions.FinishEvents(events)
       }
   }
@@ -49,22 +50,33 @@ case class ReducerIntermediateResult(
   longestChainNumberTransactions: Int,
   timesAvgWithOutliers: (Float, Float, Float),
   timesAvgNoOutliers: (Float, Float, Float),
-  firstBlockNumberOfRecipents: Int,
-  lastBlockNumberOfRecipents: Int
+  firstBlockNumberOfRecipients: Int,
+  lastBlockNumberOfRecipients: Int
 )
 
 object ReducerActor extends LazyLogging {
   def props(masterActor: ActorRef): Props = Props(new ReducerActor(masterActor))
 
-  def calculateResult(nodes: Set[VNode], start: DateTime): ReducerIntermediateResult = {
+  def calculateResult(nodes: Set[VNode], start: DateTime, transactionPool: Set[VTransaction]): ReducerIntermediateResult = {
     var events: List[VEventType] = List.empty
     var longestChain             = nodes.last.blockchain
+    var lastNode = nodes.last
 
     // find longestChain (aka longest distributed ledger)
     nodes.foreach { node =>
       if (node.blockchain.lengthCompare(longestChain.size) > 0) {
         longestChain = node.blockchain
+        lastNode = node
       }
+    }
+
+    // find all transactions in the transactionPools
+    nodes.foreach { node =>
+      node.transactionPool.foreach( transaction =>
+        if ( ! transactionPool.contains(transaction)) {
+          transactionPool.+(transaction)
+        }
+      )
     }
 
     val size = longestChain.flatMap(_.transactions).size * VConf.transactionSize
@@ -149,17 +161,22 @@ object ReducerActor extends LazyLogging {
     logger.debug(s"BLOCK PROPAGATION TIME 90% (NO OUTLIERS)... ${timesAvgNoOutliers._3} SECONDS")
 
     // +1 cause we don't count origin
-    val firstBlockNumberOfRecipents = longestChain.last.numberOfRecipients + 1
-    println(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipents}  OUT OF ${VConf.numberOfNodes} NODES")
-    logger.debug(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipents}  OUT OF ${VConf.numberOfNodes} NODES")
+    val firstBlockNumberOfRecipients = longestChain.last.numberOfRecipients + 1
+    println(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipients}  OUT OF ${VConf.numberOfNodes} NODES")
+    logger.debug(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipients}  OUT OF ${VConf.numberOfNodes} NODES")
 
-    val lastBlockNumberOfRecipents = longestChain.head.numberOfRecipients + 1
-    println(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipents} OUT OF ${VConf.numberOfNodes} NODES")
-    logger.debug(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipents} OUT OF ${VConf.numberOfNodes} NODES")
+    val lastBlockNumberOfRecipients = longestChain.head.numberOfRecipients + 1
+    println(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipients} OUT OF ${VConf.numberOfNodes} NODES")
+    logger.debug(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipients} OUT OF ${VConf.numberOfNodes} NODES")
+
+    val amountOfTransactionsInTransactionpool = lastNode.transactionPool.size
+    println(s"TOTAL TRANSACTION POOL... ${amountOfTransactionsInTransactionpool}")
+    logger.debug(s"TOTAL TRANSACTION POOL... ${amountOfTransactionsInTransactionpool}")
+    logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty
-      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp)
+      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize)
       blockEvents :::= block.currentRecipients.map { recipient =>
         TransferBlock(recipient.from, recipient.to, timestamp = recipient.timestamp)
       }
@@ -177,8 +194,8 @@ object ReducerActor extends LazyLogging {
       longestChainNumberTransactions,
       timesAvgWithOutliers,
       timesAvgNoOutliers,
-      firstBlockNumberOfRecipents,
-      lastBlockNumberOfRecipents
+      firstBlockNumberOfRecipients,
+      lastBlockNumberOfRecipients
     )
   }
 }
