@@ -3,7 +3,7 @@ package com.vibes.actors
 import akka.actor.{Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{MasterActions, ReducerActions}
-import com.vibes.models.{MinedBlock, TransferBlock, VEventType, VNode}
+import com.vibes.models._
 import com.vibes.utils.VConf
 import org.joda.time._
 

@@ -6,6 +6,7 @@ import SimulationEvents from '../../molecules/simulation-events/Component';
 import Button from '../../atoms/button/Component';
 import fetchEvents, { ISimulationPayload } from './fetchSimulationPayload';
 import EventsRange from '../../molecules/events-range/Component';
+import { Chart } from 'react-google-charts';
 
 interface ISimulationState {
   selectedIndex?: number;
@@ -109,8 +110,21 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
             </div>
           )}
         </div>
-        <div className="simulation__pending_transactions">
-              asdfasdfasdf
+        <div className="simulation__pending_transactions u-plate">
+            <div className="chart__title">
+                Pending Transactions
+            </div>
+            <div className={'my-pretty-chart-container'}>
+                <Chart
+                    chartType="LineChart"
+                    data={[['Blocks', 'Pending Transactions'], [0, 0], [1, 4], [2, 8], [3, 12], [4, 16]]}
+                    options={{}}
+                    graph_id="ScatterChart"
+                    width="100%"
+                    height="400px"
+                    legend_toggle
+                />
+            </div>
         </div>
       </div>
     );
