@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { IConfiguration } from '../../../common/types';
+import {IConfiguration} from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
 import SimulationEvents from '../../molecules/simulation-events/Component';
 import Button from '../../atoms/button/Component';
-import fetchEvents, { ISimulationPayload } from './fetchSimulationPayload';
+import fetchEvents, {ISimulationPayload} from './fetchSimulationPayload';
 import EventsRange from '../../molecules/events-range/Component';
-import { Chart } from 'react-google-charts';
+import {Chart} from 'react-google-charts';
+import {EventTypes} from "../../molecules/simulation-events/types";
 
 interface ISimulationState {
   selectedIndex?: number;
@@ -30,7 +31,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   }
 
   public render() {
-    const { simulationPayload, selectedIndex, moveIntoViewPort, isFetching } = this.state;
+    const { simulationPayload, selectedIndex, moveIntoViewPort, isFetching} = this.state;
 
     return (
       <div className="simulation">
@@ -82,6 +83,41 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
             />
           </div>
         </div>
+
+          <div className="simulation-pending-transactions u-plate">
+              <div className="simulation-pending-transactions__title">
+                  Pending Transactions
+              </div>
+              {simulationPayload && (
+                  <div className={'pending-transactions-chart-container'}>
+                      <Chart
+                          chartType="AreaChart"
+                          //data={data}
+                          data={this.pendingTransactions(simulationPayload)}
+                          // todo add processed transactions?
+                          //data={[['Blocks', 'Pending Transactions'], simulationPayload ? ]}
+                          options={{
+                              hAxis: {
+                                  title: 'Blocks',
+                                  gridlines: { count: -1}
+                              },
+                              vAxis: {
+                                  title: 'Pending Transactions'
+                              },
+                              series: {
+                                  1: {curveType: 'function'}
+                              },
+                              legend: 'none'
+                          }}
+                          graph_id="AreaChart"
+                          width="100%"
+                          height="264px"
+                          //legend_toggle
+                      />
+                  </div>
+              )}
+          </div>
+
         <div className="simulation__buttons">
           <div>
             <Button
@@ -110,22 +146,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
             </div>
           )}
         </div>
-        <div className="simulation__pending_transactions u-plate">
-            <div className="chart__title">
-                Pending Transactions
-            </div>
-            <div className={'my-pretty-chart-container'}>
-                <Chart
-                    chartType="LineChart"
-                    data={[['Blocks', 'Pending Transactions'], [0, 0], [1, 4], [2, 8], [3, 12], [4, 16]]}
-                    options={{}}
-                    graph_id="ScatterChart"
-                    width="100%"
-                    height="400px"
-                    legend_toggle
-                />
-            </div>
-        </div>
       </div>
     );
   }
@@ -138,5 +158,17 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
   private handleSelectIndex(selectedIndex: number, moveIntoViewPort: boolean) {
     this.setState({ selectedIndex, moveIntoViewPort });
+  }
+
+  private pendingTransactions(simulationPayload: any) {
+      var multi:any[][] =[['Blocks', 'Pending Transactions']];
+
+      for (let i = 0; i < simulationPayload.events.length; i++) {
+          if (simulationPayload.events[i].eventType == EventTypes.IBlockMine) {
+              multi.push(new Array(simulationPayload.events[i].level, simulationPayload.events[i].transactionPoolSize))
+          }
+      }
+
+      return multi;
   }
 }

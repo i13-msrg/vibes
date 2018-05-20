@@ -47,7 +47,9 @@ class Vibes extends React.Component<{}, IVibesState> {
         maxBlockSize: 1000, // KB
         maxBlockWeight: 4000, // KB
         networkBandwidth: 1, // MB per second
-        strategy: Strategies.GENERIC_SIMULATION.toString()
+        //strategy: Strategies.GENERIC_SIMULATION.toString()
+          // todo change strategy automatically
+        strategy: Strategies.BITCOIN_LIKE_BLOCKCHAIN.toString()
       },
     };
     this.handleStrategyChange = this.handleStrategyChange.bind(this);

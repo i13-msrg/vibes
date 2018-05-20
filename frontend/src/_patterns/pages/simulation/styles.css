@@ -60,6 +60,20 @@
   height: 40px;
   margin: 30px auto;
   font-size: 14px;
+}
 
+.simulation-pending-transactions__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
 
+.simulation-pending-transactions {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-pending-transactions;
 }

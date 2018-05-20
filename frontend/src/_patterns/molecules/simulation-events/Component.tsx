@@ -65,7 +65,7 @@ const renderEvent = (
               <use xlinkHref={`#${blockIcon.id}`} />
             </svg>
             <span>
-              Block mined from node {event.origin.id.slice(0, 8)}
+              Block mined from node {event.origin.id.slice(0, 8)} with transaction pool of {event.transactionPoolSize.toString()}
             </span>
           </span>
           <div className="simulation-events__list-time">

@@ -15,14 +15,16 @@ object VEventType {
   implicit val OrderingVEventType: Ordering[VEventType] = Ordering.by(vote => (vote.timestamp, vote.eventType))
 }
 
-case class MinedBlock(origin: VNode, timestamp: DateTime, transactionPoolSize: Int, eventType: String = "MinedBlock") extends VEventType
+case class MinedBlock(origin: VNode, timestamp: DateTime, transactionPoolSize: Int, eventType: String = "MinedBlock", level: Int) extends VEventType
 
 object MinedBlock {
   implicit val minedBlockEncoder: Encoder[MinedBlock] = new Encoder[MinedBlock] {
     override def apply(minedBlock: MinedBlock): Json = Json.obj(
       ("timestamp", Json.fromString(minedBlock.timestamp.toString())),
       ("eventType", Json.fromString(minedBlock.eventType)),
-      ("origin", minedBlock.origin.asJson)
+      ("transactionPoolSize", Json.fromInt(minedBlock.transactionPoolSize)),
+      ("origin", minedBlock.origin.asJson),
+      ("level", Json.fromInt(minedBlock.level))
     )
   }
 }

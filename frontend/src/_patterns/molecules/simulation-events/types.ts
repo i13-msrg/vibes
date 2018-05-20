@@ -13,6 +13,8 @@ export interface IBlockMine {
   eventType: EventTypes.IBlockMine;
   timestamp: Date;
   origin: INode;
+  transactionPoolSize: number;
+  level: number;
 }
 
 export interface IBlockTransfer {

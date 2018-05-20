@@ -176,7 +176,7 @@ object ReducerActor extends LazyLogging {
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty
-      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize)
+      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize, level = block.level)
       blockEvents :::= block.currentRecipients.map { recipient =>
         TransferBlock(recipient.from, recipient.to, timestamp = recipient.timestamp)
       }

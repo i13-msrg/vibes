@@ -5,7 +5,6 @@ import java.util.UUID
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.utils.VConf
 import org.joda.time.{DateTime, Duration}
-import vibes.Main.logger
 
 import scala.collection.mutable.ListBuffer
 
@@ -80,12 +79,18 @@ case class VBlock(
 
 object VBlock extends LazyLogging {
   def createWinnerBlock(node: VNode, timestamp: DateTime): VBlock = {
-    // maxBlockWeight vs maxBlockSize
-    val maxTransactionsPerBlock : Int = Math.round(VConf.maxBlockSize / VConf.transactionSize)
-    // todo genesis block has no transactions, because transaction pool is zero
-    // todo ? after last block new transactions are added to the transaction pool
-    logger.debug(s"Maximum amount of transactions per block: $maxTransactionsPerBlock")
-    logger.debug(s"Transaction pool size: ${node.transactionPool.size}")
+    var maxTransactionsPerBlock : Int = 0
+
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+      // maxBlockWeight vs maxBlockSize
+      maxTransactionsPerBlock = Math.round(VConf.maxBlockSize / VConf.transactionSize)
+      // todo genesis block has no transactions, because transaction pool is zero
+      // todo ? after last block new transactions are added to the transaction pool
+      logger.debug(s"Maximum amount of transactions per block: $maxTransactionsPerBlock")
+      logger.debug(s"Transaction pool size: ${node.transactionPool.size}")
+    } else {
+      maxTransactionsPerBlock = node.transactionPool.size
+    }
 
     VBlock(
       id = UUID.randomUUID().toString,
