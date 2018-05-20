@@ -83,7 +83,7 @@ object VBlock extends LazyLogging {
 
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
       // maxBlockWeight vs maxBlockSize
-      maxTransactionsPerBlock = Math.round(VConf.maxBlockSize / VConf.transactionSize)
+      maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
       // todo genesis block has no transactions, because transaction pool is zero
       // todo ? after last block new transactions are added to the transaction pool
       logger.debug(s"Maximum amount of transactions per block: $maxTransactionsPerBlock")

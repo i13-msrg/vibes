@@ -51,7 +51,8 @@ case class ReducerIntermediateResult(
   timesAvgWithOutliers: (Float, Float, Float),
   timesAvgNoOutliers: (Float, Float, Float),
   firstBlockNumberOfRecipients: Int,
-  lastBlockNumberOfRecipients: Int
+  lastBlockNumberOfRecipients: Int,
+  maxProcessedTransactions: Int
 )
 
 object ReducerActor extends LazyLogging {
@@ -174,9 +175,13 @@ object ReducerActor extends LazyLogging {
     logger.debug(s"TOTAL TRANSACTION POOL... ${amountOfTransactionsInTransactionpool}")
     logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
+    val maxProcessedTransactions = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
+    logger.debug(s"MAXIMUM POSSIBLE TRANSACTIONS PER BLOCK... $maxProcessedTransactions")
+    println(s"MAXIMUM POSSIBLE TRANSACTIONS PER BLOCK... $maxProcessedTransactions")
+
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty
-      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize, level = block.level)
+      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize, level = block.level, transactions = block.transactions)
       blockEvents :::= block.currentRecipients.map { recipient =>
         TransferBlock(recipient.from, recipient.to, timestamp = recipient.timestamp)
       }
@@ -195,7 +200,8 @@ object ReducerActor extends LazyLogging {
       timesAvgWithOutliers,
       timesAvgNoOutliers,
       firstBlockNumberOfRecipients,
-      lastBlockNumberOfRecipients
+      lastBlockNumberOfRecipients,
+      maxProcessedTransactions
     )
   }
 }

@@ -77,3 +77,19 @@
   height: 264px;
   grid-area: simulation-pending-transactions;
 }
+
+.simulation-processed-transactions__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-processed-transactions {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-processed-transactions;
+}

@@ -64,7 +64,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
           path("vibe") {
             get {
               // Timeout Browser Console Message: Uncaught (in promise) SyntaxError: Unexpected token < in JSON at position 0
-              withRequestTimeout(60.seconds, request => timeoutResponse) {
+              withRequestTimeout(600.seconds, request => timeoutResponse) {
                 parameters(
                   (
                     'blockTime.as[Int],
@@ -138,6 +138,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                             intermediateResult.timesAvgNoOutliers._3,
                             intermediateResult.firstBlockNumberOfRecipients,
                             intermediateResult.lastBlockNumberOfRecipients,
+                            intermediateResult.maxProcessedTransactions,
                             VConf.numberOfNodes
                           )
                         })) { extraction =>

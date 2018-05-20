@@ -94,7 +94,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                           chartType="AreaChart"
                           //data={data}
                           data={this.pendingTransactions(simulationPayload)}
-                          // todo add processed transactions?
                           //data={[['Blocks', 'Pending Transactions'], simulationPayload ? ]}
                           options={{
                               hAxis: {
@@ -113,6 +112,37 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                           width="100%"
                           height="264px"
                           //legend_toggle
+                      />
+                  </div>
+              )}
+          </div>
+
+          <div className="simulation-processed-transactions u-plate">
+              <div className="simulation-processed-transactions__title">
+                  Processed Transactions
+              </div>
+              {simulationPayload && (
+                  <div className={'processed-transactions-chart-container'}>
+                      <Chart
+                          chartType="LineChart"
+                          data={this.processedTransactions(simulationPayload)}
+                          options={{
+                              hAxis: {
+                                  title: 'Blocks',
+                                  gridlines: { count: -1}
+                              },
+                              vAxis: {
+                                  title: 'Processed Transactions'
+                              },
+                              series: {
+                                  1: {curveType: 'function'}
+                              },
+                              legend: { position: 'bottom' },
+                              focusTarget: 'category'
+                          }}
+                          graph_id="LineChart"
+                          width="100%"
+                          height="264px"
                       />
                   </div>
               )}
@@ -171,4 +201,19 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
       return multi;
   }
+
+    private processedTransactions(simulationPayload: any) {
+        var multi:any[][] =[['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
+        var maxProcessedTransactions: number = simulationPayload.maxProcessedTransactions;
+
+        console.log(maxProcessedTransactions);
+
+        for (let i = 0; i < simulationPayload.events.length; i++) {
+            if (simulationPayload.events[i].eventType == EventTypes.IBlockMine) {
+                multi.push(new Array(simulationPayload.events[i].level, simulationPayload.events[i].processedTransactions, maxProcessedTransactions))
+            }
+        }
+
+        return multi;
+    }
 }
