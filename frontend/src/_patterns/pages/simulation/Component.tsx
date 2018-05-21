@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {IConfiguration} from '../../../common/types';
+import {IConfiguration, Strategies} from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
 import SimulationEvents from '../../molecules/simulation-events/Component';
@@ -209,14 +209,25 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   }
 
     private processedTransactions(simulationPayload: any) {
-        var multi:any[][] =[['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
-        var maxProcessedTransactions: number = simulationPayload.maxProcessedTransactions;
+      var multi: any[][];
+      if (this.props.strategy == Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
+          multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
+          var maxProcessedTransactions: number = simulationPayload.maxProcessedTransactions;
 
-        for (let i = 0; i < simulationPayload.events.length; i++) {
-            if (simulationPayload.events[i].eventType == EventTypes.IBlockMine) {
-                multi.push(new Array(simulationPayload.events[i].level, simulationPayload.events[i].processedTransactions, maxProcessedTransactions))
-            }
-        }
+          for (let i = 0; i < simulationPayload.events.length; i++) {
+              if (simulationPayload.events[i].eventType == EventTypes.IBlockMine) {
+                  multi.push(new Array(simulationPayload.events[i].level, simulationPayload.events[i].processedTransactions, maxProcessedTransactions))
+              }
+          }
+      } else if (this.props.strategy == Strategies.GENERIC_SIMULATION) {
+          multi = [['Blocks', 'Processed Transactions']];
+
+          for (let i = 0; i < simulationPayload.events.length; i++) {
+              if (simulationPayload.events[i].eventType == EventTypes.IBlockMine) {
+                  multi.push(new Array(simulationPayload.events[i].level, simulationPayload.events[i].processedTransactions))
+              }
+          }
+      }
 
         return multi;
     }

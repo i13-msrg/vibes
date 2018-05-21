@@ -113,8 +113,8 @@ class Vibes extends React.Component<{}, IVibesState> {
                 blockTime: 567, // seconds
                 numberOfNeighbours: 4,
                 numberOfNodes: 104,
-                simulateUntil: Date.now() + 2.5 * 3600000, // 3 hours from now
-                transactionSize: 1, // KB
+                simulateUntil: Date.now() + 2 * 3600000, // 3 hours from now
+                transactionSize: 5, // KB
                 throughput:  195,  // average number of transactions per blockTime
                 latency: 900, // ms (latency + transfer + verification time),
                 neighboursDiscoveryInterval: 3000, // seconds
