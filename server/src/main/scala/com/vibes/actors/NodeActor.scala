@@ -66,7 +66,6 @@ class NodeActor (
     val timestamp     = node.createTimestampForNextBlock(now)
     val exWorkRequest = node.createExecutableWorkRequest(self, timestamp, VExecution.ExecutionType.MineBlock)
     val value = () => {
-      println(s"BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
       logger.debug(s"BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
       node = node.addBlock(VBlock.createWinnerBlock(node, timestamp))
       addExecutablesForPropagateOwnBlock(timestamp)
@@ -133,20 +132,17 @@ class NodeActor (
   }
 
   override def preStart(): Unit = {
-    println(s"NodeActor started ${self.path}")
     logger.debug(s"NodeActor started ${self.path}")
 
     discoveryActor ! DiscoveryActions.ReceiveNode(node)
   }
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
-    println(s"PRERESTART.... ${self.path}")
     logger.debug(s"PRERESTART.... ${self.path}")
   }
 
   override def receive: Receive = {
     case NodeActions.StartSimulation(now) =>
-      println(s"StartSimulation ${now} ${self}")
       logger.debug(s"StartSimulation ${now} ${self}")
       addExecutablesForMineBlock(now)
 

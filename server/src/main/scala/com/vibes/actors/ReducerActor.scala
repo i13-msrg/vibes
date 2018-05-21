@@ -27,7 +27,6 @@ class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
   override def preStart(): Unit = {
     start = DateTime.now
     logger.debug(s"ReducerActor started ${self.path}")
-    println(s"ReducerActor started ${self.path}")
   }
 
   override def receive: Receive = {
@@ -122,9 +121,9 @@ object ReducerActor extends LazyLogging {
                               formatter.format(timesNoOutliers._2 / timesNoOutliersFilteredSize).toFloat,
                               formatter.format(timesNoOutliers._3 / timesNoOutliersFilteredSize).toFloat)
 
-    println("=========================================================================================================")
-    println("===============================================OUTPUT====================================================")
-    println("=========================================================================================================")
+    logger.debug("=========================================================================================================")
+    logger.debug("===============================================OUTPUT====================================================")
+    logger.debug("=========================================================================================================")
 
     val interval                       = new Interval(start, new Instant)
     val duration                       = interval.toDuration.toStandardSeconds.getSeconds.toDouble
@@ -132,21 +131,6 @@ object ReducerActor extends LazyLogging {
     val longestChainSize               = size
     val longestChainNumberTransactions = longestChain.flatMap(_.transactions).size
 
-    println(s"SIMULATION TOOK... ${duration} SECONDS")
-    println(s"LONGEST CHAIN... ${longestChainLength} BLOCKS")
-    println(s"LONGEST CHAIN SIZE.... $longestChainSize KB")
-    println(s"LONGEST CHAIN NUMBER OF TRANSACTIONS... ${longestChainNumberTransactions}")
-    println(s"NUMBER OF BLOCKS FOR PROPAGATION TIME ${times.size}")
-    println(s"BLOCK PROPAGATION TIME 10%... ${timesAvgWithOutliers._1} SECONDS")
-    println(s"BLOCK PROPAGATION TIME 50%... ${timesAvgWithOutliers._2} SECONDS")
-    println(s"BLOCK PROPAGATION TIME 90%... ${timesAvgWithOutliers._3} SECONDS")
-
-    println(s"NUMBER OF BLOCKS FOR PROPAGATION TIME (NO OUTLIERS) ${timesNoOutliersFiltered.size}")
-    println(s"BLOCK PROPAGATION TIME 10% (NO OUTLIERS)... ${timesAvgNoOutliers._1} SECONDS")
-    println(s"BLOCK PROPAGATION TIME 50% (NO OUTLIERS)... ${timesAvgNoOutliers._2} SECONDS")
-    println(s"BLOCK PROPAGATION TIME 90% (NO OUTLIERS)... ${timesAvgNoOutliers._3} SECONDS")
-
-    // logging
     logger.debug(s"SIMULATION TOOK... ${duration} SECONDS")
     logger.debug(s"LONGEST CHAIN... ${longestChainLength} BLOCKS")
     logger.debug(s"LONGEST CHAIN SIZE.... $longestChainSize KB")
@@ -163,21 +147,17 @@ object ReducerActor extends LazyLogging {
 
     // +1 cause we don't count origin
     val firstBlockNumberOfRecipients = longestChain.last.numberOfRecipients + 1
-    println(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipients}  OUT OF ${VConf.numberOfNodes} NODES")
     logger.debug(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipients}  OUT OF ${VConf.numberOfNodes} NODES")
 
     val lastBlockNumberOfRecipients = longestChain.head.numberOfRecipients + 1
-    println(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipients} OUT OF ${VConf.numberOfNodes} NODES")
     logger.debug(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipients} OUT OF ${VConf.numberOfNodes} NODES")
 
     val amountOfTransactionsInTransactionpool = lastNode.transactionPool.size
-    println(s"TOTAL TRANSACTION POOL... ${amountOfTransactionsInTransactionpool}")
     logger.debug(s"TOTAL TRANSACTION POOL... ${amountOfTransactionsInTransactionpool}")
     logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
     val maxProcessedTransactions = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
     logger.debug(s"MAXIMUM POSSIBLE TRANSACTIONS PER BLOCK... $maxProcessedTransactions")
-    println(s"MAXIMUM POSSIBLE TRANSACTIONS PER BLOCK... $maxProcessedTransactions")
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty

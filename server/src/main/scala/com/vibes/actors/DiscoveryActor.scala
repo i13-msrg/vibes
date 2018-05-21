@@ -42,7 +42,6 @@ object DiscoveryActor extends LazyLogging {
   def props(numberOfNeighbours: Int): Props = Props(new DiscoveryActor(numberOfNeighbours))
 
   def announceNeighbours(currentNodes: List[VNode], numberOfNeighbours: Int): Unit = {
-    println("Update neighbours table...")
     logger.debug("Update neighbours table...")
     currentNodes.foreach(node =>
       node.actor ! NodeActions.ReceiveNeighbours(discoverNeighbours(currentNodes, node, numberOfNeighbours)))

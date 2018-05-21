@@ -24,12 +24,11 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
   private var registeredNodeActors: Set[ActorRef] = Set.empty
 
   override def preStart(): Unit = {
-    println(s"NodeRegistryActor started ${self.path}")
+    logger.debug(s"NodeRegistryActor started ${self.path}")
   }
 
   override def receive: Receive = {
     case NodeRepoActions.RegisterNode =>
-      println(s"REGISTER NODE....... ${registeredNodeActors.size}")
       logger.debug(s"REGISTER NODE....... ${registeredNodeActors.size}")
       val coordinates = NodeRepoActor.createCoordinatesOnLand()
       val actor = context.actorOf(
@@ -37,7 +36,6 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
       registeredNodeActors += actor
 
     case NodeRepoActions.AnnounceStart(now) =>
-      println("NodeRepoActions.AnnounceStart")
       logger.debug("NodeRepoActions.AnnounceStart")
       registeredNodeActors.foreach(_ ! NodeActions.StartSimulation(now))
 

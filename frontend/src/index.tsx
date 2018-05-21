@@ -30,7 +30,6 @@ class Vibes extends React.Component<{}, IVibesState> {
   constructor(props: {}) {
     super(props);
 
-    // todo
     this.state = {
       strategy: Strategies.GENERIC_SIMULATION,
       page: Pages.HOME,
@@ -47,9 +46,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         maxBlockSize: 1000, // KB
         maxBlockWeight: 4000, // KB
         networkBandwidth: 1, // MB per second
-        //strategy: Strategies.GENERIC_SIMULATION.toString()
-          // todo change strategy automatically
-        strategy: Strategies.BITCOIN_LIKE_BLOCKCHAIN.toString()
+        strategy: Strategies.GENERIC_SIMULATION.toString()
       },
     };
     this.handleStrategyChange = this.handleStrategyChange.bind(this);
@@ -111,7 +108,41 @@ class Vibes extends React.Component<{}, IVibesState> {
   }
 
   private handleStrategyChange(strategy: Strategies) {
-    this.setState({ strategy });
+    if (strategy == Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
+        var configuration: IConfiguration = {
+                blockTime: 567, // seconds
+                numberOfNeighbours: 4,
+                numberOfNodes: 104,
+                simulateUntil: Date.now() + 2.5 * 3600000, // 3 hours from now
+                transactionSize: 1, // KB
+                throughput:  195,  // average number of transactions per blockTime
+                latency: 900, // ms (latency + transfer + verification time),
+                neighboursDiscoveryInterval: 3000, // seconds
+                maxBlockSize: 1000, // KB
+                maxBlockWeight: 4000, // KB
+                networkBandwidth: 1, // MB per second
+                strategy: strategy.toString()
+        };
+        this.setState({configuration});
+        this.setState({strategy});
+    }    else if (strategy == Strategies.GENERIC_SIMULATION) {
+          var configuration: IConfiguration =        {
+            blockTime: 600, // seconds
+                numberOfNeighbours: 4,
+                numberOfNodes: 10,
+                simulateUntil: Date.now() + 3 * 3600000, // 3 hours from now
+                transactionSize: 250, // KB
+                throughput:  10,  // average number of transactions per blockTime
+                latency: 900, // ms (latency + transfer + verification time),
+                neighboursDiscoveryInterval: 3000, // seconds
+                maxBlockSize: 1000, // KB
+                maxBlockWeight: 4000, // KB
+                networkBandwidth: 1, // MB per second
+                strategy: Strategies.GENERIC_SIMULATION.toString()
+        };
+          this.setState({configuration});
+          this.setState({strategy});
+      }
   }
 
   private handleHomeNextClick() {

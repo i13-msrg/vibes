@@ -91,13 +91,12 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    networkBandwidth,
                    strategy
                   ) =>
-                    println(s"ATTEMPT START.......")
-
+                    logger.debug(s"ATTEMPT START.......")
                     if (!lock) {
                       lock = true
-                      println("=========================================================================================================")
-                      println("===============================================START=====================================================")
-                      println("=========================================================================================================")
+                      logger.debug("=========================================================================================================")
+                      logger.debug("===============================================START=====================================================")
+                      logger.debug("=========================================================================================================")
                       VConf.blockTime = blockTime
                       VConf.numberOfNeighbours = numberOfNeighbours
                       VConf.numberOfNodes = numberOfNodes
@@ -167,5 +166,4 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
   val bindingFuture = Http().bindAndHandle(route, "localhost", 8082)
 
   logger.debug("Server online at http://localhost:8082/\\nPress RETURN to stop...")
-  println(s"Server online at http://localhost:8082/\nPress RETURN to stop...")
 }

@@ -2,6 +2,7 @@ package com.vibes.actors
 
 import akka.actor.{Actor, ActorContext, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
 import com.vibes.utils.{VConf, VExecution}
 import org.joda.time._
@@ -40,7 +41,7 @@ import scala.util.Random
   * while blocking all others. The current solution blocks only in particular cases, therefore is much faster,
   * but messier.
   */
-class MasterActor extends Actor {
+class MasterActor extends Actor with LazyLogging{
   implicit val timeout: Timeout = Timeout(20.seconds)
 
   /**
@@ -89,7 +90,7 @@ class MasterActor extends Actor {
   (1 to VConf.numberOfNodes).foreach(_ => nodeRepoActor ! NodeRepoActions.RegisterNode)
 
   override def preStart(): Unit = {
-    println(s"MasterActor started ${self.path}")
+    logger.debug(s"MasterActor started ${self.path}")
   }
 
   override def receive: Receive = {
@@ -110,7 +111,7 @@ class MasterActor extends Actor {
       sender ! currentPromise
 
     case MasterActions.FinishEvents(events) =>
-      println("FINISH EVENTS...")
+      logger.debug("FINISH EVENTS...")
       currentPromise.success(events)
 
     case MasterActions.CastWorkRequest(workRequest) =>

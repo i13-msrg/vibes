@@ -9,6 +9,10 @@ import EventsRange from '../../molecules/events-range/Component';
 import {Chart} from 'react-google-charts';
 import {EventTypes} from "../../molecules/simulation-events/types";
 
+// Uncaught Error: Google Charts loader.js can only be loaded once.
+// This error seems to be on the side of the package.
+// https://github.com/rakannimer/react-google-charts/issues/195
+
 interface ISimulationState {
   selectedIndex?: number;
   moveIntoViewPort: boolean;
@@ -106,9 +110,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                               series: {
                                   1: {curveType: 'function'}
                               },
-                              legend: 'none'
+                              legend: 'none',
+                              tooltip:{}
                           }}
-                          graph_id="AreaChart"
+                          graph_id="Pending Transactions AreaChart"
                           width="100%"
                           height="264px"
                           //legend_toggle
@@ -138,9 +143,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                   1: {curveType: 'function'}
                               },
                               legend: { position: 'bottom' },
-                              focusTarget: 'category'
+                              focusTarget: 'category',
+                              tooltip:{}
                           }}
-                          graph_id="LineChart"
+                          graph_id="Processed Transactions LineChart"
                           width="100%"
                           height="264px"
                       />
@@ -205,8 +211,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     private processedTransactions(simulationPayload: any) {
         var multi:any[][] =[['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
         var maxProcessedTransactions: number = simulationPayload.maxProcessedTransactions;
-
-        console.log(maxProcessedTransactions);
 
         for (let i = 0; i < simulationPayload.events.length; i++) {
             if (simulationPayload.events[i].eventType == EventTypes.IBlockMine) {
