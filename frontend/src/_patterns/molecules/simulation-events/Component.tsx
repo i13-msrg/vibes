@@ -2,6 +2,7 @@ import * as React from 'react';
 import { IBlockMine, IBlockTransfer, EventTypes } from './types';
 import blockIcon from '../../../styles/svg/box.svg';
 import transferIcon from '../../../styles/svg/send.svg';
+import {isNull} from "util";
 
 interface ISimulationEventsProps {
   events?: (IBlockMine | IBlockTransfer)[];
@@ -118,7 +119,7 @@ export default class SimulationEvents extends React.Component<ISimulationEventsP
 
   private moveElementWithinViewport(element: HTMLElement | null) {
     if (element && this.props.moveIntoViewPort) {
-      element.scrollIntoView();
+      element.scrollIntoView(false);
     }
   }
 }

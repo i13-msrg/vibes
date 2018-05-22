@@ -7,6 +7,8 @@ import crosshairIcon from '../../../styles/svg/crosshair.svg';
 import distanceIcon from '../../../styles/svg/distance.svg';
 import wifiIcon from '../../../styles/svg/wifi.svg';
 import serverIcon from '../../../styles/svg/server.svg';
+import networkIcon from '../../../styles/svg/activity.svg';
+import maxBlockIcon from '../../../styles/svg/x-square.svg';
 import transactionSizeIcon from '../../../styles/svg/transactionSize.svg';
 import transactionsPerBlockIcon from '../../../styles/svg/transactionsPerBlock.svg';
 import { ConfigurationKey, IConfiguration, ISvg } from '../../../common/types';
@@ -62,24 +64,27 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       title: 'Propagation delay for a block (in milliseconds)',
     },
     {
-      configurationKey: 'maxBlockSize',
-      icon: distanceIcon,
-      placeholder: 'Block size',
-      title: 'Block size in KBs',
-    },
-    {
-      configurationKey: 'networkBandwidth',
-      icon: wifiIcon,
-      placeholder: 'Network bandwidth',
-      title: 'Network bandwidth in MBs per second',
-    },
-    {
       configurationKey: 'neighboursDiscoveryInterval',
       icon: wifiIcon,
       placeholder: 'Neighbours Discovery Interval',
       title: 'Neighbours Discovery Interval (in seconds)',
     },
   ];
+
+    private gridInputsBitcoin: IGridInput[] = [
+        {
+            configurationKey: 'maxBlockSize',
+            icon: maxBlockIcon,
+            placeholder: 'Max block size',
+            title: 'Maximum block size in KBs',
+        },
+        {
+            configurationKey: 'networkBandwidth',
+            icon: networkIcon,
+            placeholder: 'Network bandwidth',
+            title: 'Network bandwidth in MBs per second',
+        }
+    ];
 
   constructor(props: IConfigurationPlateProps) {
     super(props);
@@ -89,38 +94,85 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
   public render() {
     const { configuration } = this.props;
 
-    return (
-      <div className="configuration-plate u-plate">
-        <div className="configuration-plate__title">
-          Configure Options
-        </div>
-        <div className="configuration-plate__content">
-          <div className="configuration-plate__grid">
-            {this.gridInputs.map(item =>
-              <ConfigurationInput
-                key={item.configurationKey}
-                placeholder={item.placeholder}
-                type="number"
-                configurationKey={item.configurationKey}
-                onConfigurationChange={this.handleConfigurationChange}
-                icon={item.icon}
-                value={configuration[item.configurationKey]}
-                title={item.title}
-              />,
-            )}
-            <ConfigurationInput
-              placeholder="Simulate until"
-              type="datetime-local"
-              configurationKey="simulateUntil"
-              onConfigurationChange={this.handleConfigurationChange}
-              icon={calendarIcon}
-              value={configuration.simulateUntil}
-              title="Simulate until"
-            />
-          </div>
-        </div>
-      </div>
-    );
+    if (configuration.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+        return (
+            <div className="configuration-plate u-plate">
+                <div className="configuration-plate__title">
+                    Configure Options
+                </div>
+                <div className="configuration-plate__content">
+                    <div className="configuration-plate__grid">
+                        {this.gridInputs.map(item =>
+                            <ConfigurationInput
+                                key={item.configurationKey}
+                                placeholder={item.placeholder}
+                                type="number"
+                                configurationKey={item.configurationKey}
+                                onConfigurationChange={this.handleConfigurationChange}
+                                icon={item.icon}
+                                value={configuration[item.configurationKey]}
+                                title={item.title}
+                            />,
+                        )}
+                        <ConfigurationInput
+                            placeholder="Simulate until"
+                            type="datetime-local"
+                            configurationKey="simulateUntil"
+                            onConfigurationChange={this.handleConfigurationChange}
+                            icon={calendarIcon}
+                            value={configuration.simulateUntil}
+                            title="Simulate until"
+                        />
+                        {this.gridInputsBitcoin.map(item =>
+                            <ConfigurationInput
+                                key={item.configurationKey}
+                                placeholder={item.placeholder}
+                                type="number"
+                                configurationKey={item.configurationKey}
+                                onConfigurationChange={this.handleConfigurationChange}
+                                icon={item.icon}
+                                value={configuration[item.configurationKey]}
+                                title={item.title}
+                            />,
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    } else {
+        return (
+            <div className="configuration-plate u-plate">
+                <div className="configuration-plate__title">
+                    Configure Options
+                </div>
+                <div className="configuration-plate__content">
+                    <div className="configuration-plate__grid">
+                        {this.gridInputs.map(item =>
+                            <ConfigurationInput
+                                key={item.configurationKey}
+                                placeholder={item.placeholder}
+                                type="number"
+                                configurationKey={item.configurationKey}
+                                onConfigurationChange={this.handleConfigurationChange}
+                                icon={item.icon}
+                                value={configuration[item.configurationKey]}
+                                title={item.title}
+                            />,
+                        )}
+                        <ConfigurationInput
+                            placeholder="Simulate until"
+                            type="datetime-local"
+                            configurationKey="simulateUntil"
+                            onConfigurationChange={this.handleConfigurationChange}
+                            icon={calendarIcon}
+                            value={configuration.simulateUntil}
+                            title="Simulate until"
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
   }
 
   private handleConfigurationChange(configurationKey: ConfigurationKey, value: number) {

@@ -209,9 +209,13 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   }
 
     private processedTransactions(simulationPayload: any) {
-      var multi: any[][];
+      var multi: any[][] = [];
       if (this.props.strategy == Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
           multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
+
+          // I think it is better to have only one calculation of max processed transactions,
+          // therefore this value is not calculated here, but instead uses a value from the server.
+          // This makes it easier to change the implementation in just one place.
           var maxProcessedTransactions: number = simulationPayload.maxProcessedTransactions;
 
           for (let i = 0; i < simulationPayload.events.length; i++) {
