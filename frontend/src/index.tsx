@@ -30,6 +30,7 @@ class Vibes extends React.Component<{}, IVibesState> {
   constructor(props: {}) {
     super(props);
 
+    // todo strategy is redundant, move strategy solely to configuration, since the strategy is needed on the server.
     this.state = {
       strategy: Strategies.GENERIC_SIMULATION,
       page: Pages.HOME,
