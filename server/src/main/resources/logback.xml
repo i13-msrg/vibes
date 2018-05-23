@@ -7,7 +7,7 @@
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <!-- path to your log file, where you want to store logs -->
-        <file>E:\data/Studiengang Wirtschaftsinformatik/Master/5. Semester/Bitcoin-like Blockchain Simulation System/vibes/test.log</file>
+        <file>test.log</file>
         <append>false</append>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
