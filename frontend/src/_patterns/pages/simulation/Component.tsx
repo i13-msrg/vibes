@@ -22,10 +22,92 @@ interface ISimulationState {
 
 interface ISimulationProps extends IConfiguration {
   [index: string]: any;
+
   onNewSimulation: () => void;
 }
 
 export default class Simulation extends React.Component<ISimulationProps, ISimulationState> {
+  private static transactionCountGroupedByFees(simulationPayload: ISimulationPayload) {
+    const multi: any[][] = [['Transaction Fees (in Satoshi)', 'Confirmed Transactions', 'Unconfirmed Transactions']];
+
+    for (const transaction of simulationPayload.transactions) {
+      for (let j = 0; j < multi.length; j += 1) {
+        if (multi[j][0] === Simulation.makeCategory(transaction.transactionFee)) {
+          if (transaction.confirmation) {
+            multi[j][1] += 1;
+          } else {
+            multi[j][2] += 1;
+          }
+          break;
+        } else if (j === multi.length - 1) {
+          if (transaction.confirmation) {
+            multi.push([Simulation.makeCategory(transaction.transactionFee), 1, 0]);
+          } else {
+            multi.push([Simulation.makeCategory(transaction.transactionFee), 0, 1]);
+          }
+        }
+      }
+    }
+
+    return multi;
+  }
+
+  private static confirmationTime(simulationPayload: ISimulationPayload) {
+    const multi: number[][] = [[]];
+
+    for (const transaction of simulationPayload.transactions) {
+      for (let j = 0; j < multi.length; j += 1) {
+        if (multi[j][0] === Simulation.makeCategory(transaction.transactionFee)) {
+          if (transaction.confirmation) {
+            multi[j][1] += 1;
+            multi[j][2] = multi[j][2]
+                            + transaction.confirmationLevel
+                            - transaction.creationLevel;
+          }
+          break;
+        } else if (j === multi.length - 1) {
+          multi.push([Simulation.makeCategory(transaction.transactionFee), 1, 0]);
+        }
+      }
+    }
+
+    const multi2: any[][] = [['Transaction Fees (in Satoshi)', 'Confirmation Time (in Block)']];
+    for (const item of multi) {
+      multi2.push([item[0], Math.round(item[2] / item[1] * 100) / 100]);
+    }
+
+    return multi2;
+  }
+
+  private static makeCategory(number: number) {
+    return Math.floor(number / 10) * 10;
+  }
+
+  private static timeBetweenBlocks(simulationPayload: any) {
+    const multi: any[][] = [['Blocks', 'Time (in minute)'], [0, 0]];
+
+    for (let i = 1; i < simulationPayload.events.length; i += 1) {
+      if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
+        multi.push([simulationPayload.events[i].level,
+          (new Date(simulationPayload.events[i].timestamp).getTime()
+                        - new Date(simulationPayload.events[i - 1].timestamp).getTime()) / 1000 / 60]);
+      }
+    }
+    return multi;
+  }
+
+  private static pendingTransactions(simulationPayload: any) {
+    const multi: any[][] = [['Blocks', 'Pending Transactions']];
+
+    for (const event of simulationPayload.events) {
+      if (event.eventType === EventTypes.IBlockMine) {
+        multi.push([event.level, event.transactionPoolSize]);
+      }
+    }
+
+    return multi;
+  }
+
   constructor(props: ISimulationProps) {
     super(props);
 
@@ -96,7 +178,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             <div className={'time-between-blocks-chart-container'}>
                                 <Chart
                                     chartType="LineChart"
-                                    data={this.timeBetweenBlocks(simulationPayload)}
+                                    data={Simulation.timeBetweenBlocks(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Blocks',
@@ -127,7 +209,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             <div className={'pending-transactions-chart-container'}>
                                 <Chart
                                     chartType="AreaChart"
-                                    data={this.pendingTransactions(simulationPayload)}
+                                    data={Simulation.pendingTransactions(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Blocks',
@@ -190,7 +272,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             <div className={'transaction-count-grouped-by-fees-chart-container'}>
                                 <Chart
                                     chartType="ColumnChart"
-                                    data={this.transactionCountGroupedByFees(simulationPayload)}
+                                    data={Simulation.transactionCountGroupedByFees(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Transaction Fees (in Satoshis)',
@@ -224,7 +306,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             <div className={'confirmation-time-grouped-by-fees-chart-container'}>
                                 <Chart
                                     chartType="ColumnChart"
-                                    data={this.confirmationTime(simulationPayload)}
+                                    data={Simulation.confirmationTime(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Transaction Fees (in Satoshis)',
@@ -281,148 +363,148 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
       );
     }
     return (
-                <div className="simulation">
-                    <div className="simulation__grid">
-                        <div className="simulation__map u-plate">
-                            <div className="simulation__title">
-                                Simulation
-                            </div>
-                            <DataMap
-                                event={(simulationPayload && selectedIndex !== undefined)
-                                    ? simulationPayload.events[selectedIndex]
-                                    : undefined}
-                            />
-                            <EventsRange
-                                events={simulationPayload ? simulationPayload.events : undefined}
-                                selectedIndex={selectedIndex}
-                                onSelectIndex={this.handleSelectIndex}
-                            />
+            <div className="simulation">
+                <div className="simulation__grid">
+                    <div className="simulation__map u-plate">
+                        <div className="simulation__title">
+                            Simulation
                         </div>
-
-                        <div className="simulation__summary u-plate">
-                            <div className="simulation-summary__title">
-                                Summary
-                            </div>
-                            {simulationPayload && (
-                                <SimulationSummary
-                                    duration={simulationPayload.duration}
-                                    longestChainLength={simulationPayload.longestChainLength}
-                                    longestChainSize={simulationPayload.longestChainSize}
-                                    longestChainNumberTransactions={simulationPayload.longestChainNumberTransactions}
-                                    timesWithOutliers10={simulationPayload.timesWithOutliers10}
-                                    timesWithOutliers50={simulationPayload.timesWithOutliers50}
-                                    timesWithOutliers90={simulationPayload.timesWithOutliers90}
-                                    timesNoOutliers10={simulationPayload.timesNoOutliers10}
-                                    timesNoOutliers50={simulationPayload.timesNoOutliers50}
-                                    timesNoOutliers90={simulationPayload.timesNoOutliers90}
-                                    firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
-                                    lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
-                                    totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
-                                />
-                            )}
-                        </div>
-                        <div className="simulation__events u-plate">
-                            <SimulationEvents
-                                events={simulationPayload ? simulationPayload.events : undefined}
-                                selectedIndex={selectedIndex}
-                                onSelectIndex={this.handleSelectIndex}
-                                moveIntoViewPort={moveIntoViewPort}
-                            />
-                        </div>
+                        <DataMap
+                            event={(simulationPayload && selectedIndex !== undefined)
+                                ? simulationPayload.events[selectedIndex]
+                                : undefined}
+                        />
+                        <EventsRange
+                            events={simulationPayload ? simulationPayload.events : undefined}
+                            selectedIndex={selectedIndex}
+                            onSelectIndex={this.handleSelectIndex}
+                        />
                     </div>
 
-                    <div className="simulation-time-between-blocks u-plate">
-                        <div className="simulation-time-between-blocks__title">
-                            time between blocks
+                    <div className="simulation__summary u-plate">
+                        <div className="simulation-summary__title">
+                            Summary
                         </div>
                         {simulationPayload && (
-                            <div className={'time-between-blocks-chart-container'}>
-                                <Chart
-                                    chartType="LineChart"
-                                    data={this.timeBetweenBlocks(simulationPayload)}
-                                    options={{
-                                      hAxis: {
-                                        title: 'Blocks',
-                                        gridlines: { count: -1 },
-                                      },
-                                      vAxis: {
-                                        title: 'Time',
-                                      },
-                                      series: {
-                                        1: { curveType: 'function' },
-                                      },
-                                      legend: 'none',
-                                      tooltip: {},
-                                    }}
-                                    graph_id="Time Between Blocks LineChart"
-                                    width="100%"
-                                    height="264px"
-                                />
-                            </div>
+                            <SimulationSummary
+                                duration={simulationPayload.duration}
+                                longestChainLength={simulationPayload.longestChainLength}
+                                longestChainSize={simulationPayload.longestChainSize}
+                                longestChainNumberTransactions={simulationPayload.longestChainNumberTransactions}
+                                timesWithOutliers10={simulationPayload.timesWithOutliers10}
+                                timesWithOutliers50={simulationPayload.timesWithOutliers50}
+                                timesWithOutliers90={simulationPayload.timesWithOutliers90}
+                                timesNoOutliers10={simulationPayload.timesNoOutliers10}
+                                timesNoOutliers50={simulationPayload.timesNoOutliers50}
+                                timesNoOutliers90={simulationPayload.timesNoOutliers90}
+                                firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
+                                lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
+                                totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
+                            />
                         )}
                     </div>
+                    <div className="simulation__events u-plate">
+                        <SimulationEvents
+                            events={simulationPayload ? simulationPayload.events : undefined}
+                            selectedIndex={selectedIndex}
+                            onSelectIndex={this.handleSelectIndex}
+                            moveIntoViewPort={moveIntoViewPort}
+                        />
+                    </div>
+                </div>
 
-                    <div className="simulation-processed-transactions u-plate">
-                        <div className="simulation-processed-transactions__title">
-                            Processed Transactions
+                <div className="simulation-time-between-blocks u-plate">
+                    <div className="simulation-time-between-blocks__title">
+                        time between blocks
+                    </div>
+                    {simulationPayload && (
+                        <div className={'time-between-blocks-chart-container'}>
+                            <Chart
+                                chartType="LineChart"
+                                data={Simulation.timeBetweenBlocks(simulationPayload)}
+                                options={{
+                                  hAxis: {
+                                    title: 'Blocks',
+                                    gridlines: { count: -1 },
+                                  },
+                                  vAxis: {
+                                    title: 'Time',
+                                  },
+                                  series: {
+                                    1: { curveType: 'function' },
+                                  },
+                                  legend: 'none',
+                                  tooltip: {},
+                                }}
+                                graph_id="Time Between Blocks LineChart"
+                                width="100%"
+                                height="264px"
+                            />
                         </div>
-                        {simulationPayload && (
-                            <div className={'processed-transactions-chart-container'}>
-                                <Chart
-                                    chartType="LineChart"
-                                    data={this.processedTransactions(simulationPayload)}
-                                    options={{
-                                      hAxis: {
-                                        title: 'Blocks',
-                                        gridlines: { count: -1 },
-                                      },
-                                      vAxis: {
-                                        title: 'Processed Transactions',
-                                      },
-                                      series: {
-                                        1: { curveType: 'function' },
-                                      },
-                                      legend: { position: 'bottom' },
-                                      focusTarget: 'category',
-                                      tooltip: {},
-                                    }}
-                                    graph_id="Processed Transactions LineChart"
-                                    width="100%"
-                                    height="264px"
-                                />
-                            </div>
-                        )}
-                    </div>
+                    )}
+                </div>
 
-                    <div className="simulation__buttons">
+                <div className="simulation-processed-transactions u-plate">
+                    <div className="simulation-processed-transactions__title">
+                        Processed Transactions
+                    </div>
+                    {simulationPayload && (
+                        <div className={'processed-transactions-chart-container'}>
+                            <Chart
+                                chartType="LineChart"
+                                data={this.processedTransactions(simulationPayload)}
+                                options={{
+                                  hAxis: {
+                                    title: 'Blocks',
+                                    gridlines: { count: -1 },
+                                  },
+                                  vAxis: {
+                                    title: 'Processed Transactions',
+                                  },
+                                  series: {
+                                    1: { curveType: 'function' },
+                                  },
+                                  legend: { position: 'bottom' },
+                                  focusTarget: 'category',
+                                  tooltip: {},
+                                }}
+                                graph_id="Processed Transactions LineChart"
+                                width="100%"
+                                height="264px"
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="simulation__buttons">
+                    <div>
+                        <Button
+                            className="simulation__button"
+                            title="New Simulation"
+                            onClick={() => {
+                              this.setState({ simulationPayload: undefined });
+                              this.props.onNewSimulation();
+                            }}
+                            active={true}
+                        />
+                    </div>
+                    {!isFetching && (
                         <div>
                             <Button
                                 className="simulation__button"
-                                title="New Simulation"
-                                onClick={() => {
-                                  this.setState({ simulationPayload: undefined });
-                                  this.props.onNewSimulation();
-                                }}
+                                title="START"
+                                onClick={this.fetchEvents}
                                 active={true}
                             />
                         </div>
-                        {!isFetching && (
-                            <div>
-                                <Button
-                                    className="simulation__button"
-                                    title="START"
-                                    onClick={this.fetchEvents}
-                                    active={true}
-                                />
-                            </div>
-                        )}
-                        {isFetching && (
-                            <div>
-                                <div className="u-loader">Loading...</div>
-                            </div>
-                        )}
-                    </div>
+                    )}
+                    {isFetching && (
+                        <div>
+                            <div className="u-loader">Loading...</div>
+                        </div>
+                    )}
                 </div>
+            </div>
     );
   }
 
@@ -436,18 +518,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     this.setState({ selectedIndex, moveIntoViewPort });
   }
 
-  private pendingTransactions(simulationPayload: any) {
-    const multi: any[][] = [['Blocks', 'Pending Transactions']];
-
-    for (let i = 0; i < simulationPayload.events.length; i++) {
-      if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
-        multi.push([simulationPayload.events[i].level, simulationPayload.events[i].transactionPoolSize]);
-      }
-    }
-
-    return multi;
-  }
-
   private processedTransactions(simulationPayload: any) {
     let multi: any[][] = [];
     if (this.props.strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
@@ -457,94 +527,21 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
             // therefore this value is not calculated here, but instead uses a value from the server.
             // This makes it easier to change the implementation in just one place.
 
-      for (let i = 0; i < simulationPayload.events.length; i++) {
-        if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
-          multi.push([simulationPayload.events[i].level,
-            simulationPayload.events[i].processedTransactions,
-            simulationPayload.maxProcessedTransactions]);
+      for (const event of simulationPayload.events) {
+        if (event.eventType === EventTypes.IBlockMine) {
+          multi.push([event.level, event.processedTransactions, simulationPayload.maxProcessedTransactions]);
         }
       }
     } else if (this.props.strategy === Strategies.GENERIC_SIMULATION) {
       multi = [['Blocks', 'Processed Transactions']];
 
-      for (let i = 0; i < simulationPayload.events.length; i++) {
-        if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
-          multi.push([simulationPayload.events[i].level, simulationPayload.events[i].processedTransactions]);
+      for (const event of simulationPayload.events) {
+        if (event.eventType === EventTypes.IBlockMine) {
+          multi.push([event.level, event.processedTransactions]);
         }
       }
     }
 
-    return multi;
-  }
-
-  private transactionCountGroupedByFees(simulationPayload: ISimulationPayload) {
-    const multi: any[][] = [['Transaction Fees (in Satoshis)', 'Confirmed Transactions', 'Unconfirmed Transactions']];
-
-    for (let i = 0; i < simulationPayload.transactions.length; i++) {
-      for (let j = 0; j < multi.length; j++) {
-        if (multi[j][0] === this.makeCategory(simulationPayload.transactions[i].transactionFee)) {
-          if (simulationPayload.transactions[i].confirmation) {
-            multi[j][1]++;
-          } else {
-            multi[j][2]++;
-          }
-          break;
-        } else if (j === multi.length - 1) {
-          if (simulationPayload.transactions[i].confirmation) {
-            multi.push([this.makeCategory(simulationPayload.transactions[i].transactionFee),1,0]);
-          } else {
-            multi.push([this.makeCategory(simulationPayload.transactions[i].transactionFee),0,1]);
-          }
-        }
-      }
-    }
-
-    return multi;
-  }
-
-  private confirmationTime(simulationPayload: ISimulationPayload) {
-    const multi: number[][] = [[]];
-
-    for (let i = 0; i < simulationPayload.transactions.length; i++) {
-      for (let j = 0; j < multi.length; j++) {
-        if (multi[j][0] === this.makeCategory(simulationPayload.transactions[i].transactionFee)) {
-          if (simulationPayload.transactions[i].confirmation) {
-            multi[j][1]++;
-            multi[j][2] = multi[j][2]
-                + simulationPayload.transactions[i].confirmationLevel
-                - simulationPayload.transactions[i].creationLevel;
-          }
-          break;
-        } else if (j === multi.length - 1) {
-          multi.push([this.makeCategory(simulationPayload.transactions[i].transactionFee),1,0]);
-        }
-      }
-    }
-
-    const multi2: any[][] = [['Transaction Fees (in Satoshis)', 'Confirmation Time (in Blocks)']];
-    for (let j = 0; j < multi.length; j++) {
-      multi2.push([multi[j][0], Math.round(multi[j][2] / multi[j][1] * 100) / 100]);
-    }
-
-    return multi2;
-  }
-
-  private makeCategory(number: number) {
-    const test: number = Math.floor(number / 10) * 10;
-
-    return test;
-  }
-
-  private timeBetweenBlocks(simulationPayload: any) {
-    const multi: any[][] = [['Blocks', 'Time (in mins)'],[0,0]];
-
-    for (let i = 1; i < simulationPayload.events.length; i++) {
-      if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
-        multi.push([simulationPayload.events[i].level,
-          (new Date(simulationPayload.events[i].timestamp).getTime()
-                - new Date(simulationPayload.events[i - 1].timestamp).getTime()) / 1000 / 60]);
-      }
-    }
     return multi;
   }
 }
