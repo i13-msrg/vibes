@@ -71,20 +71,20 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
     },
   ];
 
-    private gridInputsBitcoin: IGridInput[] = [
-        {
-            configurationKey: 'maxBlockSize',
-            icon: maxBlockIcon,
-            placeholder: 'Max block size',
-            title: 'Maximum block size in KBs',
-        },
-        {
-            configurationKey: 'networkBandwidth',
-            icon: networkIcon,
-            placeholder: 'Network bandwidth',
-            title: 'Network bandwidth in MBs per second',
-        }
-    ];
+  private gridInputsBitcoin: IGridInput[] = [
+    {
+      configurationKey: 'maxBlockSize',
+      icon: maxBlockIcon,
+      placeholder: 'Max block size',
+      title: 'Maximum block size in KBs',
+    },
+    {
+      configurationKey: 'networkBandwidth',
+      icon: networkIcon,
+      placeholder: 'Network bandwidth',
+      title: 'Network bandwidth in MBs per second',
+    },
+  ];
 
   constructor(props: IConfigurationPlateProps) {
     super(props);
@@ -94,8 +94,8 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
   public render() {
     const { configuration } = this.props;
 
-    if (configuration.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
-        return (
+    if (configuration.strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
+      return (
             <div className="configuration-plate u-plate">
                 <div className="configuration-plate__title">
                     Configure Options
@@ -138,9 +138,9 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                     </div>
                 </div>
             </div>
-        );
-    } else {
-        return (
+      );
+    }
+    return (
             <div className="configuration-plate u-plate">
                 <div className="configuration-plate__title">
                     Configure Options
@@ -171,8 +171,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                     </div>
                 </div>
             </div>
-        );
-    }
+    );
   }
 
   private handleConfigurationChange(configurationKey: ConfigurationKey, value: number) {

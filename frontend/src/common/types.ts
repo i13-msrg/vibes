@@ -3,7 +3,7 @@ export enum Strategies {
   PROOF_OF_STAKE = 'PROOF_OF_STAKE',
   PROOF_OF_WORK = 'PROOF_OF_WORK',
   HYPERLEDGER = 'HYPERLEDGER',
-  BITCOIN_LIKE_BLOCKCHAIN = 'BITCOIN_LIKE_BLOCKCHAIN'
+  BITCOIN_LIKE_BLOCKCHAIN = 'BITCOIN_LIKE_BLOCKCHAIN',
 }
 
 export interface INumberOfNodesConfiguration {
@@ -51,7 +51,7 @@ export interface INetworkBandwidth {
 }
 
 export interface IStrategy {
-    strategy: string | null;
+  strategy: string | null;
 }
 
 export interface IConfiguration extends
@@ -68,7 +68,7 @@ export interface IConfiguration extends
   IStrategy,
   INeighboursDiscoveryInterval {
   [index: string]: any | null;
-  }
+}
 
 
 export type ConfigurationEntity =

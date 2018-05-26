@@ -17,7 +17,7 @@ declare interface DataMapOptions {
   projection?: string;
   height?: null | number;
   width?: null | number;
-  dataType?: "json" | "csv";
+  dataType?: 'json' | 'csv';
   dataUrl?: null | string;
   data?: any;
   filters?: any;
@@ -46,10 +46,10 @@ declare interface DataMapBubblesConfigOptions {
   borderOpacity?: number;
   borderColor?: string;
   popupOnHover?: boolean;
-  radius?: null | number,
+  radius?: null | number;
   popupTemplate?: (geography: DataMapGeographyData, data: DataMapBubbleDatum) => string;
   fillOpacity?: number;
-  animate?: boolean,
+  animate?: boolean;
   highlightOnHover?: boolean;
   highlightFillColor?: string;
   highlightBorderColor?: string;
@@ -100,10 +100,10 @@ declare interface DataMapLabelOptions {
 
 declare interface DataMapArcDatum {
   origin: string | {
-    latitude: number, longitude: number
+    latitude: number, longitude: number,
   };
   destination: string | {
-    latitude: number, longitude: number
+    latitude: number, longitude: number,
   };
   options?: {
     strokeWidth?: number;
@@ -114,16 +114,16 @@ declare interface DataMapArcDatum {
 
 declare class Datamap {
   constructor(options: DataMapOptions);
-  legend(): void;
-  updateChoropleth(data: string | any | null, options?: { reset: boolean, data: any }): void;
-  bubbles(data: ReadonlyArray<DataMapBubbleDatum>, opts?: DataMapGeographyConfigOptions): void;
-  labels(options?: DataMapLabelOptions): void;
-  resize(): void;
-  arc(data: ReadonlyArray<DataMapArcDatum>, options?: DataMapArcConfigOptions): void;
-  latLngToXY(lat: number, lng: number): any;
-  addLayer(className: string, id: string, first: boolean): SVGElement;
-  updatePopup(element: HTMLElement, d: DataMapGeographyData, options: DataMapGeographyConfigOptions): string;
-  addPlugin(name: string, pluginFn: Function): void;
+  public legend(): void;
+  public updateChoropleth(data: string | any | null, options?: { reset: boolean, data: any }): void;
+  public bubbles(data: ReadonlyArray<DataMapBubbleDatum>, opts?: DataMapGeographyConfigOptions): void;
+  public labels(options?: DataMapLabelOptions): void;
+  public resize(): void;
+  public arc(data: ReadonlyArray<DataMapArcDatum>, options?: DataMapArcConfigOptions): void;
+  public latLngToXY(lat: number, lng: number): any;
+  public addLayer(className: string, id: string, first: boolean): SVGElement;
+  public updatePopup(element: HTMLElement, d: DataMapGeographyData, options: DataMapGeographyConfigOptions): string;
+  public addPlugin(name: string, pluginFn: Function): void;
 }
 
 interface JQuery {

@@ -25,8 +25,8 @@ export interface IBlockTransfer {
 }
 
 export interface ITransaction {
-    transactionFee: number;
-    confirmation: boolean;
-    confirmationLevel: number;
-    creationLevel: number;
+  transactionFee: number;
+  confirmation: boolean;
+  confirmationLevel: number;
+  creationLevel: number;
 }

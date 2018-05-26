@@ -1,6 +1,6 @@
 import _fetch from '../../../common/fetch';
-import { IConfiguration} from '../../../common/types';
-import {IBlockMine, IBlockTransfer, ITransaction} from '../../molecules/simulation-events/types';
+import { IConfiguration } from '../../../common/types';
+import { IBlockMine, IBlockTransfer, ITransaction } from '../../molecules/simulation-events/types';
 
 export interface ISimulationPayload {
   events: (IBlockMine | IBlockTransfer)[];
