@@ -60,7 +60,8 @@ case class ReducerResult(
   lastBlockNumberOfRecipients: Int,
   maxProcessedTransactions: Int,
   transactions: List[Json],
-  totalNumberOfNodes: Int
+  totalNumberOfNodes: Int,
+  orphans: Int
 )
 
 object ReducerResult {

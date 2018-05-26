@@ -157,6 +157,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
                                     lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                     totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
+                                    orphans={simulationPayload.orphans}
                                 />
                             )}
                         </div>
@@ -400,6 +401,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
                                 lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                 totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
+                                orphans={simulationPayload.orphans}
                             />
                         )}
                     </div>

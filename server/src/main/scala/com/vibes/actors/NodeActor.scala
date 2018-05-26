@@ -62,12 +62,16 @@ class NodeActor (
     */
   private var executables: SortedMap[VExecution.WorkRequest, VExecution.Value] = SortedMap.empty
 
+  var blockList: Set[VBlock] = Set.empty
+
   private def addExecutablesForMineBlock(now: DateTime): Unit = {
     val timestamp     = node.createTimestampForNextBlock(now)
     val exWorkRequest = node.createExecutableWorkRequest(self, timestamp, VExecution.ExecutionType.MineBlock)
     val value = () => {
       logger.debug(s"BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
-      node = node.addBlock(VBlock.createWinnerBlock(node, timestamp))
+      var newBlock = VBlock.createWinnerBlock(node, timestamp)
+      node = node.addBlock(newBlock)
+      reducerActor ! ReducerActions.AddBlock(newBlock)
       addExecutablesForPropagateOwnBlock(timestamp)
       nodeRepoActor ! NodeRepoActions.AnnounceNextWorkRequestAndMine(timestamp)
     }

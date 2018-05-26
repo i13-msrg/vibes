@@ -15,6 +15,7 @@ interface ISimulationSummaryProps {
   firstBlockNumberOfRecipients: number;
   lastBlockNumberOfRecipients: number;
   totalNumberOfNodes: number;
+  orphans: number;
 }
 
 export default class SimulationSummary extends React.Component<ISimulationSummaryProps, {}> {
@@ -23,6 +24,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
     const {
       duration,
       longestChainLength,
+      orphans,
       longestChainSize,
       longestChainNumberTransactions,
       firstBlockNumberOfRecipients,
@@ -56,6 +58,14 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
               {longestChainLength} Blocks
             </div>
           </li>
+            <li className="simulation-summary__list-item">
+                <div className="simulation-summary__text">
+                    Total number of orphan blocks
+                </div>
+                <div className="simulation-summary__result">
+                    {orphans} Blocks
+                </div>
+            </li>
           <li className="simulation-summary__list-item">
             <div className="simulation-summary__text">
               Blockchain size

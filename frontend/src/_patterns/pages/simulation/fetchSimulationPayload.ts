@@ -18,6 +18,7 @@ export interface ISimulationPayload {
   lastBlockNumberOfRecipients: number;
   transactions: (ITransaction)[];
   totalNumberOfNodes: number;
+  orphans: number;
 }
 
 export default function fetchSimulationPayload(configuration: IConfiguration): Promise<ISimulationPayload> {

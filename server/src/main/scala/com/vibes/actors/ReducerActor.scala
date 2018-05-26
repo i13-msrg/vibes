@@ -21,6 +21,7 @@ import org.joda.time._
 */
 class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
   private var nodes: Set[VNode] = Set.empty
+  var blocks: Set[VBlock] = Set.empty
   private var start             = DateTime.now
   private var transactionPool: Set[VTransaction] = Set.empty
 
@@ -35,9 +36,14 @@ class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
       nodes += node
 
       if (VConf.numberOfNodes == nodes.size) {
-        val events = ReducerActor.calculateResult(nodes, start, transactionPool)
+        val events = ReducerActor.calculateResult(nodes, start, transactionPool, blocks)
         masterActor ! MasterActions.FinishEvents(events)
       }
+
+    case ReducerActions.AddBlock(block) =>
+      assert(!blocks.contains(block))
+      blocks += block
+      logger.debug(s"block level... ${block.level}")
   }
 }
 
@@ -52,13 +58,14 @@ case class ReducerIntermediateResult(
   firstBlockNumberOfRecipients: Int,
   lastBlockNumberOfRecipients: Int,
   maxProcessedTransactions: Int,
-  transactions: List[VTransaction]
+  transactions: List[VTransaction],
+  orphans: Int
 )
 
 object ReducerActor extends LazyLogging {
   def props(masterActor: ActorRef): Props = Props(new ReducerActor(masterActor))
 
-  def calculateResult(nodes: Set[VNode], start: DateTime, transactionPool: Set[VTransaction]): ReducerIntermediateResult = {
+  def calculateResult(nodes: Set[VNode], start: DateTime, transactionPool: Set[VTransaction], blocks: Set[VBlock]): ReducerIntermediateResult = {
     var events: List[VEventType] = List.empty
     var longestChain             = nodes.last.blockchain
     var lastNode = nodes.last
@@ -165,6 +172,9 @@ object ReducerActor extends LazyLogging {
     logger.debug(s"transaction size ${lastNode.transactionPool.size}")
     logger.debug(s"transaction size ${transactions.size}")
 
+    val orphans = blocks.size - longestChainLength
+    logger.debug(s"ORPHANS... $orphans")
+
     import com.vibes.utils.Joda._
 
     ReducerIntermediateResult(
@@ -178,7 +188,8 @@ object ReducerActor extends LazyLogging {
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
       maxProcessedTransactions,
-      transactions
+      transactions,
+      orphans
     )
   }
 }

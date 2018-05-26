@@ -143,7 +143,8 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                             intermediateResult.lastBlockNumberOfRecipients,
                             intermediateResult.maxProcessedTransactions,
                             transactionsJson,
-                            VConf.numberOfNodes
+                            VConf.numberOfNodes,
+                            intermediateResult.orphans
                           )
                         })) { extraction =>
                         lock = false
