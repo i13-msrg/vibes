@@ -118,13 +118,17 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
 
                       onComplete(reducerIntermediateResult.flatMap(promise =>
                         promise.future.map { intermediateResult =>
-                          val json = intermediateResult.events.map {
+                          val eventsJson = intermediateResult.events.map {
                             case event@(_: MinedBlock) => event.asJson
                             case event@(_: TransferBlock) => event.asJson
                           }
 
+                          val transactionsJson = intermediateResult.transactions.map {
+                            transaction => transaction.asJson
+                          }
+
                           ReducerResult(
-                            json,
+                            eventsJson,
                             intermediateResult.duration,
                             intermediateResult.longestChainLength,
                             intermediateResult.longestChainSize,
@@ -138,6 +142,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                             intermediateResult.firstBlockNumberOfRecipients,
                             intermediateResult.lastBlockNumberOfRecipients,
                             intermediateResult.maxProcessedTransactions,
+                            transactionsJson,
                             VConf.numberOfNodes
                           )
                         })) { extraction =>
@@ -165,5 +170,6 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
   }
   val bindingFuture = Http().bindAndHandle(route, "localhost", 8082)
 
-  logger.debug("Server online at http://localhost:8082/\\nPress RETURN to stop...")
+  logger.debug("Server online at http://localhost:8082/ \n ")
+  logger.debug("Press RETURN to stop...")
 }

@@ -24,6 +24,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
       duration,
       longestChainLength,
       longestChainSize,
+      longestChainNumberTransactions,
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
       totalNumberOfNodes,
@@ -71,6 +72,14 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
               {totalNumberOfNodes}
             </div>
           </li>
+            <li className="simulation-summary__list-item">
+                <div className="simulation-summary__text">
+                    Total number of transactions
+                </div>
+                <div className="simulation-summary__result">
+                    {longestChainNumberTransactions}
+                </div>
+            </li>
           <li className="simulation-summary__list-item">
             <div className="simulation-summary__text">
               First block received by

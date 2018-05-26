@@ -8,6 +8,9 @@ import org.joda.time.{DateTime, Duration}
 
 import scala.collection.mutable.ListBuffer
 
+// todo genesis block has no transactions, because transaction pool is zero
+// todo ? after last block new transactions are added to the transaction pool
+
 case class VBlock(
   id: String,
   origin: VNode,
@@ -80,22 +83,29 @@ case class VBlock(
 object VBlock extends LazyLogging {
   def createWinnerBlock(node: VNode, timestamp: DateTime): VBlock = {
     var maxTransactionsPerBlock : Int = 0
+    var processedTransactionsInBlock: Set[VTransaction] = Set.empty
 
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
-      // maxBlockWeight vs maxBlockSize
+      // todo think about segwit maxBlockWeight vs maxBlockSize
       maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
-      // todo genesis block has no transactions, because transaction pool is zero
-      // todo ? after last block new transactions are added to the transaction pool
-      logger.debug(s"Maximum amount of transactions per block: $maxTransactionsPerBlock")
-      logger.debug(s"Transaction pool size: ${node.transactionPool.size}")
+
+      // sorts the transaction pool by the transaction fee
+      processedTransactionsInBlock = node.transactionPool.toSeq.sortWith(_.transactionFee > _.transactionFee).take(maxTransactionsPerBlock).toSet
+
+      // sets confirmation status of transaction true
+      processedTransactionsInBlock.foreach { _.confirmation = true }
+
+      // sets confirmation level of transaction
+      processedTransactionsInBlock.foreach { _.confirmationLevel = node.blockchain.size }
     } else {
       maxTransactionsPerBlock = node.transactionPool.size
+      processedTransactionsInBlock = node.transactionPool
     }
 
     VBlock(
       id = UUID.randomUUID().toString,
       origin = node,
-      transactions = node.transactionPool.take(maxTransactionsPerBlock),
+      transactions = processedTransactionsInBlock,
       level = node.blockchain.size,
       timestamp = timestamp,
       recipients = ListBuffer.empty,

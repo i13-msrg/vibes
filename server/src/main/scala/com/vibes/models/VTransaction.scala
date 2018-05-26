@@ -3,8 +3,11 @@ package com.vibes.models
 import java.util.UUID
 
 import akka.actor.ActorRef
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.utils.VExecution
+import io.circe.{Encoder, Json}
 import org.joda.time.DateTime
+import io.circe.syntax._
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
@@ -15,6 +18,10 @@ class VTransaction(
   val origin: ActorRef,
   val recipient: ActorRef,
   val amount: Int,
+  val transactionFee: Int, //  satoshi per byte
+  var confirmation: Boolean,
+  var creationLevel: Int,
+  var confirmationLevel: Int,
   private val recipients: ListBuffer[VRecipient] // maybe use mutable sorted set instead todo
 ) {
   def canEqual(a: Any) = a.isInstanceOf[VTransaction]
@@ -35,9 +42,13 @@ class VTransaction(
     origin: ActorRef = origin,
     recipient: ActorRef = recipient,
     amount: Int = amount,
+    transactionFee: Int = transactionFee,
+    confirmation: Boolean = confirmation,
+    creationLevel: Int = creationLevel,
+    confirmationLevel: Int = confirmationLevel,
     recipients: ListBuffer[VRecipient] = recipients,
   ): VTransaction = {
-    new VTransaction(id, origin, recipient, amount, recipients)
+    new VTransaction(id, origin, recipient, amount, transactionFee, confirmation, creationLevel, confirmationLevel, recipients)
   }
 
   def createExecutableWorkRequest(
@@ -59,7 +70,16 @@ class VTransaction(
   }
 }
 
-object VTransaction {
+object VTransaction extends LazyLogging{
+  implicit val transactionEncoder: Encoder[VTransaction] = new Encoder[VTransaction] {
+    override def apply(transaction: VTransaction): Json = Json.obj(
+      ("transactionFee", transaction.transactionFee.asJson),
+      ("confirmation", transaction.confirmation.asJson),
+      ("confirmationLevel", transaction.confirmationLevel.asJson),
+      ("creationLevel", transaction.creationLevel.asJson),
+    )
+  }
+
   def createNewTransactionPool(
     longerBlockchain: List[VBlock],
     tail: List[VBlock],
@@ -73,15 +93,21 @@ object VTransaction {
     potentialTransactions.diff(confirmedTransactions)
   }
 
-  def createOne(from: ActorRef, to: ActorRef, timestamp: DateTime): VTransaction = {
+  def createOne(from: ActorRef, to: ActorRef, timestamp: DateTime, creationLevel: Int): VTransaction = {
     val amount = Random.nextInt(1000)
+    val transactionFee = Random.nextInt(125)
+    val confirmation = false
+    val confirmationLevel: Int = 0
     new VTransaction(
       UUID.randomUUID().toString,
       from,
       to,
       amount,
+      transactionFee,
+      confirmation,
+      creationLevel,
+      confirmationLevel,
       ListBuffer.empty
     )
   }
-
 }

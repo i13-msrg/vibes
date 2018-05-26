@@ -93,3 +93,51 @@
   height: 264px;
   grid-area: simulation-processed-transactions;
 }
+
+.simulation-transaction-count-grouped-by-fees__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-transaction-count-grouped-by-fees {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-transaction-count-grouped-by-fees;
+}
+
+.confirmation-time-grouped-by-fees__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.confirmation-time-grouped-by-fees {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: confirmation-time-grouped-by-fees;
+}
+
+.simulation-time-between-blocks__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-time-between-blocks {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-time-between-blocks;
+}

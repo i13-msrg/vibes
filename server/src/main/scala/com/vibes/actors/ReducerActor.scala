@@ -51,7 +51,8 @@ case class ReducerIntermediateResult(
   timesAvgNoOutliers: (Float, Float, Float),
   firstBlockNumberOfRecipients: Int,
   lastBlockNumberOfRecipients: Int,
-  maxProcessedTransactions: Int
+  maxProcessedTransactions: Int,
+  transactions: List[VTransaction]
 )
 
 object ReducerActor extends LazyLogging {
@@ -68,15 +69,6 @@ object ReducerActor extends LazyLogging {
         longestChain = node.blockchain
         lastNode = node
       }
-    }
-
-    // find all transactions in the transactionPools
-    nodes.foreach { node =>
-      node.transactionPool.foreach( transaction =>
-        if ( ! transactionPool.contains(transaction)) {
-          transactionPool.+(transaction)
-        }
-      )
     }
 
     val size = longestChain.flatMap(_.transactions).size * VConf.transactionSize
@@ -152,8 +144,6 @@ object ReducerActor extends LazyLogging {
     val lastBlockNumberOfRecipients = longestChain.head.numberOfRecipients + 1
     logger.debug(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipients} OUT OF ${VConf.numberOfNodes} NODES")
 
-    val amountOfTransactionsInTransactionpool = lastNode.transactionPool.size
-    logger.debug(s"TOTAL TRANSACTION POOL... ${amountOfTransactionsInTransactionpool}")
     logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
     val maxProcessedTransactions = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
@@ -169,6 +159,12 @@ object ReducerActor extends LazyLogging {
       blockEvents
     }
 
+    logger.debug(s"transaction size ${lastNode.transactionPool.size}")
+    var transactions: List[VTransaction] = longestChain.flatMap(_.transactions) ++ lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet)
+    logger.debug(s"transaction size ${longestChain.flatMap(_.transactions).size}")
+    logger.debug(s"transaction size ${lastNode.transactionPool.size}")
+    logger.debug(s"transaction size ${transactions.size}")
+
     import com.vibes.utils.Joda._
 
     ReducerIntermediateResult(
@@ -181,7 +177,8 @@ object ReducerActor extends LazyLogging {
       timesAvgNoOutliers,
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
-      maxProcessedTransactions
+      maxProcessedTransactions,
+      transactions
     )
   }
 }

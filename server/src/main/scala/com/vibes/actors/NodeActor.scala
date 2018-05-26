@@ -75,7 +75,7 @@ class NodeActor (
   }
 
   private def addExecutableForIssueTransaction(toActor: ActorRef, timestamp: DateTime): Unit = {
-    val transaction = VTransaction.createOne(self, toActor, timestamp)
+    val transaction = VTransaction.createOne(self, toActor, timestamp, node.blockchain.size)
     val exWorkRequest =
       transaction.createExecutableWorkRequest(self, self, timestamp, VExecution.ExecutionType.IssueTransaction)
     val value = () => {

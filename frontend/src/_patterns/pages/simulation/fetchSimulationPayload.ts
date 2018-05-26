@@ -1,6 +1,6 @@
 import _fetch from '../../../common/fetch';
 import { IConfiguration} from '../../../common/types';
-import { IBlockMine, IBlockTransfer } from '../../molecules/simulation-events/types';
+import {IBlockMine, IBlockTransfer, ITransaction} from '../../molecules/simulation-events/types';
 
 export interface ISimulationPayload {
   events: (IBlockMine | IBlockTransfer)[];
@@ -16,6 +16,7 @@ export interface ISimulationPayload {
   timesNoOutliers90: number | null;
   firstBlockNumberOfRecipients: number;
   lastBlockNumberOfRecipients: number;
+  transactions: (ITransaction)[];
   totalNumberOfNodes: number;
 }
 

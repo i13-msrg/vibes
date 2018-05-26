@@ -23,3 +23,10 @@ export interface IBlockTransfer {
   fromNode: INode;
   toNode: INode;
 }
+
+export interface ITransaction {
+    transactionFee: number;
+    confirmation: boolean;
+    confirmationLevel: number;
+    creationLevel: number;
+}

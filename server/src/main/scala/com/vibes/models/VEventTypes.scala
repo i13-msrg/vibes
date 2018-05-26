@@ -59,6 +59,7 @@ case class ReducerResult(
   firstBlockNumberOfRecipients: Int,
   lastBlockNumberOfRecipients: Int,
   maxProcessedTransactions: Int,
+  transactions: List[Json],
   totalNumberOfNodes: Int
 )
 

@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
+import com.vibes.models.VTransaction
 
 import scala.concurrent.duration._
 
