@@ -43,7 +43,6 @@ class ReducerActor(masterActor: ActorRef) extends Actor with LazyLogging {
     case ReducerActions.AddBlock(block) =>
       assert(!blocks.contains(block))
       blocks += block
-      logger.debug(s"block level... ${block.level}")
   }
 }
 
@@ -169,7 +168,6 @@ object ReducerActor extends LazyLogging {
     logger.debug(s"transaction size ${lastNode.transactionPool.size}")
     var transactions: List[VTransaction] = longestChain.flatMap(_.transactions) ++ lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet)
     logger.debug(s"transaction size ${longestChain.flatMap(_.transactions).size}")
-    logger.debug(s"transaction size ${lastNode.transactionPool.size}")
     logger.debug(s"transaction size ${transactions.size}")
 
     val orphans = blocks.size - longestChainLength

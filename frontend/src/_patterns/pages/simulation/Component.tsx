@@ -27,8 +27,8 @@ interface ISimulationProps extends IConfiguration {
 }
 
 export default class Simulation extends React.Component<ISimulationProps, ISimulationState> {
-  private static transactionCountGroupedByFees(simulationPayload: ISimulationPayload) {
-    const multi: any[][] = [['Transaction Fees (in Satoshi)', 'Confirmed Transactions', 'Unconfirmed Transactions']];
+  private static transactionConfirmationStatusGroupedByFees(simulationPayload: ISimulationPayload) {
+    const multi: any[][] = [['Transaction Fees', 'Confirmed Transactions', 'Unconfirmed Transactions']];
 
     for (const transaction of simulationPayload.transactions) {
       for (let j = 0; j < multi.length; j += 1) {
@@ -54,7 +54,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
   private static confirmationTime(simulationPayload: ISimulationPayload) {
     const multi: number[][] = [[]];
-
     for (const transaction of simulationPayload.transactions) {
       for (let j = 0; j < multi.length; j += 1) {
         if (multi[j][0] === Simulation.makeCategory(transaction.transactionFee)) {
@@ -71,7 +70,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
       }
     }
 
-    const multi2: any[][] = [['Transaction Fees (in Satoshi)', 'Confirmation Time (in Block)']];
+    const multi2: any[][] = [['Transaction Fees', 'Confirmation Time']];
     for (const item of multi) {
       multi2.push([item[0], Math.round(item[2] / item[1] * 100) / 100]);
     }
@@ -204,7 +203,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
                     <div className="simulation-pending-transactions u-plate">
                         <div className="simulation-pending-transactions__title">
-                            Pending Transactions
+                            Pending Transactions Per Block
                         </div>
                         {simulationPayload && (
                             <div className={'pending-transactions-chart-container'}>
@@ -235,7 +234,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
                     <div className="simulation-processed-transactions u-plate">
                         <div className="simulation-processed-transactions__title">
-                            Processed Transactions
+                            Processed Transactions Per Block
                         </div>
                         {simulationPayload && (
                             <div className={'processed-transactions-chart-container'}>
@@ -267,16 +266,16 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
                     <div className="simulation-transaction-count-grouped-by-fees u-plate">
                         <div className="simulation-transaction-count-grouped-by-fees__title">
-                            transaction confirmation status
+                            Transaction Confirmation Status Grouped By Transaction Fees
                         </div>
                         {simulationPayload && (
                             <div className={'transaction-count-grouped-by-fees-chart-container'}>
                                 <Chart
                                     chartType="ColumnChart"
-                                    data={Simulation.transactionCountGroupedByFees(simulationPayload)}
+                                    data={Simulation.transactionConfirmationStatusGroupedByFees(simulationPayload)}
                                     options={{
                                       hAxis: {
-                                        title: 'Transaction Fees (in Satoshis)',
+                                        title: 'Transaction Fees (in Satoshi)',
                                         gridlines: { count: -1 },
                                         minValue: 0,
                                       },
@@ -291,7 +290,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       legend: { position: 'bottom' },
                                       colors: ['#9ACD32', '#FF0000'],
                                     }}
-                                    graph_id="Transaction Fee ColumnChart"
+                                    graph_id="Confirmation Status ColumnChart"
                                     width="100%"
                                     height="264px"
                                 />
@@ -301,7 +300,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
                     <div className="confirmation-time-grouped-by-fees u-plate">
                         <div className="confirmation-time-grouped-by-fees__title">
-                            Transaction confirmation time
+                            Average Transaction Confirmation Time Grouped by Transaction Fees
                         </div>
                         {simulationPayload && (
                             <div className={'confirmation-time-grouped-by-fees-chart-container'}>
@@ -310,12 +309,12 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     data={Simulation.confirmationTime(simulationPayload)}
                                     options={{
                                       hAxis: {
-                                        title: 'Transaction Fees (in Satoshis)',
+                                        title: 'Transaction Fees (in Satoshi)',
                                         gridlines: { count: -1 },
                                         minValue: 0,
                                       },
                                       vAxis: {
-                                        title: 'Confirmation Time (in Blocks)',
+                                        title: 'Confirmation Time (in Block)',
                                       },
                                       series: {
                                         1: { curveType: 'function' },
@@ -417,7 +416,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
                 <div className="simulation-time-between-blocks u-plate">
                     <div className="simulation-time-between-blocks__title">
-                        time between blocks
+                        Time Between Blocks
                     </div>
                     {simulationPayload && (
                         <div className={'time-between-blocks-chart-container'}>
@@ -448,7 +447,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
                 <div className="simulation-processed-transactions u-plate">
                     <div className="simulation-processed-transactions__title">
-                        Processed Transactions
+                        Processed Transactions per Block
                     </div>
                     {simulationPayload && (
                         <div className={'processed-transactions-chart-container'}>

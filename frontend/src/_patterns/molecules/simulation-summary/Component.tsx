@@ -63,7 +63,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
                     Total number of orphan blocks
                 </div>
                 <div className="simulation-summary__result">
-                    {orphans} Blocks
+                    {orphans}
                 </div>
             </li>
           <li className="simulation-summary__list-item">
