@@ -46,6 +46,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         maxBlockWeight: 4000, // KB
         networkBandwidth: 1, // MB per second
         strategy: Strategies.GENERIC_SIMULATION.toString(),
+        transactionPropagationDelay: 150, // ms
       },
     };
     this.handleStrategyChange = this.handleStrategyChange.bind(this);
@@ -121,6 +122,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         maxBlockWeight: 4000, // KB
         networkBandwidth: 1, // MB per second
         strategy: strategy.toString(),
+        transactionPropagationDelay: 150, // ms
       };
       this.setState({ configuration });
       this.setState({ strategy });
@@ -138,6 +140,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         maxBlockWeight: 4000, // KB
         networkBandwidth: 1, // MB per second
         strategy: strategy.toString(),
+        transactionPropagationDelay: 150, // ms
       };
       this.setState({ configuration });
       this.setState({ strategy });

@@ -165,10 +165,10 @@ object ReducerActor extends LazyLogging {
       blockEvents
     }
 
-    logger.debug(s"transaction size ${lastNode.transactionPool.size}")
+    logger.debug(s"TRANSACTION SIZE OF LAST NODE TRANSACTION POOL... ${lastNode.transactionPool.size}")
     var transactions: List[VTransaction] = longestChain.flatMap(_.transactions) ++ lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet)
-    logger.debug(s"transaction size ${longestChain.flatMap(_.transactions).size}")
-    logger.debug(s"transaction size ${transactions.size}")
+    logger.debug(s"TRANSACTION SIZE OF LONGEST CHAIN... ${longestChain.flatMap(_.transactions).size}")
+    logger.debug(s"TRANSACTION SIZE... ${transactions.size}")
 
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")

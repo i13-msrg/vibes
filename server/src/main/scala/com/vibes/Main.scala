@@ -77,7 +77,8 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                     'neighboursDiscoveryInterval.as[Int],
                     'maxBlockSize.as[Int],
                     'networkBandwidth.as[Int],
-                    'strategy.as[String]
+                    'strategy.as[String],
+                    'transactionPropagationDelay.as[Int]
                   )) {
                   (blockTime,
                    numberOfNeighbours,
@@ -89,7 +90,8 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    neighboursDiscoveryInterval,
                    maxBlockSize,
                    networkBandwidth,
-                   strategy
+                   strategy,
+                   transactionPropagationDelay
                   ) =>
                     logger.debug(s"ATTEMPT START.......")
                     if (!lock) {
@@ -103,12 +105,14 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       VConf.simulateUntil = new DateTime(simulateUntil)
                       VConf.transactionSize = transactionSize
                       VConf.throughPut = throughput
-                      VConf.propagationDelay = latency
+                      VConf.blockPropagationDelay = latency
                       VConf.neighboursDiscoveryInterval = neighboursDiscoveryInterval
                       VConf.maxBlockSize = maxBlockSize
                       VConf.networkBandwidth = networkBandwidth
                       VConf.strategy = strategy
-                      logger.debug(s"Strategy: $strategy")
+                      logger.debug(s"STRATEGY... $strategy")
+                      VConf.transactionPropagationDelay = transactionPropagationDelay
+                      logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
                       val masterActor = system.actorOf(MasterActor.props(), "Master")
                       // timeout for the ask pattern
                       implicit val timeout = Timeout(5000 seconds)

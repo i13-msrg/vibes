@@ -10,7 +10,8 @@ object VConf {
   var throughPut = 10 // average number of transactions per blockTime
   var transactionSize = 250 // kb
   var simulateUntil: DateTime = DateTime.now.plusHours(3)
-  var propagationDelay = 900 // ms (latency + transfer + verification time)
+  var blockPropagationDelay = 900 // ms (latency + transfer + verification time)
+  var transactionPropagationDelay = 150 // ms
 
   var strategy = "GENERIC_SIMULATION" // mb
 

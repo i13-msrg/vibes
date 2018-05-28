@@ -84,7 +84,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
           </li>
             <li className="simulation-summary__list-item">
                 <div className="simulation-summary__text">
-                    Total number of transactions
+                    Total number of processed transactions
                 </div>
                 <div className="simulation-summary__result">
                     {longestChainNumberTransactions}

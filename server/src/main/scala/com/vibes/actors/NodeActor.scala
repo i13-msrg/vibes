@@ -94,7 +94,7 @@ class NodeActor (
     node.neighbourActors.foreach { neighbour =>
       val exWorkRequest = node.createExecutableWorkRequest(
         neighbour,
-        timestamp.plusMillis(VConf.propagationDelay),
+        timestamp.plusMillis(VConf.blockPropagationDelay),
         VExecution.ExecutionType.PropagateOwnBlock
       )
       val hash = node.createBlockchainHash()
@@ -111,7 +111,7 @@ class NodeActor (
       val exWorkRequest = transaction
         .createExecutableWorkRequest(self,
                                      neighbour,
-                                     timestamp.plusMillis(150), // todo
+                                     timestamp.plusMillis(VConf.transactionPropagationDelay), // todo
                                      VExecution.ExecutionType.PropagateTransaction)
       val value = () => {
         neighbour ! NodeActions.ReceiveTransaction(node, transaction, exWorkRequest.timestamp)
@@ -124,7 +124,7 @@ class NodeActor (
   private def addExecutablesForPropagateExternalBlock(now: DateTime): Unit = {
     node.neighbourActors.foreach { neighbour =>
       val workRequest = node.createExecutableWorkRequest(neighbour,
-                                                         now.plusMillis(VConf.propagationDelay),
+                                                         now.plusMillis(VConf.blockPropagationDelay),
                                                          VExecution.ExecutionType.PropagateExternalBlock)
       val hash = node.createBlockchainHash()
       val value = () => {

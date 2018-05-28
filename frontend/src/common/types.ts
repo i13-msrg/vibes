@@ -34,6 +34,10 @@ export interface ILatency {
   latency: number | null;
 }
 
+export interface ITransactionPropagationDelay {
+    latency: number | null;
+}
+
 export interface INeighboursDiscoveryInterval {
   neighboursDiscoveryInterval: number | null;
 }
@@ -62,6 +66,7 @@ export interface IConfiguration extends
   ISimulateUntil,
   IThroughput,
   ILatency,
+  ITransactionPropagationDelay,
   IMaxBlockSize,
   IMaxBlockWeight,
   INetworkBandwidth,
@@ -78,7 +83,8 @@ export type ConfigurationEntity =
   ITransactionSize |
   ISimulateUntil |
   IThroughput |
-  ILatency;
+  ILatency |
+  ITransactionPropagationDelay;
 
 export type ConfigurationKey = keyof IConfiguration;
 
