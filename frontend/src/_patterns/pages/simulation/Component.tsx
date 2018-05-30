@@ -27,12 +27,12 @@ interface ISimulationProps extends IConfiguration {
 }
 
 export default class Simulation extends React.Component<ISimulationProps, ISimulationState> {
-  private static transactionConfirmationStatusGroupedByFees(simulationPayload: ISimulationPayload) {
+  private static transactionConfirmationStatusPerFee(simulationPayload: ISimulationPayload) {
     const multi: any[][] = [['Transaction Fees', 'Confirmed Transactions', 'Unconfirmed Transactions']];
 
     for (const transaction of simulationPayload.transactions) {
       for (let j = 0; j < multi.length; j += 1) {
-        if (multi[j][0] === Simulation.makeCategory(transaction.transactionFee)) {
+        if (multi[j][0] === transaction.transactionFee) {
           if (transaction.confirmation) {
             multi[j][1] += 1;
           } else {
@@ -41,9 +41,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
           break;
         } else if (j === multi.length - 1) {
           if (transaction.confirmation) {
-            multi.push([Simulation.makeCategory(transaction.transactionFee), 1, 0]);
+            multi.push([transaction.transactionFee, 1, 0]);
           } else {
-            multi.push([Simulation.makeCategory(transaction.transactionFee), 0, 1]);
+            multi.push([transaction.transactionFee, 0, 1]);
           }
         }
       }
@@ -56,7 +56,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     const multi: number[][] = [[]];
     for (const transaction of simulationPayload.transactions) {
       for (let j = 0; j < multi.length; j += 1) {
-        if (multi[j][0] === Simulation.makeCategory(transaction.transactionFee)) {
+        if (multi[j][0] === transaction.transactionFee) {
           if (transaction.confirmation) {
             multi[j][1] += 1;
             multi[j][2] = multi[j][2]
@@ -65,7 +65,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
           }
           break;
         } else if (j === multi.length - 1) {
-          multi.push([Simulation.makeCategory(transaction.transactionFee), 1, 0]);
+          multi.push([transaction.transactionFee, 1, 0]);
         }
       }
     }
@@ -78,16 +78,12 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     return multi2;
   }
 
-  private static makeCategory(number: number) {
-    return Math.floor(number / 10) * 10;
-  }
-
   private static timeBetweenBlocks(simulationPayload: any) {
-    const multi: any[][] = [['Blocks', 'Time (in minute)'], [0, 0]];
+    const multi: any[][] = [['Blocks', 'Time (in minute)'], [1, 0]];
 
     for (let i = 1; i < simulationPayload.events.length; i += 1) {
       if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
-        multi.push([simulationPayload.events[i].level,
+        multi.push([simulationPayload.events[i].level + 1,
           (new Date(simulationPayload.events[i].timestamp).getTime()
                         - new Date(simulationPayload.events[i - 1].timestamp).getTime()) / 1000 / 60]);
       }
@@ -100,7 +96,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
     for (const event of simulationPayload.events) {
       if (event.eventType === EventTypes.IBlockMine) {
-        multi.push([event.level, event.transactionPoolSize]);
+        multi.push([event.level + 1, event.transactionPoolSize]);
       }
     }
 
@@ -120,6 +116,35 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     if (this.props.strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
       return (
                 <div className="simulation">
+                    <div className="simulation__buttons">
+                        <div>
+                            <Button
+                                className="simulation__button"
+                                title="New Simulation"
+                                onClick={() => {
+                                  this.setState({ simulationPayload: undefined });
+                                  this.props.onNewSimulation();
+                                }}
+                                active={true}
+                            />
+                        </div>
+                        {!isFetching && (
+                            <div>
+                                <Button
+                                    className="simulation__button"
+                                    title="START"
+                                    onClick={this.fetchEvents}
+                                    active={true}
+                                />
+                            </div>
+                        )}
+                        {isFetching && (
+                            <div>
+                                <div className="u-loader">Loading...</div>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="simulation__grid">
                         <div className="simulation__map u-plate">
                             <div className="simulation__title">
@@ -183,7 +208,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       hAxis: {
                                         title: 'Blocks',
                                         gridlines: { count: -1 },
-                                      },
+                                        minValue: 1,
+                                        viewWindow: {
+                                          min: 1,
+                                        }                                      },
                                       vAxis: {
                                         title: 'Time',
                                       },
@@ -214,6 +242,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       hAxis: {
                                         title: 'Blocks',
                                         gridlines: { count: -1 },
+                                        minValue: 1,
+                                        viewWindow: {
+                                          min: 1,
+                                        },
                                       },
                                       vAxis: {
                                         title: 'Pending Transactions',
@@ -245,6 +277,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       hAxis: {
                                         title: 'Blocks',
                                         gridlines: { count: -1 },
+                                        minValue: 1,
+                                        viewWindow: {
+                                          min: 1,
+                                        },
                                       },
                                       vAxis: {
                                         title: 'Processed Transactions',
@@ -264,20 +300,19 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         )}
                     </div>
 
-                    <div className="simulation-transaction-count-grouped-by-fees u-plate">
-                        <div className="simulation-transaction-count-grouped-by-fees__title">
-                            Transaction Confirmation Status Grouped By Transaction Fees
+                    <div className="simulation-transaction-count-per-fee u-plate">
+                        <div className="simulation-transaction-count-per-fee__title">
+                            Transaction Confirmation Status Per Transaction Fee
                         </div>
                         {simulationPayload && (
-                            <div className={'transaction-count-grouped-by-fees-chart-container'}>
+                            <div className={'transaction-count-per-fee-chart-container'}>
                                 <Chart
-                                    chartType="ColumnChart"
-                                    data={Simulation.transactionConfirmationStatusGroupedByFees(simulationPayload)}
+                                    chartType="AreaChart"
+                                    data={Simulation.transactionConfirmationStatusPerFee(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Transaction Fees (in Satoshi)',
                                         gridlines: { count: -1 },
-                                        minValue: 0,
                                       },
                                       vAxis: {
                                         title: 'Transactions',
@@ -290,7 +325,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       legend: { position: 'bottom' },
                                       colors: ['#9ACD32', '#FF0000'],
                                     }}
-                                    graph_id="Confirmation Status ColumnChart"
+                                    graph_id="Confirmation Status AreaChart"
                                     width="100%"
                                     height="264px"
                                 />
@@ -298,23 +333,22 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         )}
                     </div>
 
-                    <div className="confirmation-time-grouped-by-fees u-plate">
-                        <div className="confirmation-time-grouped-by-fees__title">
-                            Average Transaction Confirmation Time Grouped by Transaction Fees
+                    <div className="confirmation-time-per-fee u-plate">
+                        <div className="confirmation-time-per-fee__title">
+                            Average Transaction Confirmation Time per Transaction Fee
                         </div>
                         {simulationPayload && (
-                            <div className={'confirmation-time-grouped-by-fees-chart-container'}>
+                            <div className={'confirmation-time-per-fee-chart-container'}>
                                 <Chart
-                                    chartType="ColumnChart"
+                                    chartType="AreaChart"
                                     data={Simulation.confirmationTime(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Transaction Fees (in Satoshi)',
                                         gridlines: { count: -1 },
-                                        minValue: 0,
                                       },
                                       vAxis: {
-                                        title: 'Confirmation Time (in Block)',
+                                        title: 'Confirmation Time (in Blocks)',
                                       },
                                       series: {
                                         1: { curveType: 'function' },
@@ -323,39 +357,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       tooltip: {},
                                       legend: { position: 'none' },
                                     }}
-                                    graph_id="Confirmation Time ColumnChart"
+                                    graph_id="Confirmation Time AreaChart"
                                     width="100%"
                                     height="264px"
                                 />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="simulation__buttons">
-                        <div>
-                            <Button
-                                className="simulation__button"
-                                title="New Simulation"
-                                onClick={() => {
-                                  this.setState({ simulationPayload: undefined });
-                                  this.props.onNewSimulation();
-                                }}
-                                active={true}
-                            />
-                        </div>
-                        {!isFetching && (
-                            <div>
-                                <Button
-                                    className="simulation__button"
-                                    title="START"
-                                    onClick={this.fetchEvents}
-                                    active={true}
-                                />
-                            </div>
-                        )}
-                        {isFetching && (
-                            <div>
-                                <div className="u-loader">Loading...</div>
                             </div>
                         )}
                     </div>
@@ -530,7 +535,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
       for (const event of simulationPayload.events) {
         if (event.eventType === EventTypes.IBlockMine) {
-          multi.push([event.level, event.processedTransactions, simulationPayload.maxProcessedTransactions]);
+          multi.push([event.level + 1, event.processedTransactions, simulationPayload.maxProcessedTransactions]);
         }
       }
     } else if (this.props.strategy === Strategies.GENERIC_SIMULATION) {
@@ -538,7 +543,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
       for (const event of simulationPayload.events) {
         if (event.eventType === EventTypes.IBlockMine) {
-          multi.push([event.level, event.processedTransactions]);
+          multi.push([event.level + 1, event.processedTransactions]);
         }
       }
     }

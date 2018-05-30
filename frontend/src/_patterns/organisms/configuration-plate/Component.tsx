@@ -63,12 +63,12 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       placeholder: 'Latency',
       title: 'Propagation delay for a block (in milliseconds)',
     },
-      {
-          configurationKey: 'transactionPropagationDelay',
-          icon: distanceIcon,
-          placeholder: 'Transaction Propagation Delay',
-          title: 'Time it takes to send a transaction (in milliseconds)',
-      },
+    {
+      configurationKey: 'transactionPropagationDelay',
+      icon: distanceIcon,
+      placeholder: 'Transaction Propagation Delay',
+      title: 'Time it takes to send a transaction (in milliseconds)',
+    },
     {
       configurationKey: 'neighboursDiscoveryInterval',
       icon: wifiIcon,

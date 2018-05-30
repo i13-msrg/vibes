@@ -1,6 +1,7 @@
 .simulation {
   max-width: 1024px;
-  margin: 48px auto auto;
+  margin: 18px auto auto;
+  margin-bottom: 48px;
 
   @media (max-width: 1120px) {
     margin: 48px;
@@ -94,7 +95,7 @@
   grid-area: simulation-processed-transactions;
 }
 
-.simulation-transaction-count-grouped-by-fees__title {
+.simulation-transaction-count-per-fee__title {
   font-size: 16px;
   font-weight: 600;
   color: #95A4B4;
@@ -102,15 +103,15 @@
   flex: 1 0 0;
 }
 
-.simulation-transaction-count-grouped-by-fees {
+.simulation-transaction-count-per-fee {
   margin: 10px auto;
   padding: 20px;
   width: 982px;
   height: 264px;
-  grid-area: simulation-transaction-count-grouped-by-fees;
+  grid-area: simulation-transaction-count-per-fee;
 }
 
-.confirmation-time-grouped-by-fees__title {
+.confirmation-time-per-fee__title {
   font-size: 16px;
   font-weight: 600;
   color: #95A4B4;
@@ -118,12 +119,12 @@
   flex: 1 0 0;
 }
 
-.confirmation-time-grouped-by-fees {
+.confirmation-time-per-fee {
   margin: 10px auto;
   padding: 20px;
   width: 982px;
   height: 264px;
-  grid-area: confirmation-time-grouped-by-fees;
+  grid-area: confirmation-time-per-fee;
 }
 
 .simulation-time-between-blocks__title {

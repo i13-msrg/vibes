@@ -35,7 +35,7 @@ export interface ILatency {
 }
 
 export interface ITransactionPropagationDelay {
-    latency: number | null;
+  latency: number | null;
 }
 
 export interface INeighboursDiscoveryInterval {
