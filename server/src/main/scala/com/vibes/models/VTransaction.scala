@@ -22,7 +22,7 @@ class VTransaction(
   var confirmation: Boolean,
   var creationLevel: Int,
   var confirmationLevel: Int,
-  private val recipients: ListBuffer[VRecipient] // maybe use mutable sorted set instead todo
+  private val recipients: ListBuffer[VRecipient]
 ) {
   def canEqual(a: Any) = a.isInstanceOf[VTransaction]
   override def equals(that: Any): Boolean =
