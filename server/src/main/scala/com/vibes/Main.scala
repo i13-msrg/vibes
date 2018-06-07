@@ -16,19 +16,18 @@ import com.vibes.utils.VConf
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.syntax._
 import org.joda.time.DateTime
-
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContextExecutor, Future, Promise}
 import scala.language.postfixOps
 import scala.util.Success
 
 object Main extends App with FailFastCirceSupport with LazyLogging {
-  implicit val system = ActorSystem("VSystem")
-  implicit val materializer = ActorMaterializer()
+  implicit val system: ActorSystem = ActorSystem("VSystem")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
   // needed for the future flatMap/onComplete in the end
-  implicit val executionContext = system.dispatcher
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
   // do not start two simulations at once because of collisions
   private var lock = false
 
@@ -64,7 +63,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
           path("vibe") {
             get {
               // Timeout Browser Console Message: Uncaught (in promise) SyntaxError: Unexpected token < in JSON at position 0
-              withRequestTimeout(600.seconds, request => timeoutResponse) {
+              withRequestTimeout(900.seconds, request => timeoutResponse) {
                 parameters(
                   (
                     'blockTime.as[Int],
@@ -93,7 +92,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    strategy,
                    transactionPropagationDelay
                   ) =>
-                    logger.debug(s"ATTEMPT START.......")
+                    logger.debug(s"ATTEMPT START... $lock")
                     if (!lock) {
                       lock = true
                       logger.debug("=========================================================================================================")
@@ -115,7 +114,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
                       val masterActor = system.actorOf(MasterActor.props(), "Master")
                       // timeout for the ask pattern
-                      implicit val timeout = Timeout(5000 seconds)
+                      implicit val timeout: Timeout = 10 minutes
 
                       val reducerIntermediateResult: Future[Promise[ReducerIntermediateResult]] =
                         ask(masterActor, MasterActions.Start).mapTo[Promise[ReducerIntermediateResult]]
@@ -159,10 +158,12 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
 
                           case _ =>
                             masterActor ! PoisonPill
+                            logger.debug(s"EXTRACTION COMPLETE HTTP FAILURE...")
                             complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
                         }
                       }
                     } else {
+                      logger.debug(s"COMPLETE HTTP FAILURE...")
                       complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
                     }
                 }
@@ -173,6 +174,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
       }
     }
   }
+  logger.debug("test")
   val bindingFuture = Http().bindAndHandle(route, "localhost", 8082)
 
   logger.debug("Server online at http://localhost:8082/ \n ")

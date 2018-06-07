@@ -20,20 +20,30 @@ export default function fetchCustom(url: string, options?: any): any {
   document.dispatchEvent(new CustomEvent('fetch:start'));
 
   return (
-    fetch(url, options)
+    fetch(url, {
+        headers : {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+    })
       .then(response => response.json().then((body) => {
         if (response.status >= 400) {
           // it's payload: body.error instead of error: body.error in order to avoid
           // access like fetch.catch(error => error.error)
+          console.log('fetch error');
           return Promise.reject({ status: response.status, payload: body.error });
         }
         return body;
       }))
       .then((res) => {
+        console.log('fetch successful');
         document.dispatchEvent(new CustomEvent('fetch:done'));
         return res;
       })
       .catch((err) => {
+        console.log(err);
+        console.log('fetch rejected');
         document.dispatchEvent(new CustomEvent('fetch:done'));
         return Promise.reject(err);
       })
