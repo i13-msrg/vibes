@@ -21,10 +21,10 @@ export default function fetchCustom(url: string, options?: any): any {
 
   return (
     fetch(url, {
-        headers : {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
+      headers : {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
 
     })
       .then(response => response.json().then((body) => {

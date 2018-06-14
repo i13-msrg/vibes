@@ -1,6 +1,6 @@
 package com.vibes.models
 
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Encoder, Json}
 import io.circe.generic.semiauto._
 import org.joda.time.DateTime
 import io.circe.syntax._
@@ -34,14 +34,12 @@ case class TransferBlock(from: VNode, to: VNode, timestamp: DateTime, eventType:
   extends VEventType
 
 object TransferBlock {
-  implicit val transferBlockEncoder: Encoder[TransferBlock] = new Encoder[TransferBlock] {
-    override def apply(transferBlock: TransferBlock): Json = Json.obj(
-      ("timestamp", Json.fromString(transferBlock.timestamp.toString())),
-      ("eventType", Json.fromString(transferBlock.eventType)),
-      ("toNode", transferBlock.to.asJson),
-      ("fromNode", transferBlock.from.asJson)
-    )
-  }
+  implicit val transferBlockEncoder: Encoder[TransferBlock] = (transferBlock: TransferBlock) => Json.obj(
+    ("timestamp", Json.fromString(transferBlock.timestamp.toString())),
+    ("eventType", Json.fromString(transferBlock.eventType)),
+    ("toNode", transferBlock.to.asJson),
+    ("fromNode", transferBlock.from.asJson)
+  )
 }
 
 case class ReducerResult(
@@ -61,7 +59,11 @@ case class ReducerResult(
   maxProcessedTransactions: Int,
   transactions: List[Json],
   totalNumberOfNodes: Int,
-  orphans: Int
+  orphans: Int,
+  attackSuccessful: Boolean,
+  successfulAttackInBlocks: Int,
+  probabilityOfSuccessfulAttack: Double,
+  maximumSafeTransactionValue: Int
 )
 
 object ReducerResult {

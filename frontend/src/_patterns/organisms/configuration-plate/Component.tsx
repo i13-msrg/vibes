@@ -92,6 +92,21 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
     },
   ];
 
+  private gridInputsBitcoinAlternativeHistoryAttack: IGridInput[] = [
+    {
+      configurationKey: 'confirmations',
+      icon: maxBlockIcon,
+      placeholder: 'Confirmations',
+      title: 'Confirmations an attacked merchant is waiting for',
+    },
+    {
+      configurationKey: 'hashrate',
+      icon: networkIcon,
+      placeholder: 'Attacker\'s hashrate',
+      title: 'Attacker\'s percentage of total Hashrate',
+    },
+  ];
+
   constructor(props: IConfigurationPlateProps) {
     super(props);
     this.handleConfigurationChange = this.handleConfigurationChange.bind(this);
@@ -130,6 +145,18 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                             title="Simulate until"
                         />
                         {this.gridInputsBitcoin.map(item =>
+                            <ConfigurationInput
+                                key={item.configurationKey}
+                                placeholder={item.placeholder}
+                                type="number"
+                                configurationKey={item.configurationKey}
+                                onConfigurationChange={this.handleConfigurationChange}
+                                icon={item.icon}
+                                value={configuration[item.configurationKey]}
+                                title={item.title}
+                            />,
+                        )}
+                        {this.gridInputsBitcoinAlternativeHistoryAttack.map(item =>
                             <ConfigurationInput
                                 key={item.configurationKey}
                                 placeholder={item.placeholder}

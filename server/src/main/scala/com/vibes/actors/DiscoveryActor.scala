@@ -5,7 +5,6 @@ import akka.util.Timeout
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{DiscoveryActions, NodeActions}
 import com.vibes.models.VNode
-
 import scala.concurrent.duration._
 import scala.util.Random
 

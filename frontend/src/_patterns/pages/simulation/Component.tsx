@@ -2,6 +2,7 @@ import * as React from 'react';
 import { IConfiguration, Strategies } from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
+import AttackSummary from '../../molecules/attack-summary/Component';
 import SimulationEvents from '../../molecules/simulation-events/Component';
 import Button from '../../atoms/button/Component';
 import fetchEvents, { ISimulationPayload } from './fetchSimulationPayload';
@@ -364,6 +365,23 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             </div>
                         )}
                     </div>
+
+                    <div className="attack__summary u-plate">
+                        <div className="attack-summary__title">
+                            Attack Summary
+                        </div>
+                        {simulationPayload && (
+                            <AttackSummary
+                                attackSuccessful={simulationPayload.attackSuccessful}
+                                successfulAttackInBlocks={simulationPayload.successfulAttackInBlocks}
+                                probabilityOfSuccessfulAttack={simulationPayload.probabilityOfSuccessfulAttack}
+                                maximumSafeTransactionValue={simulationPayload.maximumSafeTransactionValue}
+                                hashrate={this.props.hashrate}
+                                confirmations={this.props.confirmations}
+                            />
+                        )}
+                    </div>
+
                 </div>
       );
     }

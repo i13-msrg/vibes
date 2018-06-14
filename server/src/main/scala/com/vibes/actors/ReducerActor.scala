@@ -4,8 +4,11 @@ import akka.actor.{Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{MasterActions, ReducerActions}
 import com.vibes.models._
+import com.vibes.utils.Joda._
 import com.vibes.utils.VConf
 import org.joda.time._
+
+import scala.math.pow
 
 // Takes final RAW result of the simulator and converts it to a format processable by a client
 
@@ -58,10 +61,20 @@ case class ReducerIntermediateResult(
   lastBlockNumberOfRecipients: Int,
   maxProcessedTransactions: Int,
   transactions: List[VTransaction],
-  orphans: Int
+  orphans: Int,
+  attackSuccessful: Boolean,
+  successfulAttackInBlocks: Int,
+  probabilityOfSuccessfulAttack: Double,
+  maximumSafeTransactionValue: Int
 )
 
 object ReducerActor extends LazyLogging {
+  implicit class PowerDouble(i: Double) {
+    def ** (b: Double): Double = pow(i, b).doubleValue
+  }
+
+  def factorial(n:Int):Int = if(n==0) 1 else n * factorial(n-1)
+
   def props(masterActor: ActorRef): Props = Props(new ReducerActor(masterActor))
 
   def calculateResult(nodes: Set[VNode], start: DateTime, transactionPool: Set[VTransaction], blocks: Set[VBlock]): ReducerIntermediateResult = {
@@ -119,9 +132,9 @@ object ReducerActor extends LazyLogging {
                               formatter.format(timesNoOutliers._2 / timesNoOutliersFilteredSize).toFloat,
                               formatter.format(timesNoOutliers._3 / timesNoOutliersFilteredSize).toFloat)
 
-    logger.debug("=========================================================================================================")
-    logger.debug("===============================================OUTPUT====================================================")
-    logger.debug("=========================================================================================================")
+    logger.debug("==============================================================")
+    logger.debug("============================OUTPUT============================")
+    logger.debug("==============================================================")
 
     val interval                       = new Interval(start, new Instant)
     val duration                       = interval.toDuration.toStandardSeconds.getSeconds.toDouble
@@ -129,10 +142,10 @@ object ReducerActor extends LazyLogging {
     val longestChainSize               = size
     val longestChainNumberTransactions = longestChain.flatMap(_.transactions).size
 
-    logger.debug(s"SIMULATION TOOK... ${duration} SECONDS")
-    logger.debug(s"LONGEST CHAIN... ${longestChainLength} BLOCKS")
+    logger.debug(s"SIMULATION TOOK... $duration SECONDS")
+    logger.debug(s"LONGEST CHAIN... $longestChainLength BLOCKS")
     logger.debug(s"LONGEST CHAIN SIZE.... $longestChainSize KB")
-    logger.debug(s"LONGEST CHAIN NUMBER OF TRANSACTIONS... ${longestChainNumberTransactions}")
+    logger.debug(s"LONGEST CHAIN NUMBER OF TRANSACTIONS... $longestChainNumberTransactions")
     logger.debug(s"NUMBER OF BLOCKS FOR PROPAGATION TIME ${times.size}")
     logger.debug(s"BLOCK PROPAGATION TIME 10%... ${timesAvgWithOutliers._1} SECONDS")
     logger.debug(s"BLOCK PROPAGATION TIME 50%... ${timesAvgWithOutliers._2} SECONDS")
@@ -145,10 +158,10 @@ object ReducerActor extends LazyLogging {
 
     // +1 cause we don't count origin
     val firstBlockNumberOfRecipients = longestChain.last.numberOfRecipients + 1
-    logger.debug(s"FIRST BLOCK RECEIVED BY... ${firstBlockNumberOfRecipients}  OUT OF ${VConf.numberOfNodes} NODES")
+    logger.debug(s"FIRST BLOCK RECEIVED BY... $firstBlockNumberOfRecipients  OUT OF ${VConf.numberOfNodes} NODES")
 
     val lastBlockNumberOfRecipients = longestChain.head.numberOfRecipients + 1
-    logger.debug(s"LAST BLOCK RECEIVED BY... ${lastBlockNumberOfRecipients} OUT OF ${VConf.numberOfNodes} NODES")
+    logger.debug(s"LAST BLOCK RECEIVED BY... $lastBlockNumberOfRecipients OUT OF ${VConf.numberOfNodes} NODES")
 
     logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
@@ -174,7 +187,37 @@ object ReducerActor extends LazyLogging {
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")
 
-    import com.vibes.utils.Joda._
+    val attackSuccessful = false
+    var successfulAttackInBlocks = 0
+    var probabilityOfSuccessfulAttack : Double = 0
+    var maximumSafeTransactionValue = 0
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+      // formula from arXiv:1402.2009v1 [cs.CR] 9 Feb 2014
+      val q : Double = VConf.hashrate.toDouble / 100
+      logger.debug(s"q... $q")
+      val p : Double  = 1 - q
+      val n = VConf.confirmations
+      if (q < p) {
+        var sum : Double = 0
+        for (m <- 0 until n) {
+          sum += (factorial(m + n - 1) / (factorial(m) * factorial(n - 1))) * (((p ** n) * (q ** m)) - ((p ** m) * (q ** n)))
+        }
+        val r : Double = 1 - sum
+        probabilityOfSuccessfulAttack = (math rint r * 10000) / 100
+        val B : Double = 12.5 // current block reward todo better as an input
+        val o = 20 // attacker gives up after 20 blocks
+        val α = 1 // discount of stolen goods, 1=no discount
+        val k = 5 // attack carried out against k merchants
+        maximumSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
+      } else {
+        probabilityOfSuccessfulAttack = 1
+      }
+      successfulAttackInBlocks = 0
+    }
+    logger.debug(s"ATTACK IS... $attackSuccessful")
+    logger.debug(s"IN... $orphans Blocks")
+    logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
+    logger.debug(s"ATTACK SUCCESS PROBABILITY... $probabilityOfSuccessfulAttack")
 
     ReducerIntermediateResult(
       events.sortBy(_.timestamp),
@@ -188,7 +231,11 @@ object ReducerActor extends LazyLogging {
       lastBlockNumberOfRecipients,
       maxProcessedTransactions,
       transactions,
-      orphans
+      orphans,
+      attackSuccessful,
+      successfulAttackInBlocks,
+      probabilityOfSuccessfulAttack,
+      maximumSafeTransactionValue
     )
   }
 }

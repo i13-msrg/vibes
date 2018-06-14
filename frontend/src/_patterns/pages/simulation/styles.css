@@ -32,6 +32,13 @@
   grid-area: summary;
 }
 
+.attack__summary {
+  padding: 8px;
+  height: 205px;
+  width: 318px;
+  grid-area: attack_summary;
+}
+
 .simulation__events {
   padding: 8px;
   width: 318px;

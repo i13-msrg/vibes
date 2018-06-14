@@ -24,7 +24,7 @@ class VTransaction(
   var confirmationLevel: Int,
   private val recipients: ListBuffer[VRecipient]
 ) {
-  def canEqual(a: Any) = a.isInstanceOf[VTransaction]
+  def canEqual(a: Any): Boolean = a.isInstanceOf[VTransaction]
   override def equals(that: Any): Boolean =
     that match {
       case that: VTransaction =>

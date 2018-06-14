@@ -1,7 +1,6 @@
 package com.vibes.actions
 
 import com.vibes.actors.ReducerIntermediateResult
-import com.vibes.models.VEventType
 import com.vibes.utils.VExecution
 
 object MasterActions {

@@ -5,7 +5,6 @@ import java.util.UUID
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.utils.VConf
 import org.joda.time.{DateTime, Duration}
-
 import scala.collection.mutable.ListBuffer
 
 // todo genesis block has no transactions, because transaction pool is zero

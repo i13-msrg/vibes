@@ -19,6 +19,10 @@ export interface ISimulationPayload {
   transactions: (ITransaction)[];
   totalNumberOfNodes: number;
   orphans: number;
+  attackSuccessful: boolean;
+  successfulAttackInBlocks: number | null;
+  probabilityOfSuccessfulAttack: number;
+  maximumSafeTransactionValue: number;
 }
 
 export default function fetchSimulationPayload(configuration: IConfiguration): Promise<ISimulationPayload> {

@@ -4,11 +4,13 @@ import akka.actor.{ActorSystem, PoisonPill}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.{HttpOrigin, HttpOriginRange}
 import akka.http.scaladsl.model.{StatusCodes, _}
-import akka.http.scaladsl.server.{Directives, ExceptionHandler, RejectionHandler, Route}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{ExceptionHandler, RejectionHandler, Route}
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.MasterActions
 import com.vibes.actors.{MasterActor, ReducerIntermediateResult}
 import com.vibes.models.{MinedBlock, ReducerResult, TransferBlock}
@@ -16,23 +18,22 @@ import com.vibes.utils.VConf
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.syntax._
 import org.joda.time.DateTime
-import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContextExecutor, Future, Promise}
+import scala.concurrent.{Await, ExecutionContextExecutor, Future, Promise}
 import scala.language.postfixOps
 import scala.util.Success
 
 object Main extends App with FailFastCirceSupport with LazyLogging {
   implicit val system: ActorSystem = ActorSystem("VSystem")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
+
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
   // do not start two simulations at once because of collisions
   private var lock = false
 
   val route: Route = {
-    import Directives._
     import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
     // CORS settings [hardcoded;-)]
@@ -57,13 +58,16 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
     // Note how rejections and exceptions are handled *before* the CORS directive (in the inner route).
     // This is required to have the correct CORS headers in the response even when an error occurs.
     handleErrors {
+      logger.debug(s"HANDLE ERRORS... $handleErrors ${rejectionHandler.toString()} $exceptionHandler")
       cors(corsSettings) {
         handleErrors {
           // http://localhost:8082/vibe?blockTime=600&numberOfNeighbours=4&numberOfNodes=10&simulateUntil=1526647160712&transactionSize=250&throughput=10&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=1&maxBlockWeight=4&networkBandwidth=1&strategy=PROOF_OF_WORK
           path("vibe") {
+            logger.debug(s"GET...")
             get {
-              // Timeout Browser Console Message: Uncaught (in promise) SyntaxError: Unexpected token < in JSON at position 0
+              logger.debug(s"WITHREQUESTTIMEOUT...")
               withRequestTimeout(900.seconds, request => timeoutResponse) {
+                logger.debug(s"PARAMETERS...")
                 parameters(
                   (
                     'blockTime.as[Int],
@@ -77,7 +81,9 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                     'maxBlockSize.as[Int],
                     'networkBandwidth.as[Int],
                     'strategy.as[String],
-                    'transactionPropagationDelay.as[Int]
+                    'transactionPropagationDelay.as[Int],
+                    'hashrate.as[Int],
+                    'confirmations.as[Int]
                   )) {
                   (blockTime,
                    numberOfNeighbours,
@@ -90,14 +96,16 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    maxBlockSize,
                    networkBandwidth,
                    strategy,
-                   transactionPropagationDelay
+                   transactionPropagationDelay,
+                   hashrate,
+                   confirmations
                   ) =>
                     logger.debug(s"ATTEMPT START... $lock")
                     if (!lock) {
                       lock = true
-                      logger.debug("=========================================================================================================")
-                      logger.debug("===============================================START=====================================================")
-                      logger.debug("=========================================================================================================")
+                      logger.debug("==============================================================")
+                      logger.debug("=============================START============================")
+                      logger.debug("==============================================================")
                       VConf.blockTime = blockTime
                       VConf.numberOfNeighbours = numberOfNeighbours
                       VConf.numberOfNodes = numberOfNodes
@@ -112,12 +120,21 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       logger.debug(s"STRATEGY... $strategy")
                       VConf.transactionPropagationDelay = transactionPropagationDelay
                       logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
+                      VConf.hashrate = hashrate
+                      logger.debug(s"HASHRATE... $hashrate")
+                      VConf.confirmations = confirmations
+                      logger.debug(s"CONFIRMATIONS... $confirmations")
                       val masterActor = system.actorOf(MasterActor.props(), "Master")
                       // timeout for the ask pattern
-                      implicit val timeout: Timeout = 10 minutes
+                      implicit val timeout: Timeout = Timeout(900.seconds)
 
                       val reducerIntermediateResult: Future[Promise[ReducerIntermediateResult]] =
                         ask(masterActor, MasterActions.Start).mapTo[Promise[ReducerIntermediateResult]]
+
+                      logger.debug(s"reducerIntermediateResult... $reducerIntermediateResult")
+
+                      val result2 = Await.result(reducerIntermediateResult, 900 seconds)
+                      logger.debug(s"result2 ${result2}")
 
                       onComplete(reducerIntermediateResult.flatMap(promise =>
                         promise.future.map { intermediateResult =>
@@ -147,18 +164,24 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                             intermediateResult.maxProcessedTransactions,
                             transactionsJson,
                             VConf.numberOfNodes,
-                            intermediateResult.orphans
+                            intermediateResult.orphans,
+                            intermediateResult.attackSuccessful,
+                            intermediateResult.successfulAttackInBlocks,
+                            intermediateResult.probabilityOfSuccessfulAttack,
+                            intermediateResult.maximumSafeTransactionValue
                           )
                         })) { extraction =>
                         lock = false
+                        logger.debug("EXTRACTION...")
                         extraction match {
                           case Success(result) =>
+                            logger.debug("SUCCESS...")
                             masterActor ! PoisonPill
                             complete(result.asJson)
 
                           case _ =>
-                            masterActor ! PoisonPill
                             logger.debug(s"EXTRACTION COMPLETE HTTP FAILURE...")
+                            masterActor ! PoisonPill
                             complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
                         }
                       }
@@ -174,9 +197,9 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
       }
     }
   }
-  logger.debug("test")
+
   val bindingFuture = Http().bindAndHandle(route, "localhost", 8082)
 
-  logger.debug("Server online at http://localhost:8082/ \n ")
+  logger.debug("Server online at http://localhost:8082/")
   logger.debug("Press RETURN to stop...")
 }

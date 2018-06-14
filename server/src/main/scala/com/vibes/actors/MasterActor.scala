@@ -1,12 +1,11 @@
 package com.vibes.actors
 
-import akka.actor.{Actor, ActorContext, ActorRef, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
 import com.vibes.utils.{VConf, VExecution}
 import org.joda.time._
-
 import scala.collection.immutable.SortedSet
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Promise
