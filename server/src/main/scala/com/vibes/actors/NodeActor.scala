@@ -39,7 +39,8 @@ class NodeActor (
   discoveryActor: ActorRef,
   reducerActor: ActorRef,
   lat: Double,
-  lng: Double
+  lng: Double,
+  isEvil: Option[Boolean]
 ) extends Actor with LazyLogging {
   implicit val timeout: Timeout = Timeout(20.seconds)
   private var node = new VNode(
@@ -50,7 +51,8 @@ class NodeActor (
     neighbourActors = Set.empty,
     nextRecipient = None,
     lat = lat,
-    long = lng
+    long = lng,
+    isMalicious = isEvil
   )
 
   /**
@@ -147,7 +149,7 @@ class NodeActor (
 
   override def receive: Receive = {
     case NodeActions.StartSimulation(now) =>
-      logger.debug(s"StartSimulation ${now} ${self}")
+      logger.debug(s"StartSimulation $now $self")
       addExecutablesForMineBlock(now)
 
       self ! NodeActions.CastNextWorkRequestOnly
@@ -232,8 +234,9 @@ object NodeActor {
     discoveryActor: ActorRef,
     reducerActor: ActorRef,
     lat: Double,
-    lng: Double
-  ): Props = Props(new NodeActor(masterActor, nodeRepoActor, discoveryActor, reducerActor, lat, lng))
+    lng: Double,
+    isEvil: Option[Boolean] = None
+  ): Props = Props(new NodeActor(masterActor, nodeRepoActor, discoveryActor, reducerActor, lat, lng, isEvil))
   def shouldSynch(node: VNode, hash: Int): Boolean = {
     node.createBlockchainHash() != hash
   }

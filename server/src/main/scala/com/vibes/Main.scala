@@ -122,6 +122,9 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
                       VConf.hashrate = hashrate
                       logger.debug(s"HASHRATE... $hashrate")
+                      if(hashrate > 0) {
+                        VConf.isAlternativeHistoryAttack = true
+                      }
                       VConf.confirmations = confirmations
                       logger.debug(s"CONFIRMATIONS... $confirmations")
                       val masterActor = system.actorOf(MasterActor.props(), "Master")

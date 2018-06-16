@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
+import com.vibes.utils.VConf
 import scala.concurrent.duration._
 
 /*
@@ -28,10 +29,19 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
 
   override def receive: Receive = {
     case NodeRepoActions.RegisterNode =>
-      logger.debug(s"REGISTER NODE....... ${registeredNodeActors.size}")
+      var isEvil: Option[Boolean] = None
+      if (VConf.isAlternativeHistoryAttack && (registeredNodeActors.size < VConf.hashrate.toDouble / 100 * VConf.numberOfNodes)) {
+        logger.debug(s"REGISTER EVIL NODE....... ${registeredNodeActors.size}")
+        isEvil = Some(true)
+      } else if (VConf.isAlternativeHistoryAttack) {
+        logger.debug(s"REGISTER NODE....... ${registeredNodeActors.size}")
+        isEvil = Some(false)
+      } else {
+        logger.debug(s"REGISTER NODE....... ${registeredNodeActors.size}")
+      }
       val coordinates = NodeRepoActor.createCoordinatesOnLand()
       val actor = context.actorOf(
-        NodeActor.props(context.parent, self, discoveryActor, reducerActor, coordinates._1, coordinates._2))
+        NodeActor.props(context.parent, self, discoveryActor, reducerActor, coordinates._1, coordinates._2, isEvil))
       registeredNodeActors += actor
 
     case NodeRepoActions.AnnounceStart(now) =>

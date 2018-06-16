@@ -174,7 +174,6 @@ object ReducerActor extends LazyLogging {
       blockEvents :::= block.currentRecipients.map { recipient =>
         TransferBlock(recipient.from, recipient.to, timestamp = recipient.timestamp)
       }
-
       blockEvents
     }
 
@@ -187,37 +186,49 @@ object ReducerActor extends LazyLogging {
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")
 
-    val attackSuccessful = false
+    var attackSuccessful = false
     var successfulAttackInBlocks = 0
     var probabilityOfSuccessfulAttack : Double = 0
     var maximumSafeTransactionValue = 0
-    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.isAlternativeHistoryAttack) {
       // formula from arXiv:1402.2009v1 [cs.CR] 9 Feb 2014
       val q : Double = VConf.hashrate.toDouble / 100
-      logger.debug(s"q... $q")
       val p : Double  = 1 - q
       val n = VConf.confirmations
       if (q < p) {
-        var sum : Double = 0
+        var sum: Double = 0
         for (m <- 0 until n) {
           sum += (factorial(m + n - 1) / (factorial(m) * factorial(n - 1))) * (((p ** n) * (q ** m)) - ((p ** m) * (q ** n)))
         }
-        val r : Double = 1 - sum
+        val r: Double = 1 - sum
         probabilityOfSuccessfulAttack = (math rint r * 10000) / 100
-        val B : Double = 12.5 // current block reward todo better as an input
-        val o = 20 // attacker gives up after 20 blocks
-        val α = 1 // discount of stolen goods, 1=no discount
-        val k = 5 // attack carried out against k merchants
+        val B = VConf.blockReward
+        val o = VConf.attackDuration
+        val α = VConf.discountOnStolenGoods
+        val k = VConf.amountOfAttackedMerchants
         maximumSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
+
+        var confirmationsCounter = 0
+        for (i <- 1 to VConf.confirmations + 1) {
+          if(longestChain(i).origin.isMalicious.contains(true)) {
+            confirmationsCounter += 1
+          }
+        }
+        logger.debug(s"EVIL BLOCKS... $confirmationsCounter")
+        if(confirmationsCounter == VConf.confirmations){
+          attackSuccessful = true
+        }
+
       } else {
         probabilityOfSuccessfulAttack = 1
+        attackSuccessful = true
       }
-      successfulAttackInBlocks = 0
+
+      logger.debug(s"ATTACK IS... $attackSuccessful")
+      logger.debug(s"IN... $orphans Blocks")
+      logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
+      logger.debug(s"ATTACK SUCCESS PROBABILITY... $probabilityOfSuccessfulAttack")
     }
-    logger.debug(s"ATTACK IS... $attackSuccessful")
-    logger.debug(s"IN... $orphans Blocks")
-    logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
-    logger.debug(s"ATTACK SUCCESS PROBABILITY... $probabilityOfSuccessfulAttack")
 
     ReducerIntermediateResult(
       events.sortBy(_.timestamp),

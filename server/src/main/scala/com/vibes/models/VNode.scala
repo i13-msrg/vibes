@@ -16,7 +16,8 @@ class VNode(
   val neighbourActors: Set[ActorRef],
   val nextRecipient: Option[ActorRef],
   val lat: Double,
-  val long: Double
+  val long: Double,
+  val isMalicious: Option[Boolean]
 ) {
   def copy(
     id: String = id,
@@ -26,9 +27,10 @@ class VNode(
     neighbourActors: Set[ActorRef] = neighbourActors,
     nextRecipient: Option[ActorRef] = nextRecipient,
     lat: Double = lat,
-    long: Double = long
+    long: Double = long,
+    isMalicious: Option[Boolean] = isMalicious
   ): VNode = {
-    new VNode(id, actor, blockchain, transactionPool, neighbourActors, nextRecipient, lat, long)
+    new VNode(id, actor, blockchain, transactionPool, neighbourActors, nextRecipient, lat, long, isMalicious)
   }
 
   def createExecutableWorkRequest(toActor: ActorRef,

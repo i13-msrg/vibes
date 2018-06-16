@@ -3,6 +3,7 @@ package com.vibes.utils
 import org.joda.time.DateTime
 
 object VConf {
+
   var numberOfNodes = 10
   var blockTime = 600 // seconds
   var neighboursDiscoveryInterval = 3000 // seconds
@@ -23,6 +24,13 @@ object VConf {
   var distanceBetweenNodes = 1 // km
 
   // variables for Alternative History Attack
+  var isAlternativeHistoryAttack = false
   var hashrate = 30 // Attacker's hashrate in percentage of total network
   var confirmations = 4 // Confirmations the attacked Merchant is waiting for
+
+  // todo following attack parameter could be made into input parameter
+  var attackDuration = 20 // attacker gives up after 20 blocks
+  var discountOnStolenGoods = 1 // discount of stolen goods, 1=no discount
+  var amountOfAttackedMerchants = 5 // attack carried out against k merchants
+  var blockReward : Double = 12.5 // current block reward in BTC
 }
