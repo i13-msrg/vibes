@@ -40,7 +40,7 @@ case class VBlock(
   // This assumes that recipients of a block are always nonEmpty, which is currently the case
   // since block is created only via createWinnerBlock for now
   def addRecipient(from: VNode, to: VNode, timestamp: DateTime): VBlock = {
-    assert(!containsRecipient(to))
+    assert(!containsRecipient(to), "This assumes that recipients of a block are always nonEmpty, which is currently the case since block is created only via createWinnerBlock for now")
 
     if (to.actor != origin.actor) {
       recipients += VRecipient(from, to, timestamp)

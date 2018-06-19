@@ -372,7 +372,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         </div>
                         {simulationPayload && (
                             <AttackSummary
-                                attackSuccessful={simulationPayload.attackSuccessful}
+                                attackSucceeded={simulationPayload.attackSucceeded}
                                 successfulAttackInBlocks={simulationPayload.successfulAttackInBlocks}
                                 probabilityOfSuccessfulAttack={simulationPayload.probabilityOfSuccessfulAttack}
                                 maximumSafeTransactionValue={simulationPayload.maximumSafeTransactionValue}

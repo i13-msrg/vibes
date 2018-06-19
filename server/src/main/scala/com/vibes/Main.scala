@@ -30,9 +30,6 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
 
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
-  // do not start two simulations at once because of collisions
-  private var lock = false
-
   val route: Route = {
     import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
@@ -106,86 +103,97 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       logger.debug("==============================================================")
                       logger.debug("=============================START============================")
                       logger.debug("==============================================================")
+
+                      VConf.attackSuccessful = false
+                      VConf.goodChainLength = 0
+                      VConf.evilChainLength = 0
+                      VConf.attackFailed = false
+
                       VConf.blockTime = blockTime
                       VConf.numberOfNeighbours = numberOfNeighbours
                       VConf.numberOfNodes = numberOfNodes
                       VConf.simulateUntil = new DateTime(simulateUntil)
-                      VConf.transactionSize = transactionSize
-                      VConf.throughPut = throughput
-                      VConf.blockPropagationDelay = latency
-                      VConf.neighboursDiscoveryInterval = neighboursDiscoveryInterval
-                      VConf.maxBlockSize = maxBlockSize
-                      VConf.networkBandwidth = networkBandwidth
-                      VConf.strategy = strategy
-                      logger.debug(s"STRATEGY... $strategy")
-                      VConf.transactionPropagationDelay = transactionPropagationDelay
-                      logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
-                      VConf.hashrate = hashrate
-                      logger.debug(s"HASHRATE... $hashrate")
-                      if(hashrate > 0) {
-                        VConf.isAlternativeHistoryAttack = true
-                      }
-                      VConf.confirmations = confirmations
-                      logger.debug(s"CONFIRMATIONS... $confirmations")
-                      val masterActor = system.actorOf(MasterActor.props(), "Master")
-                      // timeout for the ask pattern
-                      implicit val timeout: Timeout = Timeout(900.seconds)
+                      if (VConf.simulateUntil.isBeforeNow) {
+                        logger.debug(s"SIMULATE DATETIME IS IN THE PAST...")
+                        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
+                      } else {
+                        VConf.transactionSize = transactionSize
+                        VConf.throughPut = throughput
+                        VConf.blockPropagationDelay = latency
+                        VConf.neighboursDiscoveryInterval = neighboursDiscoveryInterval
+                        VConf.maxBlockSize = maxBlockSize
+                        VConf.networkBandwidth = networkBandwidth
+                        VConf.strategy = strategy
+                        logger.debug(s"STRATEGY... $strategy")
+                        VConf.transactionPropagationDelay = transactionPropagationDelay
+                        logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
+                        VConf.hashrate = hashrate
+                        logger.debug(s"HASHRATE... $hashrate")
+                        if (hashrate > 0) {
+                          VConf.isAlternativeHistoryAttack = true
+                        }
+                        VConf.confirmations = confirmations
+                        logger.debug(s"CONFIRMATIONS... ${VConf.confirmations}")
+                        val masterActor = system.actorOf(MasterActor.props(), "Master")
+                        // timeout for the ask pattern
+                        implicit val timeout: Timeout = Timeout(900.seconds)
 
-                      val reducerIntermediateResult: Future[Promise[ReducerIntermediateResult]] =
-                        ask(masterActor, MasterActions.Start).mapTo[Promise[ReducerIntermediateResult]]
+                        val reducerIntermediateResult: Future[Promise[ReducerIntermediateResult]] =
+                          ask(masterActor, MasterActions.Start).mapTo[Promise[ReducerIntermediateResult]]
 
-                      logger.debug(s"reducerIntermediateResult... $reducerIntermediateResult")
+                        logger.debug(s"reducerIntermediateResult... $reducerIntermediateResult")
 
-                      val result2 = Await.result(reducerIntermediateResult, 900 seconds)
-                      logger.debug(s"result2 ${result2}")
+                        val result2 = Await.result(reducerIntermediateResult, 900 seconds)
+                        logger.debug(s"result2 $result2")
 
-                      onComplete(reducerIntermediateResult.flatMap(promise =>
-                        promise.future.map { intermediateResult =>
-                          val eventsJson = intermediateResult.events.map {
-                            case event@(_: MinedBlock) => event.asJson
-                            case event@(_: TransferBlock) => event.asJson
+                        onComplete(reducerIntermediateResult.flatMap(promise =>
+                          promise.future.map { intermediateResult =>
+                            val eventsJson = intermediateResult.events.map {
+                              case event@(_: MinedBlock) => event.asJson
+                              case event@(_: TransferBlock) => event.asJson
+                            }
+
+                            val transactionsJson = intermediateResult.transactions.map {
+                              transaction => transaction.asJson
+                            }
+
+                            ReducerResult(
+                              eventsJson,
+                              intermediateResult.duration,
+                              intermediateResult.longestChainLength,
+                              intermediateResult.longestChainSize,
+                              intermediateResult.longestChainNumberTransactions,
+                              intermediateResult.timesAvgWithOutliers._1,
+                              intermediateResult.timesAvgWithOutliers._2,
+                              intermediateResult.timesAvgWithOutliers._3,
+                              intermediateResult.timesAvgNoOutliers._1,
+                              intermediateResult.timesAvgNoOutliers._2,
+                              intermediateResult.timesAvgNoOutliers._3,
+                              intermediateResult.firstBlockNumberOfRecipients,
+                              intermediateResult.lastBlockNumberOfRecipients,
+                              intermediateResult.maxProcessedTransactions,
+                              transactionsJson,
+                              VConf.numberOfNodes,
+                              intermediateResult.orphans,
+                              intermediateResult.attackSucceeded,
+                              intermediateResult.successfulAttackInBlocks,
+                              intermediateResult.probabilityOfSuccessfulAttack,
+                              intermediateResult.maximumSafeTransactionValue
+                            )
+                          })) { extraction =>
+                          lock = false
+                          logger.debug("EXTRACTION...")
+                          extraction match {
+                            case Success(result) =>
+                              logger.debug("SUCCESS...")
+                              masterActor ! PoisonPill
+                              complete(result.asJson)
+
+                            case _ =>
+                              logger.debug(s"EXTRACTION COMPLETE HTTP FAILURE...")
+                              masterActor ! PoisonPill
+                              complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
                           }
-
-                          val transactionsJson = intermediateResult.transactions.map {
-                            transaction => transaction.asJson
-                          }
-
-                          ReducerResult(
-                            eventsJson,
-                            intermediateResult.duration,
-                            intermediateResult.longestChainLength,
-                            intermediateResult.longestChainSize,
-                            intermediateResult.longestChainNumberTransactions,
-                            intermediateResult.timesAvgWithOutliers._1,
-                            intermediateResult.timesAvgWithOutliers._2,
-                            intermediateResult.timesAvgWithOutliers._3,
-                            intermediateResult.timesAvgNoOutliers._1,
-                            intermediateResult.timesAvgNoOutliers._2,
-                            intermediateResult.timesAvgNoOutliers._3,
-                            intermediateResult.firstBlockNumberOfRecipients,
-                            intermediateResult.lastBlockNumberOfRecipients,
-                            intermediateResult.maxProcessedTransactions,
-                            transactionsJson,
-                            VConf.numberOfNodes,
-                            intermediateResult.orphans,
-                            intermediateResult.attackSuccessful,
-                            intermediateResult.successfulAttackInBlocks,
-                            intermediateResult.probabilityOfSuccessfulAttack,
-                            intermediateResult.maximumSafeTransactionValue
-                          )
-                        })) { extraction =>
-                        lock = false
-                        logger.debug("EXTRACTION...")
-                        extraction match {
-                          case Success(result) =>
-                            logger.debug("SUCCESS...")
-                            masterActor ! PoisonPill
-                            complete(result.asJson)
-
-                          case _ =>
-                            logger.debug(s"EXTRACTION COMPLETE HTTP FAILURE...")
-                            masterActor ! PoisonPill
-                            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
                         }
                       }
                     } else {
@@ -200,8 +208,9 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
       }
     }
   }
-
   val bindingFuture = Http().bindAndHandle(route, "localhost", 8082)
+  // do not start two simulations at once because of collisions
+  private var lock = false
 
   logger.debug("Server online at http://localhost:8082/")
   logger.debug("Press RETURN to stop...")

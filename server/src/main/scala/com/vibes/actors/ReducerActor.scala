@@ -62,18 +62,14 @@ case class ReducerIntermediateResult(
   maxProcessedTransactions: Int,
   transactions: List[VTransaction],
   orphans: Int,
-  attackSuccessful: Boolean,
+  attackSucceeded: Int,
   successfulAttackInBlocks: Int,
   probabilityOfSuccessfulAttack: Double,
   maximumSafeTransactionValue: Int
 )
 
 object ReducerActor extends LazyLogging {
-  implicit class PowerDouble(i: Double) {
-    def ** (b: Double): Double = pow(i, b).doubleValue
-  }
-
-  def factorial(n:Int):Int = if(n==0) 1 else n * factorial(n-1)
+  def factorial(n:Double):Double = if(n==0) 1 else n * factorial(n-1)
 
   def props(masterActor: ActorRef): Props = Props(new ReducerActor(masterActor))
 
@@ -186,48 +182,51 @@ object ReducerActor extends LazyLogging {
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")
 
-    var attackSuccessful = false
-    var successfulAttackInBlocks = 0
+    var successfulAttackInBlocks = 0 // todo
     var probabilityOfSuccessfulAttack : Double = 0
     var maximumSafeTransactionValue = 0
+
+    var attackSucceeded = 0
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.isAlternativeHistoryAttack) {
       // formula from arXiv:1402.2009v1 [cs.CR] 9 Feb 2014
-      val q : Double = VConf.hashrate.toDouble / 100
-      val p : Double  = 1 - q
-      val n = VConf.confirmations
-      if (q < p) {
-        var sum: Double = 0
-        for (m <- 0 until n) {
-          sum += (factorial(m + n - 1) / (factorial(m) * factorial(n - 1))) * (((p ** n) * (q ** m)) - ((p ** m) * (q ** n)))
-        }
-        val r: Double = 1 - sum
-        probabilityOfSuccessfulAttack = (math rint r * 10000) / 100
-        val B = VConf.blockReward
-        val o = VConf.attackDuration
-        val α = VConf.discountOnStolenGoods
-        val k = VConf.amountOfAttackedMerchants
-        maximumSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
-
-        var confirmationsCounter = 0
-        for (i <- 1 to VConf.confirmations + 1) {
-          if(longestChain(i).origin.isMalicious.contains(true)) {
-            confirmationsCounter += 1
-          }
-        }
-        logger.debug(s"EVIL BLOCKS... $confirmationsCounter")
-        if(confirmationsCounter == VConf.confirmations){
-          attackSuccessful = true
-        }
-
+      // calculation of the success probability for an attack
+      var r: Double = 0
+      if (VConf.hashrate >= 50) {
+        r = 1
+        probabilityOfSuccessfulAttack = 100
       } else {
-        probabilityOfSuccessfulAttack = 1
-        attackSuccessful = true
+        val q: Double = VConf.hashrate.toDouble / 100
+        val p: Double = 1 - q
+        val n = VConf.confirmations
+        if (q < p) {
+          var sum: Double = 0
+          var test: Double = 0
+          for (m <- 0 until n + 1) {
+            sum += ((factorial(m + n - 1) / (factorial(m) * factorial(m + n - 1 - m))) * ((Math.pow(p,n) * Math.pow(q,m)) - (Math.pow(p,m) * Math.pow(q,n))))
+          }
+          r = 1 - sum
+          probabilityOfSuccessfulAttack = (math rint r * 100000) / 1000
+        }
       }
-
-      logger.debug(s"ATTACK IS... $attackSuccessful")
-      logger.debug(s"IN... $orphans Blocks")
-      logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
       logger.debug(s"ATTACK SUCCESS PROBABILITY... $probabilityOfSuccessfulAttack")
+
+      // calculation of the maximum safe transaction value
+      val B = VConf.blockReward
+      val o = VConf.attackDuration
+      val α = VConf.discountOnStolenGoods
+      val k = VConf.amountOfAttackedMerchants
+      maximumSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
+      logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
+
+      if (VConf.attackFailed) {
+        attackSucceeded = -1
+        logger.debug(s"ATTACK FAILED")
+      } else if (VConf.attackSuccessful) {
+        attackSucceeded = 1
+        logger.debug(s"ATTACK SUCCESSFUL")
+      } else {
+        logger.debug(s"ATTACK NEITHER SUCCESSFUL NOR FAILED")
+      }
     }
 
     ReducerIntermediateResult(
@@ -243,7 +242,7 @@ object ReducerActor extends LazyLogging {
       maxProcessedTransactions,
       transactions,
       orphans,
-      attackSuccessful,
+      attackSucceeded,
       successfulAttackInBlocks,
       probabilityOfSuccessfulAttack,
       maximumSafeTransactionValue

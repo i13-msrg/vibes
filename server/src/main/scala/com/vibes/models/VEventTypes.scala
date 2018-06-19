@@ -60,7 +60,7 @@ case class ReducerResult(
   transactions: List[Json],
   totalNumberOfNodes: Int,
   orphans: Int,
-  attackSuccessful: Boolean,
+  attackSucceeded: Int,
   successfulAttackInBlocks: Int,
   probabilityOfSuccessfulAttack: Double,
   maximumSafeTransactionValue: Int

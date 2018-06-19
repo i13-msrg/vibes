@@ -5,6 +5,8 @@ import akka.util.Timeout
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{DiscoveryActions, NodeActions}
 import com.vibes.models.VNode
+import com.vibes.utils.VConf
+
 import scala.concurrent.duration._
 import scala.util.Random
 
@@ -24,8 +26,7 @@ class DiscoveryActor(numberOfNeighbours: Int) extends Actor with LazyLogging {
   implicit private val timeout: Timeout = Timeout(20.seconds)
 
   override def preStart(): Unit = {
-    println(s"DisoveryActor started ${self.path}")
-    logger.debug(s"DisoveryActor started ${self.path}")
+    logger.debug(s"DiscoveryActor started ${self.path}")
   }
 
   override def receive: Receive = {
@@ -47,8 +48,14 @@ object DiscoveryActor extends LazyLogging {
   }
 
   def discoverNeighbours(currentNodes: List[VNode], node: VNode, numberOfNeighbours: Int): Set[ActorRef] = {
-    val nodes = currentNodes.filter(_ != node)
-    Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
+      if (VConf.isAlternativeHistoryAttack && !VConf.attackSuccessful && !VConf.attackFailed) {
+        var nodes = currentNodes.filter(_.isMalicious == node.isMalicious)
+        nodes = nodes.filter(_ != node)
+        Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
+      } else {
+        val nodes = currentNodes.filter(_ != node)
+        Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
+      }
   }
 
   def updateCurrentNodes(currentNodes: List[VNode], node: VNode): List[VNode] = {

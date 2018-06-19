@@ -3,7 +3,6 @@ package com.vibes.utils
 import org.joda.time.DateTime
 
 object VConf {
-
   var numberOfNodes = 10
   var blockTime = 600 // seconds
   var neighboursDiscoveryInterval = 3000 // seconds
@@ -33,4 +32,8 @@ object VConf {
   var discountOnStolenGoods = 1 // discount of stolen goods, 1=no discount
   var amountOfAttackedMerchants = 5 // attack carried out against k merchants
   var blockReward : Double = 12.5 // current block reward in BTC
+  var attackSuccessful = false
+  var goodChainLength = 0
+  var evilChainLength = 0
+  var attackFailed = false
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 interface IAttackSummaryProps {
-  attackSuccessful: boolean;
+    attackSucceeded: number;
   successfulAttackInBlocks: number | null;
   probabilityOfSuccessfulAttack: number;
   maximumSafeTransactionValue: number;
@@ -13,7 +13,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
   public render() {
 
     const {
-        attackSuccessful,
+        attackSucceeded,
         successfulAttackInBlocks,
         probabilityOfSuccessfulAttack,
         maximumSafeTransactionValue,
@@ -21,7 +21,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
         confirmations,
     } = this.props;
 
-        return (
+    return (
             <div className="attack-summary">
                 <ul className="attack-summary__list">
                     <li className="attack-summary__list-item">
@@ -45,19 +45,35 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                             The simulated attack
                         </div>
                         <div className="attack-summary__result">
-                            {attackSuccessful ? 'was successful.' : 'failed.'}
+                            {(() => {
+                              switch (attackSucceeded) {
+                                case -1:    return 'failed';
+                                case 0:     return 'neither failed nor succeeded';
+                                case 1:     return 'was successful';
+                                default:      return '';
+                              }
+                            })()}
                         </div>
                     </li>
-                    {attackSuccessful ?
-                    <li className="attack-summary__list-item">
-                        <div className="attack-summary__text">
-                            The attacker had to mine
-                        </div>
-                        <div className="attack-summary__result">
-                            {successfulAttackInBlocks} Blocks
-                        </div>
-                    </li>
-                    : '' }
+                    {(() => {
+                        switch (attackSucceeded) {
+                            case -1:
+                                return '';
+                            case 0:
+                                return '';
+                            case 1:
+                                return <li className="attack-summary__list-item">
+                                    <div className="attack-summary__text">
+                                        The attacker had to mine
+                                    </div>
+                                    <div className="attack-summary__result">
+                                        {successfulAttackInBlocks} Blocks
+                                    </div>
+                                </li>;
+                            default:
+                                return '';
+                        }
+                    })()}
                     <li className="attack-summary__list-item">
                         <div className="attack-summary__text">
                             Probability of an successful attack
@@ -76,6 +92,6 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                     </li>
                 </ul>
             </div>
-        );
-    }
+    );
+  }
 }

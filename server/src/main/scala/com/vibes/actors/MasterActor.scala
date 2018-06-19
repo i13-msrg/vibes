@@ -128,15 +128,15 @@ class MasterActor extends Actor with LazyLogging{
           // the last workRequest goes on
           currentNodeActors += workRequest.fromActor
           // assert no workRequest should be received more than once
-          assert(!workRequests.contains(workRequest))
+          assert(!workRequests.contains(workRequest), "no workRequest should be received more than once")
           workRequests += workRequest
 
           // have all workRequests been collected?
           if (workRequests.size == VConf.numberOfNodes) {
             // number of actors that requested work should be the same of number of nodes (aka each requested work once)
-            assert(currentNodeActors.size == VConf.numberOfNodes)
+            assert(currentNodeActors.size == VConf.numberOfNodes, "number of actors that requested work should be the same of number of nodes (aka each requested work once")
             // assert each requested work once, checked in an alternative way
-            assert(workRequests.map(_.fromActor).toSet.size == workRequests.size)
+            assert(workRequests.map(_.fromActor).toSet.size == workRequests.size, "each requested work once, checked in an alternative way")
 
             // Do neighbour discovery / update neighbour tables
             // this is a convenient, but not 100% correct place to execute this type of functionality
@@ -190,7 +190,7 @@ class MasterActor extends Actor with LazyLogging{
               // propagate a block. Imagine now A2 transfers transaction and workRequests with propagate block. Later
               // A2 receives the transaction from A1 and now has in the queue on top of propagate block propagate
               // transaction. Luckily, A2's first workRequest will have been discarded because of numberOfWorkRequests > 1
-              // and now A2 will be able to correctly workRequest with the most recene peace of executable on top
+              // and now A2 will be able to correctly workRequest with the most recent peace of executable on top
               // (which is propagate transaction)
               var propagateWorkRequests: List[VExecution.WorkRequest] =
                 List.empty

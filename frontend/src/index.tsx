@@ -114,8 +114,8 @@ class Vibes extends React.Component<{}, IVibesState> {
       const configuration: IConfiguration = {
         blockTime: 567, // seconds
         numberOfNeighbours: 4,
-        numberOfNodes: 52,
-        simulateUntil: Date.now() + 3 * 3600000, // 3 hours from now
+        numberOfNodes: 20,
+        simulateUntil: Date.now() + 4 * 3600000, // 4 hours from now
         transactionSize: 1, // KB
         throughput: 105,  // average number of transactions per blockTime
         latency: 900, // ms (latency + transfer + verification time),
