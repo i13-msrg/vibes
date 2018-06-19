@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 interface IAttackSummaryProps {
-    attackSucceeded: number;
+  attackSucceeded: number;
   successfulAttackInBlocks: number | null;
   probabilityOfSuccessfulAttack: number;
   maximumSafeTransactionValue: number;
@@ -56,23 +56,23 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                         </div>
                     </li>
                     {(() => {
-                        switch (attackSucceeded) {
-                            case -1:
-                                return '';
-                            case 0:
-                                return '';
-                            case 1:
-                                return <li className="attack-summary__list-item">
+                      switch (attackSucceeded) {
+                        case -1:
+                          return '';
+                        case 0:
+                          return '';
+                        case 1:
+                          return <li className="attack-summary__list-item">
                                     <div className="attack-summary__text">
-                                        The attacker had to mine
+                                        The Attacker is successful at the
                                     </div>
                                     <div className="attack-summary__result">
-                                        {successfulAttackInBlocks} Blocks
+                                        {successfulAttackInBlocks} Block
                                     </div>
                                 </li>;
-                            default:
-                                return '';
-                        }
+                        default:
+                          return '';
+                      }
                     })()}
                     <li className="attack-summary__list-item">
                         <div className="attack-summary__text">

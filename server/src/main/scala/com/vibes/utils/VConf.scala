@@ -36,4 +36,5 @@ object VConf {
   var goodChainLength = 0
   var evilChainLength = 0
   var attackFailed = false
+  var attackSuccessfulInBlocks = 0
 }

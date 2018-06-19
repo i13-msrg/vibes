@@ -71,41 +71,44 @@ class NodeActor (
     val exWorkRequest = node.createExecutableWorkRequest(self, timestamp, VExecution.ExecutionType.MineBlock)
     val value = () => {
       // logging
-      logger.debug(s"{${node.isMalicious}} BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
+      logger.debug(s"{${node.isMalicious.contains(true)}} BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
 
       var newBlock = VBlock.createWinnerBlock(node, timestamp)
 
       if (!VConf.isAlternativeHistoryAttack) {
-        logger.debug(s"addExecutablesForMineBlock: !VConf.isAlternativeHistoryAttack ${node.isMalicious} + ${newBlock.origin.isMalicious}")
+        logger.debug(s"addExecutablesForMineBlock: !VConf.isAlternativeHistoryAttack")
         node = node.addBlock(newBlock)
       } else if (VConf.attackSuccessful) {
-        logger.debug(s"addExecutablesForMineBlock: VConf.attackSuccessful ${node.isMalicious} + ${newBlock.origin.isMalicious}")
+        logger.debug(s"addExecutablesForMineBlock: VConf.attackSuccessful")
         node = node.addBlock(newBlock)
       } else if (VConf.attackFailed) {
-        logger.debug(s"addExecutablesForMineBlock: VConf.attackFailed ${node.isMalicious} + ${newBlock.origin.isMalicious}")
+        logger.debug(s"addExecutablesForMineBlock: VConf.attackFailed")
         node = node.addBlock(newBlock)
       } else if (newBlock.level == 0) {
-        logger.debug(s"addExecutablesForMineBlock: newBlock.level == 0 ${node.isMalicious} + ${newBlock.origin.isMalicious}")
+        logger.debug(s"addExecutablesForMineBlock: newBlock.level == 0")
         node = node.addBlock(newBlock)
       } else if (node.isMalicious == newBlock.origin.isMalicious) {
-        logger.debug(s"addExecutablesForMineBlock: added newBlock  ${node.isMalicious} + ${newBlock.origin.isMalicious}")
+        logger.debug(s"addExecutablesForMineBlock: added newBlock")
         node = node.addBlock(newBlock)
       } else {
-        logger.debug(s"addExecutablesForMineBlock: Didn't add newBlock  ${node.isMalicious}, ${newBlock.origin.isMalicious}, ${newBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
+        logger.debug(s"addExecutablesForMineBlock: Didn't add newBlock  ${newBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
       }
 
       reducerActor ! ReducerActions.AddBlock(newBlock)
       addExecutablesForPropagateOwnBlock(timestamp)
       nodeRepoActor ! NodeRepoActions.AnnounceNextWorkRequestAndMine(timestamp)
 
-      if(VConf.evilChainLength >= VConf.attackDuration  && !VConf.attackFailed && !VConf.attackSuccessful) {
+      // todo clean up ifs
+      if(VConf.evilChainLength >= VConf.attackDuration  && !VConf.attackSuccessful && !VConf.attackFailed) {
         logger.debug(s"ATTACK FAILED.....  $timestamp, ${self.path}")
         VConf.attackFailed = true
       }
       if (VConf.isAlternativeHistoryAttack && !VConf.attackFailed) {
-        if (VConf.evilChainLength > VConf.goodChainLength && node.blockchain.size > VConf.confirmations + 1 && !VConf.attackSuccessful) {
+        if (VConf.evilChainLength > VConf.goodChainLength && node.blockchain.size >= VConf.confirmations + 1 && !VConf.attackSuccessful) {
           VConf.attackSuccessful = true
-          logger.debug(s"ATTACK IS SUCCESSFUL.....  $timestamp, ${self.path}")
+          VConf.attackSuccessfulInBlocks = node.blockchain.size
+          logger.debug(s"ATTACK IS SUCCESSFUL.....")
+          logger.debug(s"GOOD CHAIN LENGTH: ${VConf.goodChainLength}; BAD CHAIN LENGTH ${VConf.evilChainLength}")
         }
         if (node.isMalicious.contains(true)) {
           if (node.blockchain.size > VConf.evilChainLength) {
@@ -117,7 +120,7 @@ class NodeActor (
           }
         }
         if (!VConf.attackSuccessful && !VConf.attackFailed) {
-          logger.debug(s"GOOD CHAIN LENGTH: ${VConf.goodChainLength}; BAD CHAIN LENGTH ${VConf.evilChainLength}  $timestamp, ${self.path}")
+          logger.debug(s"GOOD CHAIN LENGTH: ${VConf.goodChainLength}; BAD CHAIN LENGTH ${VConf.evilChainLength}")
         }
       }
     }
@@ -254,8 +257,8 @@ class NodeActor (
           node = node.synch(origin, origin.blockchain, now)
         } else {
           if ((node.isMalicious == origin.isMalicious || block.level == 0) && (VConf.isAlternativeHistoryAttack && !VConf.attackSuccessful && !VConf.attackFailed)) {
-            node = node.addBlock(incomingBlock)
             logger.debug(s"NodeActions.ReceiveBlock: Added newBlock  ${node.isMalicious}, ${origin.isMalicious}, ${incomingBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
+            node = node.addBlock(incomingBlock)
           } else {
             logger.debug(s"NodeActions.ReceiveBlock: Didn't add newBlock  ${node.isMalicious}, ${origin.isMalicious}, ${incomingBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
           }

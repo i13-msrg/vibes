@@ -182,7 +182,7 @@ object ReducerActor extends LazyLogging {
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")
 
-    var successfulAttackInBlocks = 0 // todo
+    var successfulAttackInBlocks = 0
     var probabilityOfSuccessfulAttack : Double = 0
     var maximumSafeTransactionValue = 0
 
@@ -222,6 +222,7 @@ object ReducerActor extends LazyLogging {
         attackSucceeded = -1
         logger.debug(s"ATTACK FAILED")
       } else if (VConf.attackSuccessful) {
+        successfulAttackInBlocks = VConf.attackSuccessfulInBlocks
         attackSucceeded = 1
         logger.debug(s"ATTACK SUCCESSFUL")
       } else {
