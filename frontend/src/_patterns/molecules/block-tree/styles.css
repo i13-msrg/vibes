@@ -1,0 +1,68 @@
+.block-tree__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+}
+
+.block-tree__list {
+  overflow-x: auto;
+  list-style: none;
+  padding-left: 0;
+  height: 170px;
+}
+
+.block-tree__list-item {
+  color: #5e6f82;
+  font-size: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.block-tree__result {
+  font-weight: 600;
+}
+
+.block-tree__text {
+  flex: 1 0 auto;
+}
+
+.block-tree__table {
+  overflow-x: auto;
+  list-style: none;
+  height: 270px;
+  text-align: center;
+  padding: 0;
+  table-layout: auto;
+  width: 100%;
+  color: #5e6f82;
+  font-size: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  font-weight: 600;
+}
+
+.block-tree__legend {
+  font-family: Arial;
+  font-size: 14px;
+  stroke: none;
+  stroke-width: 0;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  vertical-align: bottom;
+}
+
+.block-tree__legend-svg {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.block-tree__legend-text {
+  margin-left: 5px;
+  margin-right: 10px;
+}

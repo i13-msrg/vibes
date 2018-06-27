@@ -1,6 +1,5 @@
 import * as React from 'react';
 import convertTimestampToDate from '../../../common/convertTimestampToDate';
-
 import { ConfigurationKey, ISvg } from '../../../common/types';
 
 

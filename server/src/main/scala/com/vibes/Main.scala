@@ -104,19 +104,16 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       logger.debug("=============================START============================")
                       logger.debug("==============================================================")
 
-                      VConf.attackSuccessful = false
-                      VConf.goodChainLength = 0
-                      VConf.evilChainLength = 0
-                      VConf.attackFailed = false
-
-                      VConf.blockTime = blockTime
-                      VConf.numberOfNeighbours = numberOfNeighbours
-                      VConf.numberOfNodes = numberOfNodes
                       VConf.simulateUntil = new DateTime(simulateUntil)
+
+                      // checks for proper datetime for the end of the simulation
                       if (VConf.simulateUntil.isBeforeNow) {
                         logger.debug(s"SIMULATE DATETIME IS IN THE PAST...")
                         complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
                       } else {
+                        VConf.blockTime = blockTime
+                        VConf.numberOfNeighbours = numberOfNeighbours
+                        VConf.numberOfNodes = numberOfNodes
                         VConf.transactionSize = transactionSize
                         VConf.throughPut = throughput
                         VConf.blockPropagationDelay = latency
@@ -126,14 +123,24 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         VConf.strategy = strategy
                         logger.debug(s"STRATEGY... $strategy")
                         VConf.transactionPropagationDelay = transactionPropagationDelay
-                        logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay")
+                        logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay MS")
+
+                        // checks for alternative history attack
                         VConf.hashrate = hashrate
-                        logger.debug(s"HASHRATE... $hashrate")
                         if (hashrate > 0) {
+                          logger.debug(s"ALTERNATIVE HISTORY ATTACK")
+                          logger.debug(s"ATTACKER'S HASHRATE... $hashrate%")
                           VConf.isAlternativeHistoryAttack = true
+                          VConf.attackSuccessful = false
+                          VConf.goodChainLength = 0
+                          VConf.evilChainLength = 0
+                          VConf.attackFailed = false
+                          VConf.confirmations = confirmations
+                          logger.debug(s"CONFIRMATIONS... ${VConf.confirmations} BLOCKS")
+                        } else {
+                          VConf.isAlternativeHistoryAttack = false
                         }
-                        VConf.confirmations = confirmations
-                        logger.debug(s"CONFIRMATIONS... ${VConf.confirmations}")
+
                         val masterActor = system.actorOf(MasterActor.props(), "Master")
                         // timeout for the ask pattern
                         implicit val timeout: Timeout = Timeout(900.seconds)
@@ -143,8 +150,8 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
 
                         logger.debug(s"reducerIntermediateResult... $reducerIntermediateResult")
 
-                        val result2 = Await.result(reducerIntermediateResult, 900 seconds)
-                        logger.debug(s"result2 $result2")
+                        val resultIntermediateResult = Await.result(reducerIntermediateResult, 900 seconds)
+                        logger.debug(s"Await.result reducerIntermediateResult $resultIntermediateResult")
 
                         onComplete(reducerIntermediateResult.flatMap(promise =>
                           promise.future.map { intermediateResult =>
@@ -178,7 +185,14 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.attackSucceeded,
                               intermediateResult.successfulAttackInBlocks,
                               intermediateResult.probabilityOfSuccessfulAttack,
-                              intermediateResult.maximumSafeTransactionValue
+                              intermediateResult.maximumSafeTransactionValue,
+                              intermediateResult.maliciousBlockchainLength,
+                              intermediateResult.goodBlockchainLength,
+                              intermediateResult.attackDuration,
+                              intermediateResult.B,
+                              intermediateResult.o,
+                              intermediateResult.α,
+                              intermediateResult.k
                             )
                           })) { extraction =>
                           lock = false

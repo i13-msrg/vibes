@@ -64,12 +64,6 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       title: 'Propagation delay for a block (in milliseconds)',
     },
     {
-      configurationKey: 'transactionPropagationDelay',
-      icon: distanceIcon,
-      placeholder: 'Transaction Propagation Delay',
-      title: 'Time it takes to send a transaction (in milliseconds)',
-    },
-    {
       configurationKey: 'neighboursDiscoveryInterval',
       icon: wifiIcon,
       placeholder: 'Neighbours Discovery Interval',
@@ -78,6 +72,12 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
   ];
 
   private gridInputsBitcoin: IGridInput[] = [
+    {
+      configurationKey: 'transactionPropagationDelay',
+      icon: distanceIcon,
+      placeholder: 'Transaction Propagation Delay',
+      title: 'Time it takes to send a transaction (in milliseconds)',
+    },
     {
       configurationKey: 'maxBlockSize',
       icon: maxBlockIcon,

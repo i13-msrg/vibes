@@ -7,8 +7,8 @@ import com.vibes.utils.VConf
 import org.joda.time.{DateTime, Duration}
 import scala.collection.mutable.ListBuffer
 
-// todo genesis block has no transactions, because transaction pool is zero
-// todo ? after last block new transactions are added to the transaction pool
+// todo maybe: genesis block has no transactions, because transaction pool is zero
+// todo maybe: after last block new transactions are added to the transaction pool
 
 case class VBlock(
   id: String,
@@ -58,6 +58,8 @@ case class VBlock(
 
     val sortedRecipients = recipients.sortBy(_.timestamp)
 
+    assert(sortedRecipients.nonEmpty, "sortedRecipients are empty")
+
     val t0                = sortedRecipients.head.timestamp
     var t1: Option[Float] = None
     var t2: Option[Float] = None
@@ -85,7 +87,7 @@ object VBlock extends LazyLogging {
     var processedTransactionsInBlock: Set[VTransaction] = Set.empty
 
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
-      // todo think about segwit maxBlockWeight vs maxBlockSize
+      // todo think about if to implement SegWit (maxBlockWeight vs maxBlockSize)
       maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
 
       // sorts the transaction pool by the transaction fee

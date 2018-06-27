@@ -65,7 +65,14 @@ case class ReducerIntermediateResult(
   attackSucceeded: Int,
   successfulAttackInBlocks: Int,
   probabilityOfSuccessfulAttack: Double,
-  maximumSafeTransactionValue: Int
+  maximumSafeTransactionValue: Int,
+  maliciousBlockchainLength: Int,
+  goodBlockchainLength: Int,
+  attackDuration: Int,
+  B: Double,
+  o: Int,
+  α: Int,
+  k: Int
 )
 
 object ReducerActor extends LazyLogging {
@@ -185,6 +192,13 @@ object ReducerActor extends LazyLogging {
     var successfulAttackInBlocks = 0
     var probabilityOfSuccessfulAttack : Double = 0
     var maximumSafeTransactionValue = 0
+    var maliciousBlockchainLength = 0
+    var goodBlockchainLength = 0
+    var attackDuration = 0
+    var B: Double = 0
+    var o = 0
+    var α = 0
+    var k = 0
 
     var attackSucceeded = 0
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.isAlternativeHistoryAttack) {
@@ -200,7 +214,6 @@ object ReducerActor extends LazyLogging {
         val n = VConf.confirmations
         if (q < p) {
           var sum: Double = 0
-          var test: Double = 0
           for (m <- 0 until n + 1) {
             sum += ((factorial(m + n - 1) / (factorial(m) * factorial(m + n - 1 - m))) * ((Math.pow(p,n) * Math.pow(q,m)) - (Math.pow(p,m) * Math.pow(q,n))))
           }
@@ -211,10 +224,11 @@ object ReducerActor extends LazyLogging {
       logger.debug(s"ATTACK SUCCESS PROBABILITY... $probabilityOfSuccessfulAttack")
 
       // calculation of the maximum safe transaction value
-      val B = VConf.blockReward
-      val o = VConf.attackDuration
-      val α = VConf.discountOnStolenGoods
-      val k = VConf.amountOfAttackedMerchants
+      B = VConf.blockReward
+      o = VConf.attackDuration
+      α = VConf.discountOnStolenGoods
+      k = VConf.amountOfAttackedMerchants
+      attackDuration = VConf.attackDuration
       maximumSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
       logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
 
@@ -228,7 +242,12 @@ object ReducerActor extends LazyLogging {
       } else {
         logger.debug(s"ATTACK NEITHER SUCCESSFUL NOR FAILED")
       }
+
+      maliciousBlockchainLength = VConf.evilChainLength
+      goodBlockchainLength = VConf.goodChainLength
     }
+
+    logger.debug(s"TEST... $B")
 
     ReducerIntermediateResult(
       events.sortBy(_.timestamp),
@@ -246,7 +265,14 @@ object ReducerActor extends LazyLogging {
       attackSucceeded,
       successfulAttackInBlocks,
       probabilityOfSuccessfulAttack,
-      maximumSafeTransactionValue
+      maximumSafeTransactionValue,
+      maliciousBlockchainLength,
+      goodBlockchainLength,
+      attackDuration,
+      B,
+      o,
+      α,
+      k
     )
   }
 }

@@ -63,7 +63,14 @@ case class ReducerResult(
   attackSucceeded: Int,
   successfulAttackInBlocks: Int,
   probabilityOfSuccessfulAttack: Double,
-  maximumSafeTransactionValue: Int
+  maximumSafeTransactionValue: Int,
+  maliciousBlockchainLength: Int,
+  goodBlockchainLength: Int,
+  attackDuration: Int,
+  B: Double,
+  o: Int,
+  α: Int,
+  k: Int
 )
 
 object ReducerResult {

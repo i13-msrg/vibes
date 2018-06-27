@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
 import com.vibes.utils.{VConf, VExecution}
 import org.joda.time._
+
 import scala.collection.immutable.SortedSet
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Promise
@@ -142,11 +143,11 @@ class MasterActor extends Actor with LazyLogging{
             // this is a convenient, but not 100% correct place to execute this type of functionality
             val priorityWorkRequest = workRequests.head
             if (new org.joda.time.Duration(lastNeighbourDiscoveryDate, priorityWorkRequest.timestamp)
-                  .isLongerThan(
-                    new org.joda.time.Duration(
-                      lastNeighbourDiscoveryDate,
-                      lastNeighbourDiscoveryDate.plusSeconds(VConf.neighboursDiscoveryInterval))
-                  )) {
+              .isLongerThan(
+                new org.joda.time.Duration(
+                  lastNeighbourDiscoveryDate,
+                  lastNeighbourDiscoveryDate.plusSeconds(VConf.neighboursDiscoveryInterval))
+              ) ) {
               lastNeighbourDiscoveryDate = priorityWorkRequest.timestamp
               discoveryActor ! DiscoveryActions.AnnounceNeighbours
             }

@@ -3,6 +3,7 @@ import { IConfiguration, Strategies } from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
 import AttackSummary from '../../molecules/attack-summary/Component';
+import BlockTree from '../../molecules/block-tree/Component';
 import SimulationEvents from '../../molecules/simulation-events/Component';
 import Button from '../../atoms/button/Component';
 import fetchEvents, { ISimulationPayload } from './fetchSimulationPayload';
@@ -117,34 +118,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     if (this.props.strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
       return (
                 <div className="simulation">
-                    <div className="simulation__buttons">
-                        <div>
-                            <Button
-                                className="simulation__button"
-                                title="New Simulation"
-                                onClick={() => {
-                                  this.setState({ simulationPayload: undefined });
-                                  this.props.onNewSimulation();
-                                }}
-                                active={true}
-                            />
-                        </div>
-                        {!isFetching && (
-                            <div>
-                                <Button
-                                    className="simulation__button"
-                                    title="START"
-                                    onClick={this.fetchEvents}
-                                    active={true}
-                                />
-                            </div>
-                        )}
-                        {isFetching && (
-                            <div>
-                                <div className="u-loader">Loading...</div>
-                            </div>
-                        )}
-                    </div>
 
                     <div className="simulation__grid">
                         <div className="simulation__map u-plate">
@@ -196,6 +169,74 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         </div>
                     </div>
 
+                    <div className="simulation__buttons">
+                        <div>
+                            <Button
+                                className="simulation__button"
+                                title="New Simulation"
+                                onClick={() => {
+                                  this.setState({ simulationPayload: undefined });
+                                  this.props.onNewSimulation();
+                                }}
+                                active={true}
+                            />
+                        </div>
+                        {!isFetching && (
+                            <div>
+                                <Button
+                                    className="simulation__button"
+                                    title="START"
+                                    onClick={this.fetchEvents}
+                                    active={true}
+                                />
+                            </div>
+                        )}
+                        {isFetching && (
+                            <div>
+                                <div className="u-loader">Loading...</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {this.props.hashrate > 0 ?
+                        <div className="attack__grid">
+                            <div className="attack__summary u-plate">
+                                <div className="attack-summary__title">
+                                    Attack Summary
+                                </div>
+                                {simulationPayload && (
+                                    <AttackSummary
+                                        attackSucceeded={simulationPayload.attackSucceeded}
+                                        successfulAttackInBlocks={simulationPayload.successfulAttackInBlocks}
+                                        probabilityOfSuccessfulAttack={simulationPayload.probabilityOfSuccessfulAttack}
+                                        maximumSafeTransactionValue={simulationPayload.maximumSafeTransactionValue}
+                                        hashrate={this.props.hashrate}
+                                        confirmations={this.props.confirmations}
+                                        B={simulationPayload.B}
+                                        o={simulationPayload.o}
+                                        α={simulationPayload.α}
+                                        k={simulationPayload.k}
+                                    />
+                                )}
+                            </div>
+
+                            <div className="block__tree u-plate">
+                                <div className="block-tree__title">
+                                    Block Tree and Branch Selection
+                                </div>
+                                {simulationPayload && (
+                                    <BlockTree
+                                        maliciousBlockchainLength={simulationPayload.maliciousBlockchainLength}
+                                        goodBlockchainLength={simulationPayload.goodBlockchainLength}
+                                        attackDuration={simulationPayload.attackDuration}
+                                        successfulAttackInBlocks={simulationPayload.successfulAttackInBlocks}
+                                        attackSucceeded={simulationPayload.attackSucceeded}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    : '' }
+
                     <div className="simulation-time-between-blocks u-plate">
                         <div className="simulation-time-between-blocks__title">
                             time between blocks
@@ -212,7 +253,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         minValue: 1,
                                         viewWindow: {
                                           min: 1,
-                                        }                                      },
+                                        },
+                                      },
                                       vAxis: {
                                         title: 'Time',
                                       },
@@ -366,22 +408,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         )}
                     </div>
 
-                    <div className="attack__summary u-plate">
-                        <div className="attack-summary__title">
-                            Attack Summary
-                        </div>
-                        {simulationPayload && (
-                            <AttackSummary
-                                attackSucceeded={simulationPayload.attackSucceeded}
-                                successfulAttackInBlocks={simulationPayload.successfulAttackInBlocks}
-                                probabilityOfSuccessfulAttack={simulationPayload.probabilityOfSuccessfulAttack}
-                                maximumSafeTransactionValue={simulationPayload.maximumSafeTransactionValue}
-                                hashrate={this.props.hashrate}
-                                confirmations={this.props.confirmations}
-                            />
-                        )}
-                    </div>
-
                 </div>
       );
     }
@@ -435,69 +461,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             moveIntoViewPort={moveIntoViewPort}
                         />
                     </div>
-                </div>
-
-                <div className="simulation-time-between-blocks u-plate">
-                    <div className="simulation-time-between-blocks__title">
-                        Time Between Blocks
-                    </div>
-                    {simulationPayload && (
-                        <div className={'time-between-blocks-chart-container'}>
-                            <Chart
-                                chartType="LineChart"
-                                data={Simulation.timeBetweenBlocks(simulationPayload)}
-                                options={{
-                                  hAxis: {
-                                    title: 'Blocks',
-                                    gridlines: { count: -1 },
-                                  },
-                                  vAxis: {
-                                    title: 'Time',
-                                  },
-                                  series: {
-                                    1: { curveType: 'function' },
-                                  },
-                                  legend: 'none',
-                                  tooltip: {},
-                                }}
-                                graph_id="Time Between Blocks LineChart"
-                                width="100%"
-                                height="264px"
-                            />
-                        </div>
-                    )}
-                </div>
-
-                <div className="simulation-processed-transactions u-plate">
-                    <div className="simulation-processed-transactions__title">
-                        Processed Transactions per Block
-                    </div>
-                    {simulationPayload && (
-                        <div className={'processed-transactions-chart-container'}>
-                            <Chart
-                                chartType="LineChart"
-                                data={this.processedTransactions(simulationPayload)}
-                                options={{
-                                  hAxis: {
-                                    title: 'Blocks',
-                                    gridlines: { count: -1 },
-                                  },
-                                  vAxis: {
-                                    title: 'Processed Transactions',
-                                  },
-                                  series: {
-                                    1: { curveType: 'function' },
-                                  },
-                                  legend: { position: 'bottom' },
-                                  focusTarget: 'category',
-                                  tooltip: {},
-                                }}
-                                graph_id="Processed Transactions LineChart"
-                                width="100%"
-                                height="264px"
-                            />
-                        </div>
-                    )}
                 </div>
 
                 <div className="simulation__buttons">

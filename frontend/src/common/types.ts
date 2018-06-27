@@ -54,7 +54,7 @@ export interface INetworkBandwidth {
 }
 
 export interface IHashrate {
-  hashrate: number | null;
+  hashrate: number;
 }
 
 export interface IConfirmations {
@@ -78,8 +78,8 @@ export interface IConfiguration extends
   IMaxBlockWeight,
   INetworkBandwidth,
   IStrategy,
-    IHashrate,
-    IConfirmations,
+  IHashrate,
+  IConfirmations,
   INeighboursDiscoveryInterval {
   [index: string]: any | null;
 }

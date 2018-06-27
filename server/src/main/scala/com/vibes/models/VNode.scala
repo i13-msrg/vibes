@@ -102,12 +102,14 @@ class VNode(
     }
 
     val newTransactionPool = VTransaction.createNewTransactionPool(longerBlockchain, tail, transactionPool)
+
     // add itself as a recipient to all unreceived blocks
     longerBlockchain.foreach { block =>
       if (!block.containsRecipient(this)) {
         block.addRecipient(origin, this, now)
       }
     }
+
     copy(
       blockchain = longerBlockchain,
       transactionPool = newTransactionPool

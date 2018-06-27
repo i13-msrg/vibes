@@ -48,7 +48,7 @@ object DiscoveryActor extends LazyLogging {
   }
 
   def discoverNeighbours(currentNodes: List[VNode], node: VNode, numberOfNeighbours: Int): Set[ActorRef] = {
-      if (VConf.isAlternativeHistoryAttack && !VConf.attackSuccessful && !VConf.attackFailed) {
+      if (VConf.isAlternativeHistoryAttack && !VConf.attackSuccessful && !VConf.attackFailed && (VConf.evilChainLength > 0 || VConf.goodChainLength > 0)) {
         var nodes = currentNodes.filter(_.isMalicious == node.isMalicious)
         nodes = nodes.filter(_ != node)
         Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
