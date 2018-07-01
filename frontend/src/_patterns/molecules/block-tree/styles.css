@@ -44,6 +44,7 @@
   justify-content: center;
   align-content: center;
   font-weight: 600;
+  border-color: black;
 }
 
 .block-tree__legend {
@@ -65,4 +66,16 @@
 .block-tree__legend-text {
   margin-left: 5px;
   margin-right: 10px;
+}
+
+.block-tree__legend-icon {
+  width: 12px;
+  height: 12px;
+  color: black;
+}
+
+.block-tree__icon {
+  width: 24px;
+  height: 24px;
+  color: black;
 }

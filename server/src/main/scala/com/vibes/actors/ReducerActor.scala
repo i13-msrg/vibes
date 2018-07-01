@@ -8,8 +8,6 @@ import com.vibes.utils.Joda._
 import com.vibes.utils.VConf
 import org.joda.time._
 
-import scala.math.pow
-
 // Takes final RAW result of the simulator and converts it to a format processable by a client
 
 /*
@@ -205,21 +203,21 @@ object ReducerActor extends LazyLogging {
       // formula from arXiv:1402.2009v1 [cs.CR] 9 Feb 2014
       // calculation of the success probability for an attack
       var r: Double = 0
-      if (VConf.hashrate >= 50) {
-        r = 1
-        probabilityOfSuccessfulAttack = 100
-      } else {
+      if (VConf.confirmations > 0 && VConf.hashrate < 50) {
         val q: Double = VConf.hashrate.toDouble / 100
         val p: Double = 1 - q
         val n = VConf.confirmations
         if (q < p) {
           var sum: Double = 0
           for (m <- 0 until n + 1) {
-            sum += ((factorial(m + n - 1) / (factorial(m) * factorial(m + n - 1 - m))) * ((Math.pow(p,n) * Math.pow(q,m)) - (Math.pow(p,m) * Math.pow(q,n))))
+            sum += ((factorial(m + n - 1) / (factorial(m) * factorial(m + n - 1 - m))) * ((Math.pow(p, n) * Math.pow(q, m)) - (Math.pow(p, m) * Math.pow(q, n))))
           }
           r = 1 - sum
           probabilityOfSuccessfulAttack = (math rint r * 100000) / 1000
         }
+      } else {
+        r = 1
+        probabilityOfSuccessfulAttack = 100
       }
       logger.debug(s"ATTACK SUCCESS PROBABILITY... $probabilityOfSuccessfulAttack")
 
@@ -246,8 +244,6 @@ object ReducerActor extends LazyLogging {
       maliciousBlockchainLength = VConf.evilChainLength
       goodBlockchainLength = VConf.goodChainLength
     }
-
-    logger.debug(s"TEST... $B")
 
     ReducerIntermediateResult(
       events.sortBy(_.timestamp),
