@@ -1,7 +1,14 @@
 \chapter{Introduction} 
 \label{chapter:introduction}
 
-Introduction \cite{sample_ref}.
+Currently and in the last years Blockchain technologies such as Bitcoin and Ethereum are a very hot topic. According to the Gartner Hype Cycle \cite{gartner} Blockchain technology is undergoing the peak of inflated expectation in 2017. Price and market capitalization changes of cryptocurrencies are covered by the media.
+
+Blockchain technology enables decentralized consensus and can be used for record keeping. Bitcoin is the first digital currency to solve the double-spending problem without the need of a trusted authority. One of the main problems of Bitcoin or in general of Blockchains is the low maximum amount of possible processed transactions per seconds. Additionally, the Bitcoin community disagrees about how to solve this scalability problem, already split about different approaches and created Bitcoin forks.
+
+VIBES (Visualizations of Interactive, Blockchain, Extended Simulations) is a blockchain sim-ulator, which allows fast, scalable and configurable network simulations on a single
+computer without any additional resources. It was developed in a master thesis by Lyubomir Stoykov \cite{stoykov2018} and which is the foundation for this master thesis proposal. The goal of my master thesis is to improve VIBES to make more realistic simulations possible. In the future VIBES could be used by developers or heavy blockchain users to simulate changes to different Blockchains. So maybe in the future it can help the Bitcoin community to agree on change proposals.
+
+There are other Simulators like Bitcoin-Simulator, but VIBES is the first simulator designed to be extended to blockchain systems beyond bitcoin and the first of its kind to be able to simu-late transactions in the network. Bitcoin-Simulator only simulates the network at block level and therefore does not consider transactions \cite{sec&perf}.
 
 \section{Motivation} 
 \label{sec:motivation}
@@ -11,12 +18,29 @@ Motivation of Thesis.
 \section{Problem Statement} 
 \label{sec:problemStatement}
 
-Problem Statement of Thesis.
+There are lots of possibilities to improve VIBES, which were also already outlined in the mas-ter thesis of Stoykov. The portability to different kinds of Blockchains and the ease of use is very important.
+
+Here are some possibilities to extend the current version of VIBES, that I would like to work on in my master thesis:
+•	Add maximal block size and transaction incentives
+•	Break propagation delay down into three components: network bandwidth, block size and distance between Nodes.
+•	Improve speed by testing mutable variables
+•	Differentiate between miners and full nodes
+•	Calculate resources used by network: CPU, electricity and bandwidth.
+•	Change transaction generation from coordinator to nodes.
+•	Other improvements: code improvements, analysis and visualizing of information that is already captured by VIBES (probability of forks), …
+
+These extensions can improve the quality of the simulations and the use cases of VIBES. For example, the implications of Segwit2x could be analyzed. Maybe these extensions could also make it possible to realistically simulate the current Bitcoin blockchain.
 
 \section{Approach}
  \label{sec:approach}
 
-Your Approach overview.
+The goal to make simulations more realistic. The approach from the original VIBES paper is taken over. Some designs and parts of the architecture have to be adjusted.
+
+The configuration parameters (4.1.8) must be extended to break down propagation delay, to add maximal block size and transaction incentives.
+
+Change transaction generation from coordinator to nodes (4.3.1).
+
+Differentiate between miners and full nodes (4.3.2).
 
 \section{Organization}
  \label{sec:organization}

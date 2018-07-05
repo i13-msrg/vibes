@@ -4,7 +4,6 @@
 \usepackage[none]{hyphenat} %hyphenation
 \sloppy
 \usepackage{parskip} %no indentation after paragraphs
-\usepackage{umlaute}
 \usepackage{afterpage} %for using \afterpage{\clearpage} (don't push images to the end of a chapter)
 \usepackage{makeidx}
 \usepackage[numbers]{natbib}
@@ -34,6 +33,9 @@
 \definecolor{gray}{rgb}{0.4,0.4,0.4}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.6}
 \definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
 \usepackage[autostyle]{csquotes}
 \usepackage{subcaption}
 \usepackage[ruled,lined,linesnumbered, noend]{algorithm2e}
@@ -46,6 +48,24 @@
 \usepackage{CJKutf8}
 \usepackage{longtable}
 
+\lstdefinestyle{myScalastyle}{
+  frame=tb,
+  language=scala,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+}
 
 \setlength{\extrarowheight}{10pt}
 
