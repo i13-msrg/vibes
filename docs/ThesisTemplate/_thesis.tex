@@ -1,7 +1,7 @@
 \documentclass[12pt]{report}
 \usepackage[utf8]{inputenc}
 \usepackage{a4}
-\usepackage[none]{hyphenat} %hyphenation
+%\usepackage[none]{hyphenat} %hyphenation destroys code linewrapping
 \sloppy
 \usepackage{parskip} %no indentation after paragraphs
 \usepackage{afterpage} %for using \afterpage{\clearpage} (don't push images to the end of a chapter)
@@ -47,6 +47,7 @@
 \usepackage[toc,page]{appendix}
 \usepackage{CJKutf8}
 \usepackage{longtable}
+\usepackage{amsmath}  % for \hookrightarrow
 
 \lstdefinestyle{myScalastyle}{
   frame=tb,
@@ -70,10 +71,11 @@
 \setlength{\extrarowheight}{10pt}
 
 \lstset{
-	basicstyle=\ttfamily,
-	columns=fullflexible,
-	showstringspaces=false,
-	commentstyle=\color{gray}\upshape
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  frame=single,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
 
 \titleformat{\paragraph}[hang]{\normalfont\bfseries}{\theparagraph}{.5em}{}

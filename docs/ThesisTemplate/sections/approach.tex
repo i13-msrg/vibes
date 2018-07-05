@@ -12,16 +12,40 @@ The introduction of a block size limit allows a more accurate simulation of the 
 
 \subsection{Alternative history attack}
 
-
-
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=myScalastyle]
-object Test {
-   def main(args: Array[String]) {
-      var a = 0;
-      // for loop execution with a range
-      for( a <- 1 to 10){
-         println( "Value of a: " + a );
-      }
-   }
+object VBlock extends LazyLogging {
+  def createWinnerBlock(node: VNode, timestamp: DateTime): VBlock = {
+    var maxTransactionsPerBlock : Int = 0
+    var processedTransactionsInBlock: Set[VTransaction] = Set.empty
+
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+      // todo think about if to implement SegWit (maxBlockWeight vs maxBlockSize)
+      maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
+
+      // sorts the transaction pool by the transaction fee
+      processedTransactionsInBlock = node.transactionPool.toSeq.sortWith(_.transactionFee > _.transactionFee).take(maxTransactionsPerBlock).toSet
+
+      // sets confirmation status of transaction true
+      processedTransactionsInBlock.foreach { _.confirmation = true }
+
+      // sets confirmation level of transaction
+      processedTransactionsInBlock.foreach { _.confirmationLevel = node.blockchain.size }
+    } else {
+      maxTransactionsPerBlock = node.transactionPool.size
+      processedTransactionsInBlock = node.transactionPool
+    }
+
+    VBlock(
+      id = UUID.randomUUID().toString,
+      origin = node,
+      transactions = processedTransactionsInBlock,
+      level = node.blockchain.size,
+      timestamp = timestamp,
+      recipients = ListBuffer.empty,
+      transactionPoolSize = node.transactionPool.size
+    )
+  }
 }
 \end{lstlisting}
+\end{minipage}
