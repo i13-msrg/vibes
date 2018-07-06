@@ -18,13 +18,15 @@ import com.vibes.utils.VConf
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.syntax._
 import org.joda.time.DateTime
-
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future, Promise}
 import scala.language.postfixOps
 import scala.util.Success
+import com.typesafe.config.ConfigFactory
 
 object Main extends App with FailFastCirceSupport with LazyLogging {
+  val conf = ConfigFactory.load
+
   implicit val system: ActorSystem = ActorSystem("VSystem")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
@@ -109,7 +111,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                       // checks for proper datetime for the end of the simulation
                       if (VConf.simulateUntil.isBeforeNow) {
                         logger.debug(s"SIMULATE DATETIME IS IN THE PAST...")
-                        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
+                        complete(HttpEntity(ContentTypes.`application/json`, "{\"text\": \"Failure\"}"))
                       } else {
                         VConf.blockTime = blockTime
                         VConf.numberOfNeighbours = numberOfNeighbours
@@ -206,13 +208,13 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                             case _ =>
                               logger.debug(s"EXTRACTION COMPLETE HTTP FAILURE...")
                               masterActor ! PoisonPill
-                              complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
+                              complete(HttpEntity(ContentTypes.`application/json`, "{\"text\": \"Failure\"}"))
                           }
                         }
                       }
                     } else {
                       logger.debug(s"COMPLETE HTTP FAILURE...")
-                      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Failure"))
+                      complete(HttpEntity(ContentTypes.`application/json`, "{\"text\": \"Failure\"}"))
                     }
                 }
               }
