@@ -210,7 +210,7 @@ object ReducerActor extends LazyLogging {
         if (q < p) {
           var sum: Double = 0
           for (m <- 0 until n + 1) {
-            sum += ((factorial(m + n - 1) / (factorial(m) * factorial(m + n - 1 - m))) * ((Math.pow(p, n) * Math.pow(q, m)) - (Math.pow(p, m) * Math.pow(q, n))))
+            sum += ((factorial(m + n - 1) / (factorial(m) * factorial( n - 1))) * ((Math.pow(p, n) * Math.pow(q, m)) - (Math.pow(p, m) * Math.pow(q, n))))
           }
           r = 1 - sum
           probabilityOfSuccessfulAttack = (math rint r * 100000) / 1000
