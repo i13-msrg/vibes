@@ -24,7 +24,7 @@ object VConf {
 
   // variables for Alternative History Attack
   var isAlternativeHistoryAttack = false
-  var hashrate = 30 // Attacker's hashrate in percentage of total network
+  var hashRate = 30 // Attacker's hashrate in percentage of total network
   var confirmations = 4 // Confirmations the attacked Merchant is waiting for
 
   // todo following attack parameter could be made into input parameter

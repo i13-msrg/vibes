@@ -30,7 +30,7 @@ class NodeRepoActor(discoveryActor: ActorRef, reducerActor: ActorRef) extends Ac
   override def receive: Receive = {
     case NodeRepoActions.RegisterNode =>
       var isEvil: Option[Boolean] = None
-      if (VConf.isAlternativeHistoryAttack && (registeredNodeActors.size < VConf.hashrate.toDouble / 100 * VConf.numberOfNodes)) {
+      if (VConf.isAlternativeHistoryAttack && (registeredNodeActors.size < VConf.hashRate.toDouble / 100 * VConf.numberOfNodes)) {
         logger.debug(s"REGISTER EVIL NODE....... ${registeredNodeActors.size}")
         isEvil = Some(true)
       } else if (VConf.isAlternativeHistoryAttack) {

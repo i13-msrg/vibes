@@ -189,7 +189,7 @@ object ReducerActor extends LazyLogging {
 
     var successfulAttackInBlocks = 0
     var probabilityOfSuccessfulAttack : Double = 0
-    var maximumSafeTransactionValue = 0
+    var maximalSafeTransactionValue = 0
     var maliciousBlockchainLength = 0
     var goodBlockchainLength = 0
     var attackDuration = 0
@@ -203,8 +203,8 @@ object ReducerActor extends LazyLogging {
       // formula from arXiv:1402.2009v1 [cs.CR] 9 Feb 2014
       // calculation of the success probability for an attack
       var r: Double = 0
-      if (VConf.confirmations > 0 && VConf.hashrate < 50) {
-        val q: Double = VConf.hashrate.toDouble / 100
+      if (VConf.confirmations > 0 && VConf.hashRate < 50) {
+        val q: Double = VConf.hashRate.toDouble / 100
         val p: Double = 1 - q
         val n = VConf.confirmations
         if (q < p) {
@@ -227,8 +227,8 @@ object ReducerActor extends LazyLogging {
       α = VConf.discountOnStolenGoods
       k = VConf.amountOfAttackedMerchants
       attackDuration = VConf.attackDuration
-      maximumSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
-      logger.debug(s"MAXIMUM SAFE TRANSACTION VALUE... $maximumSafeTransactionValue")
+      maximalSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
+      logger.debug(s"MAXIMAL SAFE TRANSACTION VALUE... $maximalSafeTransactionValue")
 
       if (VConf.attackFailed) {
         attackSucceeded = -1
@@ -261,7 +261,7 @@ object ReducerActor extends LazyLogging {
       attackSucceeded,
       successfulAttackInBlocks,
       probabilityOfSuccessfulAttack,
-      maximumSafeTransactionValue,
+      maximalSafeTransactionValue,
       maliciousBlockchainLength,
       goodBlockchainLength,
       attackDuration,

@@ -128,7 +128,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay MS")
 
                         // checks for alternative history attack
-                        VConf.hashrate = hashrate
+                        VConf.hashRate = hashrate
                         if (hashrate > 0) {
                           logger.debug(s"ALTERNATIVE HISTORY ATTACK")
                           logger.debug(s"ATTACKER'S HASHRATE... $hashrate%")
