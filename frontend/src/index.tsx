@@ -47,7 +47,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         networkBandwidth: 1, // MB per second
         strategy: Strategies.GENERIC_SIMULATION.toString(),
         transactionPropagationDelay: 150, // ms
-        hashrate: 0, // Percentage of total network
+        hashRate: 0, // Percentage of total network
         confirmations: 0, // Blocks
       },
     };
@@ -125,7 +125,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         networkBandwidth: 1, // MB per second
         strategy: strategy.toString(),
         transactionPropagationDelay: 150, // ms
-        hashrate: 30, // Percentage of total network
+        hashRate: 30, // Percentage of total network
         confirmations: 4, // Blocks
       };
       this.setState({ configuration });
@@ -145,7 +145,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         networkBandwidth: 1, // MB per second
         strategy: strategy.toString(),
         transactionPropagationDelay: 150, // ms
-        hashrate: 0, // Percentage of total network
+        hashRate: 0, // Percentage of total network
         confirmations: 0, // Blocks
       };
       this.setState({ configuration });

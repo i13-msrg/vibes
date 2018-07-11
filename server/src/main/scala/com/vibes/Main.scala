@@ -81,7 +81,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                     'networkBandwidth.as[Int],
                     'strategy.as[String],
                     'transactionPropagationDelay.as[Int],
-                    'hashrate.as[Int],
+                    'hashRate.as[Int],
                     'confirmations.as[Int]
                   )) {
                   (blockTime,
@@ -96,7 +96,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    networkBandwidth,
                    strategy,
                    transactionPropagationDelay,
-                   hashrate,
+                   hashRate,
                    confirmations
                   ) =>
                     logger.debug(s"ATTEMPT START... $lock")
@@ -113,6 +113,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         logger.debug(s"SIMULATE DATETIME IS IN THE PAST...")
                         complete(HttpEntity(ContentTypes.`application/json`, "{\"text\": \"Failure\"}"))
                       } else {
+                        VConf.simulationStart = DateTime.now
                         VConf.blockTime = blockTime
                         VConf.numberOfNeighbours = numberOfNeighbours
                         VConf.numberOfNodes = numberOfNodes
@@ -128,10 +129,10 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay MS")
 
                         // checks for alternative history attack
-                        VConf.hashRate = hashrate
-                        if (hashrate > 0) {
+                        VConf.hashRate = hashRate
+                        if (hashRate > 0) {
                           logger.debug(s"ALTERNATIVE HISTORY ATTACK")
-                          logger.debug(s"ATTACKER'S HASHRATE... $hashrate%")
+                          logger.debug(s"ATTACKER'S HASH RATE... $hashRate%")
                           VConf.isAlternativeHistoryAttack = true
                           VConf.attackSuccessful = false
                           VConf.goodChainLength = 0

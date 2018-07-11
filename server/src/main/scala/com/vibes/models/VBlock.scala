@@ -58,6 +58,13 @@ case class VBlock(
 
     val sortedRecipients = recipients.sortBy(_.timestamp)
 
+    if(VConf.isAlternativeHistoryAttack && sortedRecipients.isEmpty) {
+      val t1: Option[Float] = None
+      val t2: Option[Float] = None
+      val t3: Option[Float] = None
+      return (t1, t2, t3)
+    }
+
     assert(sortedRecipients.nonEmpty, "sortedRecipients are empty")
 
     val t0                = sortedRecipients.head.timestamp

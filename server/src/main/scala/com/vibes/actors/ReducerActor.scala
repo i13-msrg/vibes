@@ -6,6 +6,7 @@ import com.vibes.actions.{MasterActions, ReducerActions}
 import com.vibes.models._
 import com.vibes.utils.Joda._
 import com.vibes.utils.VConf
+import org.joda.time.Seconds.secondsBetween
 import org.joda.time._
 
 // Takes final RAW result of the simulator and converts it to a format processable by a client
@@ -171,7 +172,7 @@ object ReducerActor extends LazyLogging {
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty
-      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize, level = block.level, transactions = block.transactions)
+      blockEvents ::= MinedBlock(block.origin, timestamp = block.timestamp, transactionPoolSize = block.transactionPoolSize, level = block.level, transactions = block.transactions, isMalicious = block.origin.isMalicious)
       blockEvents :::= block.currentRecipients.map { recipient =>
         TransferBlock(recipient.from, recipient.to, timestamp = recipient.timestamp)
       }
@@ -183,6 +184,14 @@ object ReducerActor extends LazyLogging {
     logger.debug(s"TRANSACTION SIZE OF LONGEST CHAIN... ${longestChain.flatMap(_.transactions).size}")
     logger.debug(s"TRANSACTION SIZE... ${transactions.size}")
     transactions = transactions.sortBy((transaction: VTransaction) => transaction.transactionFee)
+
+
+    var tps: Double = longestChainNumberTransactions.toDouble / secondsBetween(VConf.simulationStart, VConf.simulateUntil).getSeconds.toDouble
+    tps = (math rint tps * 100000) / 1000
+    logger.debug(s"TPS... $tps")
+
+    val avgBlockTime: Double = secondsBetween(VConf.simulationStart, longestChain.head.timestamp).getSeconds.toDouble / longestChain.size
+    logger.debug(s"AVG BLOCK TIME... $avgBlockTime... SHOULD BE ${VConf.blockTime}")
 
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")

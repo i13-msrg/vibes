@@ -69,74 +69,13 @@ class NodeActor (
   private def addExecutablesForMineBlock(now: DateTime): Unit = {
     val timestamp = node.createTimestampForNextBlock(now)
     val exWorkRequest = node.createExecutableWorkRequest(self, timestamp, VExecution.ExecutionType.MineBlock)
+
     val value = () => {
-      var newBlock = VBlock.createWinnerBlock(node, timestamp)
+      val newBlock = VBlock.createWinnerBlock(node, timestamp)
 
       if (VConf.isAlternativeHistoryAttack) {
-        if (node.isMalicious.contains(true)) {
-          logger.debug(s"EVIL BLOCK MINED AT LEVEL ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
-        } else {
-          logger.debug(s"GOOD BLOCK MINED AT LEVEL ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
-        }
-
-        // checks if to add block
-        if (VConf.attackSuccessful) {
-          logger.debug(s"addExecutablesForMineBlock: VConf.attackSuccessful")
-          node = node.addBlock(newBlock)
-        } else if (VConf.attackFailed) {
-          logger.debug(s"addExecutablesForMineBlock: VConf.attackFailed")
-          node = node.addBlock(newBlock)
-        } else if (newBlock.level == 1 && node.isMalicious != newBlock.origin.isMalicious) { // block zero is the common block
-          logger.debug(s"addExecutablesForMineBlock: newBlock.level == 1")
-          node = node.addBlock(newBlock)
-        } else if (newBlock.level == 0) {
-          logger.debug(s"addExecutablesForMineBlock: newBlock.level == 0")
-          node = node.addBlock(newBlock)
-        } else if (node.isMalicious == newBlock.origin.isMalicious) {
-          logger.debug(s"addExecutablesForMineBlock: added newBlock")
-          node = node.addBlock(newBlock)
-        } else {
-          logger.debug(s"addExecutablesForMineBlock: Didn't add newBlock  ${newBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
-        }
-
-        // checks if attack is finished
-        if (!VConf.attackFailed && !VConf.attackSuccessful) {
-          // sets good and evil chain length
-          if (node.isMalicious.contains(true)) {
-            if (node.blockchain.size > VConf.evilChainLength) {
-              VConf.evilChainLength = node.blockchain.size
-            }
-          } else if (node.isMalicious.contains(false)) {
-            if (node.blockchain.size > VConf.goodChainLength) {
-              VConf.goodChainLength = node.blockchain.size
-            }
-          }
-
-          // prints chain lengths
-          logger.debug(s"GOOD CHAIN LENGTH: ${VConf.goodChainLength}; BAD CHAIN LENGTH ${VConf.evilChainLength}")
-
-          // checks if attack succeeded
-          if (VConf.evilChainLength > VConf.goodChainLength && VConf.goodChainLength > VConf.confirmations) {
-            logger.debug(s"ATTACK IS SUCCESSFUL.....")
-            VConf.attackSuccessful = true
-            VConf.attackSuccessfulInBlocks = node.blockchain.size
-            discoveryActor ! DiscoveryActions.AnnounceNeighbours
-          }
-
-          // checks if attack failed
-          if (((VConf.evilChainLength > VConf.attackDuration && VConf.goodChainLength > VConf.confirmations) || VConf.goodChainLength > VConf.attackDuration) && !VConf.attackSuccessful) {
-            logger.debug(s"ATTACK FAILED.....  $timestamp, ${self.path}")
-            VConf.attackFailed = true
-            discoveryActor ! DiscoveryActions.AnnounceNeighbours
-          }
-
-          // updates neighbours to make only evil nodes work with evil nodes and good nodes with good nodes after one common block
-          if (newBlock.level == 0) {
-            discoveryActor ! DiscoveryActions.AnnounceNeighbours
-          }
-        }
+        addBlockIfAlternativeHistoryAttack(timestamp, newBlock)
       } else {
-        // no alternative history attack
         logger.debug(s"BLOCK MINED AT LEVEL ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
         node = node.addBlock(newBlock)
       }
@@ -208,6 +147,79 @@ class NodeActor (
     }
   }
 
+  // method only for alternative history attack
+  private def addBlockIfAlternativeHistoryAttack(timestamp: DateTime, newBlock: VBlock): Unit = {
+    if (node.isMalicious.contains(true)) {
+      logger.debug(s"EVIL BLOCK MINED AT LEVEL ${node.blockchain.size + 1} .....")
+      // logger.debug(s"EVIL BLOCK MINED AT LEVEL ${node.blockchain.size + 1} BY NODE ${node.id}.....")
+      // logger.debug(s"$timestamp, ${self.path}")
+    } else {
+      logger.debug(s"GOOD BLOCK MINED AT LEVEL ${node.blockchain.size + 1} .....")
+      // logger.debug(s"GOOD BLOCK MINED AT LEVEL ${node.blockchain.size + 1} BY NODE ${node.id}.....")
+      // logger.debug(s"$timestamp, ${self.path}")
+    }
+
+    // checks if to add block
+    if (VConf.attackSuccessful) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: VConf.attackSuccessful")
+      node = node.addBlock(newBlock)
+    } else if (VConf.attackFailed) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: VConf.attackFailed")
+      node = node.addBlock(newBlock)
+    } else if (newBlock.level == 1 && node.isMalicious != newBlock.origin.isMalicious) { // block zero is the common block
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: newBlock.level == 1")
+      node = node.addBlock(newBlock)
+    } else if (newBlock.level == 0) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: newBlock.level == 0")
+      node = node.addBlock(newBlock)
+    } else if (node.isMalicious == newBlock.origin.isMalicious && node.blockchain.head.timestamp.isBefore(newBlock.timestamp)) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: added newBlock")
+      node = node.addBlock(newBlock)
+    } else {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: Didn't add newBlock  ${newBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
+    }
+
+    // checks if attack is finished
+    if (!VConf.attackFailed && !VConf.attackSuccessful) {
+      // sets good and evil chain length
+      if (node.blockchain.size == 1) {
+        VConf.evilChainLength = node.blockchain.size
+        VConf.goodChainLength = node.blockchain.size
+      } else if (node.isMalicious.contains(true)) {
+        if (node.blockchain.size > VConf.evilChainLength) {
+          VConf.evilChainLength = node.blockchain.size
+        }
+      } else if (node.isMalicious.contains(false)) {
+        if (node.blockchain.size > VConf.goodChainLength) {
+          VConf.goodChainLength = node.blockchain.size
+        }
+      }
+
+      // prints chain lengths
+      logger.debug(s"GOOD CHAIN LENGTH: ${VConf.goodChainLength}; BAD CHAIN LENGTH ${VConf.evilChainLength}")
+
+      // checks if attack succeeded
+      if (VConf.evilChainLength > VConf.goodChainLength && VConf.goodChainLength > VConf.confirmations) {
+        logger.debug(s"ATTACK IS SUCCESSFUL.....")
+        VConf.attackSuccessful = true
+        VConf.attackSuccessfulInBlocks = node.blockchain.size
+        discoveryActor ! DiscoveryActions.AnnounceNeighbours
+      }
+
+      // checks if attack failed
+      if (((VConf.evilChainLength > VConf.attackDuration && VConf.goodChainLength > VConf.confirmations) || VConf.goodChainLength > VConf.attackDuration) && !VConf.attackSuccessful) {
+        logger.debug(s"ATTACK FAILED.....  $timestamp, ${self.path}")
+        VConf.attackFailed = true
+        discoveryActor ! DiscoveryActions.AnnounceNeighbours
+      }
+
+      // updates neighbours to make only evil nodes work with evil nodes and good nodes with good nodes after one common block
+      if (newBlock.level == 0) {
+        discoveryActor ! DiscoveryActions.AnnounceNeighbours
+      }
+    }
+  }
+
   override def preStart(): Unit = {
     logger.debug(s"NodeActor started ${self.path}")
 
@@ -271,7 +283,7 @@ class NodeActor (
 
     case NodeActions.ReceiveBlock(origin, block, now, hash) =>
       if (VConf.isAlternativeHistoryAttack) {
-        if (block.level + 1 > node.blockchain.size && (node.isMalicious == origin.isMalicious || block.level == 0) && !VConf.attackSuccessful && !VConf.attackFailed) {
+        if (block.level + 1 > node.blockchain.size && (node.isMalicious.contains(true) == block.origin.isMalicious.contains(true) || block.level == 0) && !VConf.attackSuccessful && !VConf.attackFailed) {
           val incomingBlock = block.addRecipient(origin, node, now)
 
           if (NodeActor.shouldSynch(node, hash)) {

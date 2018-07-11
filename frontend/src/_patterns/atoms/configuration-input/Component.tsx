@@ -15,6 +15,19 @@ interface IConfigurationInputProps {
 }
 
 export default class ConfigurationInput extends React.Component<IConfigurationInputProps, {}> {
+  private static convertValue(value: number | null): string {
+    if (value === null) {
+      return '';
+    }
+
+        // if timestamp, don't judge me, other methods throw warnings
+    if (value > 10000000) {
+      return convertTimestampToDate(value);
+    }
+
+    return String(value);
+  }
+
   constructor(props: IConfigurationInputProps) {
     super(props);
 
@@ -44,7 +57,7 @@ export default class ConfigurationInput extends React.Component<IConfigurationIn
           placeholder={placeholder}
           onChange={this.handleInputChange}
           type={type}
-          value={this.convertValue(value)}
+          value={ConfigurationInput.convertValue(value)}
         />
         <svg
           viewBox={icon.viewBox}
@@ -54,19 +67,6 @@ export default class ConfigurationInput extends React.Component<IConfigurationIn
         </svg>
       </div>
     );
-  }
-
-  private convertValue(value: number | null): string {
-    if (value === null) {
-      return '';
-    }
-
-    // if timestamp, don't judge me, other methods throw warnings
-    if (value > 10000000) {
-      return convertTimestampToDate(value);
-    }
-
-    return String(value);
   }
 
   private handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {

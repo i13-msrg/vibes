@@ -5,7 +5,7 @@ interface IAttackSummaryProps {
   successfulAttackInBlocks: number | null;
   probabilityOfSuccessfulAttack: number;
   maximumSafeTransactionValue: number;
-  hashrate: number | null;
+  hashRate: number | null;
   confirmations: number | null;
   B: number | null;
   o: number | null;
@@ -21,7 +21,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
         successfulAttackInBlocks,
         probabilityOfSuccessfulAttack,
         maximumSafeTransactionValue,
-        hashrate,
+        hashRate,
         confirmations,
         B,
         o,
@@ -70,10 +70,10 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
 
                     <li className="attack-summary__list-item">
                         <div className="attack-summary__text">
-                            Attacker's percentage of the total hashrate
+                            Attacker's percentage of the total hash rate
                         </div>
                         <div className="attack-summary__result">
-                            {hashrate}%
+                            {hashRate}%
                         </div>
                     </li>
 

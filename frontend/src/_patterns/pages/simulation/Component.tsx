@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IConfiguration, Strategies } from '../../../common/types';
+import { IConfiguration, IStrategy, Strategies } from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
 import AttackSummary from '../../molecules/attack-summary/Component';
@@ -50,7 +50,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
         }
       }
     }
-
     return multi;
   }
 
@@ -81,7 +80,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   }
 
   private static timeBetweenBlocks(simulationPayload: any) {
-    const multi: any[][] = [['Blocks', 'Time (in minute)'], [1, 0]];
+    const multi: any[][] = [['Blocks', 'Time'], [1, 0]];
 
     for (let i = 1; i < simulationPayload.events.length; i += 1) {
       if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
@@ -101,13 +100,11 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
         multi.push([event.level + 1, event.transactionPoolSize]);
       }
     }
-
     return multi;
   }
 
   constructor(props: ISimulationProps) {
     super(props);
-
     this.state = { moveIntoViewPort: false, isFetching: false };
     this.handleSelectIndex = this.handleSelectIndex.bind(this);
     this.fetchEvents = this.fetchEvents.bind(this);
@@ -165,6 +162,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 selectedIndex={selectedIndex}
                                 onSelectIndex={this.handleSelectIndex}
                                 moveIntoViewPort={moveIntoViewPort}
+                                strategy={this.props.strategy}
                             />
                         </div>
                     </div>
@@ -198,7 +196,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         )}
                     </div>
 
-                    {this.props.hashrate > 0 ?
+                    {this.props.hashRate > 0 ?
                         <div className="attack__grid">
                             <div className="attack__summary u-plate">
                                 <div className="attack-summary__title">
@@ -210,7 +208,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         successfulAttackInBlocks={simulationPayload.successfulAttackInBlocks}
                                         probabilityOfSuccessfulAttack={simulationPayload.probabilityOfSuccessfulAttack}
                                         maximumSafeTransactionValue={simulationPayload.maximumSafeTransactionValue}
-                                        hashrate={this.props.hashrate}
+                                        hashRate={this.props.hashRate}
                                         confirmations={this.props.confirmations}
                                         B={simulationPayload.B}
                                         o={simulationPayload.o}
@@ -256,13 +254,15 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         },
                                       },
                                       vAxis: {
-                                        title: 'Time',
+                                        title: 'Time (in Minutes)',
                                       },
                                       series: {
                                         1: { curveType: 'function' },
                                       },
                                       legend: 'none',
-                                      tooltip: {},
+                                      tooltip: {
+                                        isHtml: true,
+                                      },
                                     }}
                                     graph_id="Time Between Blocks LineChart"
                                     width="100%"
@@ -297,7 +297,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         1: { curveType: 'function' },
                                       },
                                       legend: 'none',
-                                      tooltip: {},
+                                      tooltip: {
+                                        isHtml: true,
+                                      },
                                     }}
                                     graph_id="Pending Transactions AreaChart"
                                     width="100%"
@@ -333,7 +335,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       },
                                       legend: { position: 'bottom' },
                                       focusTarget: 'category',
-                                      tooltip: {},
+                                      tooltip: {
+                                        isHtml: true,
+                                      },
                                     }}
                                     graph_id="Processed Transactions LineChart"
                                     width="100%"
@@ -364,7 +368,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         1: { curveType: 'function' },
                                       },
                                       focusTarget: 'category',
-                                      tooltip: {},
+                                      tooltip: {
+                                        isHtml: true,
+                                      },
                                       legend: { position: 'bottom' },
                                       colors: ['#9ACD32', '#FF0000'],
                                     }}
@@ -397,7 +403,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         1: { curveType: 'function' },
                                       },
                                       focusTarget: 'category',
-                                      tooltip: {},
+                                      tooltip: {
+                                        isHtml: true,
+                                      },
                                       legend: { position: 'none' },
                                     }}
                                     graph_id="Confirmation Time AreaChart"
@@ -459,6 +467,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             selectedIndex={selectedIndex}
                             onSelectIndex={this.handleSelectIndex}
                             moveIntoViewPort={moveIntoViewPort}
+                            strategy={this.props.strategy}
                         />
                     </div>
                 </div>

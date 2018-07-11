@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IBlockMine, IBlockTransfer, EventTypes } from './types';
+import { EventTypes, IBlockMine, IBlockTransfer } from './types';
 import blockIcon from '../../../styles/svg/box.svg';
 import transferIcon from '../../../styles/svg/send.svg';
 
@@ -8,6 +8,7 @@ interface ISimulationEventsProps {
   onSelectIndex: (selectedIndex: number, moveIntoViewPort: boolean) => void;
   selectedIndex?: number;
   moveIntoViewPort: boolean;
+  strategy: string;
 }
 
 const renderEvent = (
@@ -15,9 +16,11 @@ const renderEvent = (
   key: number,
   onSelectIndex: (index: number) => void,
   moveElementWithinViewport: (element: HTMLElement | null) => void,
+  strategy: string,
   selectedIndex?: number,
 ) => {
   let className = 'simulation-events__list-item ';
+  const tzoffset = (new Date()).getTimezoneOffset() * 60000; // offset in milliseconds
 
   if (selectedIndex === key) {
     className += 'simulation-events__list-item--active';
@@ -44,7 +47,7 @@ const renderEvent = (
             </span>
           </span>
           <div className="simulation-events__list-time">
-            {new Date(event.timestamp).toISOString().slice(-13).slice(0, -1)}
+              {new Date(new Date(event.timestamp).getTime() - tzoffset).toISOString().slice(-13).slice(0, -1)}
           </div>
         </li>
       );
@@ -65,11 +68,16 @@ const renderEvent = (
               <use xlinkHref={`#${blockIcon.id}`} />
             </svg>
             <span>
-              Block mined from node {event.origin.id.slice(0, 8)}
+                {(event.isMalicious && strategy === 'BITCOIN_LIKE_BLOCKCHAIN') ?
+                    'Block at level ' + (event.level + 1) + ' mined from \n' +
+                    ' malicious node ' + event.origin.id.slice(0, 8)
+                    : strategy === 'BITCOIN_LIKE_BLOCKCHAIN' ?
+                        'Block at level ' + (event.level + 1) + ' mined from node ' + event.origin.id.slice(0, 8)
+                        : 'Block mined from node ' + event.origin.id.slice(0, 8)}
             </span>
           </span>
           <div className="simulation-events__list-time">
-            {new Date(event.timestamp).toISOString().slice(-13).slice(0, -1)}
+            {new Date(new Date(event.timestamp).getTime() - tzoffset).toISOString().slice(-13).slice(0, -1)}
           </div>
         </li>
       );
@@ -86,7 +94,11 @@ export default class SimulationEvents extends React.Component<ISimulationEventsP
   }
 
   public render() {
-    const { events, selectedIndex } = this.props;
+    const {
+            events,
+            selectedIndex,
+            strategy,
+        } = this.props;
 
     let date = null;
 
@@ -103,7 +115,7 @@ export default class SimulationEvents extends React.Component<ISimulationEventsP
 
         <ul className="simulation-events__list">
           {events && events.map((event, index) =>
-            renderEvent(event, index, this.selectIndex, this.moveElementWithinViewport, selectedIndex))
+            renderEvent(event, index, this.selectIndex, this.moveElementWithinViewport, strategy, selectedIndex))
           }
         </ul>
 

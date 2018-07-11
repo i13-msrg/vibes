@@ -100,10 +100,10 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       title: 'Confirmations an attacked merchant is waiting for',
     },
     {
-      configurationKey: 'hashrate',
+      configurationKey: 'hashRate',
       icon: networkIcon,
-      placeholder: 'Attacker\'s hashrate',
-      title: 'Attacker\'s percentage of total Hashrate',
+      placeholder: 'Attacker\'s hash rate',
+      title: 'Attacker\'s percentage of total hash rate',
     },
   ];
 

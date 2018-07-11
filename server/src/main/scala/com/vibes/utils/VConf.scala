@@ -9,6 +9,7 @@ object VConf {
   var numberOfNeighbours = 4
   var throughPut = 10 // average number of transactions per blockTime
   var transactionSize = 250 // kb
+  var simulationStart: DateTime = DateTime.now
   var simulateUntil: DateTime = DateTime.now.plusHours(3)
   var blockPropagationDelay = 900 // ms (latency + transfer + verification time)
   var transactionPropagationDelay = 150 // ms
@@ -24,10 +25,10 @@ object VConf {
 
   // variables for Alternative History Attack
   var isAlternativeHistoryAttack = false
-  var hashRate = 30 // Attacker's hashrate in percentage of total network
+  var hashRate = 30 // Attacker's hash rate in percentage of total network
   var confirmations = 4 // Confirmations the attacked Merchant is waiting for
 
-  // todo following attack parameter could be made into input parameter
+  // todo following attack parameter could be made into input parameters
   var attackDuration = 20 // attacker gives up after x blocks, in the original paper the attack duration is 20
   var discountOnStolenGoods = 1 // discount of stolen goods, 1=no discount
   var amountOfAttackedMerchants = 5 // attack carried out against k merchants

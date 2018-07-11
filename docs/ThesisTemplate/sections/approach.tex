@@ -1,8 +1,11 @@
 \chapter{Approach}\label{chapter:approach}
 In this chapter the changes to the existing VIBES framework are presented one by one. First the reasons for each improvement are described. Then the prerequisites for every change and the design and architecture are shown. Finally the implementation is explained. Part of the implementation is the implementation of the front-end. The front-end shows the results of the back-end and can therefore also be used for the evaluation.
 
+where to put bugfixes?
+
 \section{Bitcoin-like Blockchain Simulation}
 changes necessary to differentiate strategies
+especially in the front-end
 
 \section{Lazy Logging}
 Previously logging only occurred in the console. This made debugging for long simulations difficult. Especially for the evaluation of any implementations a log file is necessary. For this reason the Scala modules \textit{logback} and \textit{scala-logging} were integrated into the project. Every important event is logged into \textit{/logfile.log}.
@@ -72,7 +75,7 @@ To simulate an alternative history attack additional \textbf{configuration param
 
 \begin{itemize}
 \item \textit{isAlternativeHistoryAttack}: if an alternative history attack is simulated as a boolean
-\item \textit{hashrate}: attacker's hashrate as a percentage of the total hashrate of the Bitcoin Network
+\item \textit{hashRate}: attacker's hashRate as a percentage of the total hashRate of the Bitcoin Network
 \item \textit{confirmations}: the amount of confirmations the attacked merchants are waiting for to accept a transaction
 \item \textit{attackDuration}: the attacker gives up after mining a certain amount of blocks and not succeeding or if it is not possible any more to surpass the level of the honest blockchain
 \item \textit{discountOnStolenGoods}: discount of the stolen goods by the attacker, a value from 0 (= full discount) to 1 (= no discount)
@@ -86,7 +89,7 @@ To simulate an alternative history attack additional \textbf{configuration param
 
 In the following the attacker's nodes, blockchain or blocks are interchangeably described as \textit{evil} and the honest networks' nodes as \textit{good}.\linebreak
 
-The solution for the simulation of an alternative history attack selects nodes as attacking nodes according to the attacker's hashrate as a percentage of the total Bitcoin Network.
+The solution for the simulation of an alternative history attack selects nodes as attacking nodes according to the attacker's hashRate as a percentage of the total Bitcoin Network.
 The good and the evil nodes both can mine the genesis block. The genesis block is then the first block in both the good and the evil blockchain. For simplicity we assume that the attacker successfully sent the transactions to the attacked merchants in the second block of the honest blockchain. Immediately after the genesis block is mined, the evil nodes start mining together on their own evil blockchain. It is necessary for all nodes to update their neighbour nodes to only have their corresponding nodes as neighbours. For example in the case of a low amount of evil nodes and a low amount of neighbours... Since the attacker of course doesn't want his...\linebreak
 
 Finally the success of the simulated attack is decided if the attacker's blockchain level can surpass the honest's blockchain level after waiting for the Merchants confirmation and before the attack duration ends.
@@ -124,6 +127,7 @@ The formula for $q < p$ is transformed for the implementation. This allows the u
 \end{equation}
 
 \subsubsection{Calculating the maximal safe transaction value  \cite{doublespending}}
+
 
 \eqref{eq:successProbability}
 

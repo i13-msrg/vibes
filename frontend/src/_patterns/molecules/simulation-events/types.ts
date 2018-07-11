@@ -15,6 +15,7 @@ export interface IBlockMine {
   origin: INode;
   transactionPoolSize: number;
   level: number;
+  isMalicious: boolean;
 }
 
 export interface IBlockTransfer {

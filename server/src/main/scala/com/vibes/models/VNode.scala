@@ -1,14 +1,16 @@
 package com.vibes.models
 
 import java.util.UUID
+
 import akka.actor.ActorRef
 import com.vibes.utils.{VConf, VExecution}
 import io.circe.{Encoder, Json}
 import org.joda.time.DateTime
+
 import scala.util.Random
 import scala.util.hashing.MurmurHash3
 
-class VNode(
+class VNode (
   val id: String,
   val actor: ActorRef,
   val blockchain: List[VBlock],
