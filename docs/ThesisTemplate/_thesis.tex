@@ -36,6 +36,11 @@
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{bat-bg}{rgb}{.16,.19,.2}
+\definecolor{bat-norm}{rgb}{.9,.9,.9}
+\definecolor{bat-comm}{rgb}{.4,.45,.48}
+\definecolor{bat-kw}{rgb}{.57,.78,.39}
+\definecolor{bat-str}{rgb}{.2,.38,.62}
 \usepackage[autostyle]{csquotes}
 \usepackage{subcaption}
 \usepackage[ruled,lined,linesnumbered, noend]{algorithm2e}
@@ -47,6 +52,7 @@
 \usepackage[toc,page]{appendix}
 \usepackage{CJKutf8}
 \usepackage{longtable}
+\usepackage{adjustbox}
 
 \lstdefinestyle{myScalastyle}{
   frame=tb,
@@ -65,6 +71,18 @@
   breaklines=true,
   breakatwhitespace=true,
   tabsize=3,
+}
+
+\lstdefinestyle{batch}{
+    language={[WinXP]command.com},
+    commentstyle=\color{bat-comm},
+    keywordstyle=\color{bat-kw},
+    keywords=[2]{@},
+    keywords=[3]{\%1,\%~2,\%3,\%4, \%params\%, \%url\%, \%redirect\%},
+    keywords=[4]{curl},
+    keywordstyle=[2]\color{bat-at},
+    keywordstyle=[3]\color{bat-str},
+    keywordstyle=[4]\color{bat-cmd} 
 }
 
 \setlength{\extrarowheight}{10pt}

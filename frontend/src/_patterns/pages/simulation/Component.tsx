@@ -80,7 +80,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   }
 
   private static timeBetweenBlocks(simulationPayload: any) {
-    const multi: any[][] = [['Blocks', 'Time'], [1, 0]];
+    const multi: any[][] = [['Blocks', 'Time'], [1,
+      (new Date(simulationPayload.events[0].timestamp).getTime() -
+            new Date(simulationPayload.simulationStart).getTime()) / 1000 / 60]];
 
     for (let i = 1; i < simulationPayload.events.length; i += 1) {
       if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
@@ -153,6 +155,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                     totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
                                     orphans={simulationPayload.orphans}
+                                    tps={simulationPayload.tps}
+                                    strategy={this.props.strategy}
+                                    avgBlockTime={simulationPayload.avgBlockTime}
+                                    maxTransactionsPerBlock={simulationPayload.maxTransactionsPerBlock}
                                 />
                             )}
                         </div>
@@ -212,8 +218,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                         confirmations={this.props.confirmations}
                                         B={simulationPayload.B}
                                         o={simulationPayload.o}
-                                        α={simulationPayload.α}
+                                        alpha={simulationPayload.alpha}
                                         k={simulationPayload.k}
+                                        goodBlockchainLength={simulationPayload.goodBlockchainLength}
+                                        maliciousBlockchainLength={simulationPayload.maliciousBlockchainLength}
                                     />
                                 )}
                             </div>
@@ -458,6 +466,10 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                 totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
                                 orphans={simulationPayload.orphans}
+                                tps={simulationPayload.tps}
+                                strategy={this.props.strategy}
+                                avgBlockTime={simulationPayload.avgBlockTime}
+                                maxTransactionsPerBlock={simulationPayload.maxTransactionsPerBlock}
                             />
                         )}
                     </div>
@@ -525,7 +537,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
 
       for (const event of simulationPayload.events) {
         if (event.eventType === EventTypes.IBlockMine) {
-          multi.push([event.level + 1, event.processedTransactions, simulationPayload.maxProcessedTransactions]);
+          multi.push([event.level + 1, event.processedTransactions, simulationPayload.maxTransactionsPerBlock]);
         }
       }
     } else if (this.props.strategy === Strategies.GENERIC_SIMULATION) {

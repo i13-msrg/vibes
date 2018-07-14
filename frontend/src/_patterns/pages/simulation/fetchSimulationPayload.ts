@@ -16,6 +16,7 @@ export interface ISimulationPayload {
   timesNoOutliers90: number | null;
   firstBlockNumberOfRecipients: number;
   lastBlockNumberOfRecipients: number;
+  maxTransactionsPerBlock: number;
   transactions: (ITransaction)[];
   totalNumberOfNodes: number;
   orphans: number;
@@ -28,8 +29,11 @@ export interface ISimulationPayload {
   attackDuration: number;
   B: number;
   o: number;
-  α: number;
+  alpha: number;
   k: number;
+  tps: number;
+  avgBlockTime: number;
+  simulationStart: string;
 }
 
 export default function fetchSimulationPayload(configuration: IConfiguration): Promise<ISimulationPayload> {

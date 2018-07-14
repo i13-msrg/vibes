@@ -1,5 +1,5 @@
 declare module '*.svg' {
-  var svg: {
+  const svg: {
     viewBox: string,
     id: string,
     content: string,
@@ -9,6 +9,6 @@ declare module '*.svg' {
 }
 
 declare module '*.css' {
-  var css: any;
+  const css: any;
   export default css;
 }

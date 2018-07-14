@@ -58,7 +58,7 @@ case class ReducerIntermediateResult(
   timesAvgNoOutliers: (Float, Float, Float),
   firstBlockNumberOfRecipients: Int,
   lastBlockNumberOfRecipients: Int,
-  maxProcessedTransactions: Int,
+  maxTransactionsPerBlock: Int,
   transactions: List[VTransaction],
   orphans: Int,
   attackSucceeded: Int,
@@ -70,8 +70,11 @@ case class ReducerIntermediateResult(
   attackDuration: Int,
   B: Double,
   o: Int,
-  α: Int,
-  k: Int
+  alpha: Int,
+  k: Int,
+  tps: Double,
+  avgBlockTime: Int,
+  simulationStart: String
 )
 
 object ReducerActor extends LazyLogging {
@@ -167,8 +170,11 @@ object ReducerActor extends LazyLogging {
 
     logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
-    val maxProcessedTransactions = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
-    logger.debug(s"MAXIMUM POSSIBLE TRANSACTIONS PER BLOCK... $maxProcessedTransactions")
+    var maxTransactionsPerBlock = 2147483647
+      if (VConf.transactionSize != 0) {
+      maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
+    }
+    logger.debug(s"MAXIMUM POSSIBLE TRANSACTIONS PER BLOCK... $maxTransactionsPerBlock")
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty
@@ -187,14 +193,18 @@ object ReducerActor extends LazyLogging {
 
 
     var tps: Double = longestChainNumberTransactions.toDouble / secondsBetween(VConf.simulationStart, VConf.simulateUntil).getSeconds.toDouble
-    tps = (math rint tps * 100000) / 1000
+    tps = (math rint tps * 100) / 100
     logger.debug(s"TPS... $tps")
 
-    val avgBlockTime: Double = secondsBetween(VConf.simulationStart, longestChain.head.timestamp).getSeconds.toDouble / longestChain.size
+    val avgBlockTimeDouble: Double = secondsBetween(VConf.simulationStart, longestChain.head.timestamp).getSeconds.toDouble / longestChain.size
+    val avgBlockTime: Int = (math rint avgBlockTimeDouble).toInt
     logger.debug(s"AVG BLOCK TIME... $avgBlockTime... SHOULD BE ${VConf.blockTime}")
 
     val orphans = blocks.size - longestChainLength
     logger.debug(s"ORPHANS... $orphans")
+
+    val simulationStart: String = VConf.simulationStart.toString()
+    logger.debug(s"SIMULATION START... $simulationStart")
 
     var successfulAttackInBlocks = 0
     var probabilityOfSuccessfulAttack : Double = 0
@@ -204,7 +214,7 @@ object ReducerActor extends LazyLogging {
     var attackDuration = 0
     var B: Double = 0
     var o = 0
-    var α = 0
+    var alpha = 0
     var k = 0
 
     var attackSucceeded = 0
@@ -233,10 +243,10 @@ object ReducerActor extends LazyLogging {
       // calculation of the maximum safe transaction value
       B = VConf.blockReward
       o = VConf.attackDuration
-      α = VConf.discountOnStolenGoods
+      alpha = VConf.discountOnStolenGoods
       k = VConf.amountOfAttackedMerchants
       attackDuration = VConf.attackDuration
-      maximalSafeTransactionValue = ((o * (1 - r) * B) / (k * (α + r - 1))).toInt
+      maximalSafeTransactionValue = ((o * (1 - r) * B) / (k * (alpha + r - 1))).toInt
       logger.debug(s"MAXIMAL SAFE TRANSACTION VALUE... $maximalSafeTransactionValue")
 
       if (VConf.attackFailed) {
@@ -264,7 +274,7 @@ object ReducerActor extends LazyLogging {
       timesAvgNoOutliers,
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
-      maxProcessedTransactions,
+      maxTransactionsPerBlock,
       transactions,
       orphans,
       attackSucceeded,
@@ -276,8 +286,11 @@ object ReducerActor extends LazyLogging {
       attackDuration,
       B,
       o,
-      α,
-      k
+      alpha,
+      k,
+      tps,
+      avgBlockTime,
+      simulationStart
     )
   }
 }

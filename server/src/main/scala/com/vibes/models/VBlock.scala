@@ -93,7 +93,7 @@ object VBlock extends LazyLogging {
     var maxTransactionsPerBlock : Int = 0
     var processedTransactionsInBlock: Set[VTransaction] = Set.empty
 
-    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.transactionSize != 0) {
       // todo think about if to implement SegWit (maxBlockWeight vs maxBlockSize)
       maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
 

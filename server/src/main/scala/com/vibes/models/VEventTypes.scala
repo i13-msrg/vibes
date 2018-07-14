@@ -57,7 +57,7 @@ case class ReducerResult(
   timesNoOutliers90: Float,
   firstBlockNumberOfRecipients: Int,
   lastBlockNumberOfRecipients: Int,
-  maxProcessedTransactions: Int,
+  maxTransactionsPerBlock: Int,
   transactions: List[Json],
   totalNumberOfNodes: Int,
   orphans: Int,
@@ -70,8 +70,11 @@ case class ReducerResult(
   attackDuration: Int,
   B: Double,
   o: Int,
-  α: Int,
-  k: Int
+  alpha: Int,
+  k: Int,
+  tps: Double,
+  avgBlockTime: Int,
+  simulationStart: String
 )
 
 object ReducerResult {

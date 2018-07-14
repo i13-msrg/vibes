@@ -18,6 +18,7 @@ import com.vibes.utils.VConf
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.syntax._
 import org.joda.time.DateTime
+
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future, Promise}
 import scala.language.postfixOps
@@ -181,7 +182,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.timesAvgNoOutliers._3,
                               intermediateResult.firstBlockNumberOfRecipients,
                               intermediateResult.lastBlockNumberOfRecipients,
-                              intermediateResult.maxProcessedTransactions,
+                              intermediateResult.maxTransactionsPerBlock,
                               transactionsJson,
                               VConf.numberOfNodes,
                               intermediateResult.orphans,
@@ -194,8 +195,11 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.attackDuration,
                               intermediateResult.B,
                               intermediateResult.o,
-                              intermediateResult.α,
-                              intermediateResult.k
+                              intermediateResult.alpha,
+                              intermediateResult.k,
+                              intermediateResult.tps,
+                              intermediateResult.avgBlockTime,
+                              intermediateResult.simulationStart
                             )
                           })) { extraction =>
                           lock = false

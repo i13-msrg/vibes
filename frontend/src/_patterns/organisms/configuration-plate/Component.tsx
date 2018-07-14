@@ -11,6 +11,8 @@ import networkIcon from '../../../styles/svg/activity.svg';
 import maxBlockIcon from '../../../styles/svg/x-square.svg';
 import transactionSizeIcon from '../../../styles/svg/transactionSize.svg';
 import transactionsPerBlockIcon from '../../../styles/svg/transactionsPerBlock.svg';
+import threequarterIcon from '../../../styles/svg/threequarter.svg';
+import speedometerIcon from '../../../styles/svg/speedometer.svg';
 import { ConfigurationKey, IConfiguration, ISvg } from '../../../common/types';
 
 interface IConfigurationPlateProps {
@@ -95,13 +97,13 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
   private gridInputsBitcoinAlternativeHistoryAttack: IGridInput[] = [
     {
       configurationKey: 'confirmations',
-      icon: maxBlockIcon,
+      icon: threequarterIcon,
       placeholder: 'Confirmations',
       title: 'Confirmations an attacked merchant is waiting for',
     },
     {
       configurationKey: 'hashRate',
-      icon: networkIcon,
+      icon: speedometerIcon,
       placeholder: 'Attacker\'s hash rate',
       title: 'Attacker\'s percentage of total hash rate',
     },
@@ -117,60 +119,73 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
 
     if (configuration.strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
       return (
-            <div className="configuration-plate u-plate">
-                <div className="configuration-plate__title">
-                    Configure Options
-                </div>
-                <div className="configuration-plate__content">
-                    <div className="configuration-plate__grid">
-                        {this.gridInputs.map(item =>
+                <div className="configuration-plate u-plate">
+                    <div className="configuration-plate__title">
+                        Configure Options
+                    </div>
+                    <div className="configuration-plate-bitcoin__content">
+                        <div className="configuration-plate-options__title">
+                            Generic Blockchain Options
+                        </div>
+                        <div className="configuration-plate-bitcoin__grid">
+                            {this.gridInputs.map(item =>
+                                <ConfigurationInput
+                                    key={item.configurationKey}
+                                    placeholder={item.placeholder}
+                                    type="number"
+                                    configurationKey={item.configurationKey}
+                                    onConfigurationChange={this.handleConfigurationChange}
+                                    icon={item.icon}
+                                    value={configuration[item.configurationKey]}
+                                    title={item.title}
+                                />,
+                            )}
                             <ConfigurationInput
-                                key={item.configurationKey}
-                                placeholder={item.placeholder}
-                                type="number"
-                                configurationKey={item.configurationKey}
+                                placeholder="Simulate until"
+                                type="datetime-local"
+                                configurationKey="simulateUntil"
                                 onConfigurationChange={this.handleConfigurationChange}
-                                icon={item.icon}
-                                value={configuration[item.configurationKey]}
-                                title={item.title}
-                            />,
-                        )}
-                        <ConfigurationInput
-                            placeholder="Simulate until"
-                            type="datetime-local"
-                            configurationKey="simulateUntil"
-                            onConfigurationChange={this.handleConfigurationChange}
-                            icon={calendarIcon}
-                            value={configuration.simulateUntil}
-                            title="Simulate until"
-                        />
-                        {this.gridInputsBitcoin.map(item =>
-                            <ConfigurationInput
-                                key={item.configurationKey}
-                                placeholder={item.placeholder}
-                                type="number"
-                                configurationKey={item.configurationKey}
-                                onConfigurationChange={this.handleConfigurationChange}
-                                icon={item.icon}
-                                value={configuration[item.configurationKey]}
-                                title={item.title}
-                            />,
-                        )}
-                        {this.gridInputsBitcoinAlternativeHistoryAttack.map(item =>
-                            <ConfigurationInput
-                                key={item.configurationKey}
-                                placeholder={item.placeholder}
-                                type="number"
-                                configurationKey={item.configurationKey}
-                                onConfigurationChange={this.handleConfigurationChange}
-                                icon={item.icon}
-                                value={configuration[item.configurationKey]}
-                                title={item.title}
-                            />,
-                        )}
+                                icon={calendarIcon}
+                                value={configuration.simulateUntil}
+                                title="Simulate until"
+                            />
+                        </div>
+                        <div className="configuration-plate-options__title">
+                            Bitcoin-like Blockchain specific Options
+                        </div>
+                        <div className="configuration-plate-bitcoin__grid">
+                            {this.gridInputsBitcoin.map(item =>
+                                <ConfigurationInput
+                                    key={item.configurationKey}
+                                    placeholder={item.placeholder}
+                                    type="number"
+                                    configurationKey={item.configurationKey}
+                                    onConfigurationChange={this.handleConfigurationChange}
+                                    icon={item.icon}
+                                    value={configuration[item.configurationKey]}
+                                    title={item.title}
+                                />,
+                            )}
+                        </div>
+                        <div className="configuration-plate-options__title">
+                            Double-Spending Options
+                        </div>
+                        <div className="configuration-plate-bitcoin__grid">
+                            {this.gridInputsBitcoinAlternativeHistoryAttack.map(item =>
+                                <ConfigurationInput
+                                    key={item.configurationKey}
+                                    placeholder={item.placeholder}
+                                    type="number"
+                                    configurationKey={item.configurationKey}
+                                    onConfigurationChange={this.handleConfigurationChange}
+                                    icon={item.icon}
+                                    value={configuration[item.configurationKey]}
+                                    title={item.title}
+                                />,
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
       );
     }
     return (

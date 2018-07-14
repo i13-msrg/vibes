@@ -9,8 +9,10 @@ interface IAttackSummaryProps {
   confirmations: number | null;
   B: number | null;
   o: number | null;
-  α: number | null;
+  alpha: number | null;
   k: number | null;
+  goodBlockchainLength: number;
+  maliciousBlockchainLength: number;
 }
 
 export default class AttackSummary extends React.Component<IAttackSummaryProps, {}> {
@@ -25,8 +27,10 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
         confirmations,
         B,
         o,
-        α,
+        alpha,
         k,
+        goodBlockchainLength,
+        maliciousBlockchainLength,
     } = this.props;
 
     return (
@@ -109,7 +113,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                             Discount on stolen goods
                         </div>
                         <div className="attack-summary__result">
-                            {α}
+                            {alpha}
                         </div>
                     </li>
 
@@ -139,6 +143,28 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                             {maximumSafeTransactionValue} BTC
                         </div>
                     </li>
+
+                    {(() => {
+                      if (goodBlockchainLength > maliciousBlockchainLength) {
+                        return <li className="attack-summary__list-item">
+                                <div className="attack-summary__text">
+                                    Orphan blocks due to attack (at least)
+                                </div>
+                                <div className="attack-summary__result">
+                                    {maliciousBlockchainLength - 1} Blocks
+                                </div>
+                            </li>;
+                      }
+                      return <li className="attack-summary__list-item">
+                                <div className="attack-summary__text">
+                                    Orphan blocks due to attack (at least)
+                                </div>
+                                <div className="attack-summary__result">
+                                    {goodBlockchainLength - 1} Blocks
+                                </div>
+                            </li>;
+
+                    })()}
 
                 </ul>
             </div>

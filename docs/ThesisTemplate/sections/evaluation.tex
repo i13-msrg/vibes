@@ -2,3 +2,109 @@
 \label{chapter:evaluation}
 
 The evaluation chapter.
+
+\section{Correctness}
+
+The evaluation of the correctness of the Simulator's front-end output is essential. By validating the output of the front-end we also validate the output of the back-end.\linebreak
+
+Some parts of the evaluations are sample testing for consistency between the input parameters, expected and simulated or calculated output. Other parts are empirical tested.\linebreak
+
+For the calculation of the probability of a successful double spend and the maximal safe transaction value sample testing is used. For validating the success probability of simulated double spends empirical testing is applied.
+
+\subsection{Calculation of the probability of a successful double spend}
+\label{subsection:evalCalcDoubleSpending}
+
+The probability of a successful double spend is tested with five samples and the results are compared to the figure \ref{fig:doubleSpend} from the original paper \cite{doublespending}.\linebreak
+
+The edge cases q = 2\% and n = 1, q = 50\% and n = 1, q = 2\% and n = 10 and q = 2\% and n = 10 are tested as well as the common case of q = 30\% and n = 6.\linebreak
+
+All mentioned test cases of figure \ref{fig:testCases} match the expected result.
+
+... table comparing both
+
+\begin{figure}[H]
+\centering
+
+\subcaptionbox{Sample with input: q = 2\% and n = 1}{\includegraphics[width=0.4\textwidth]{"figures/Testing/q 2 n 1".PNG}}%
+\hfill % <-- Separation
+\subcaptionbox{Sample with input: q = 2\% and n = 10}{\includegraphics[width=0.4\textwidth]{"figures/Testing/q 2 n 10".PNG}}%
+\hfill % <-- Separation
+
+\vskip\baselineskip
+
+\subcaptionbox{Sample with input: q = 50\% and n = 1}{\includegraphics[width=0.4\textwidth]{"figures/Testing/q 50 n 1".PNG}}%
+\hfill % <-- Separation
+\subcaptionbox{Sample with input: q = 50\% and n = 10}{\includegraphics[width=0.4\textwidth]{"figures/Testing/q 50 n 10".PNG}}%
+\hfill % <-- Separation
+
+\vskip\baselineskip
+
+\subcaptionbox{Sample with input: q = 30\% and n = 6}{\includegraphics[width=0.4\textwidth]{"figures/Testing/q 30 n 6".PNG}}%
+\hfill % <-- Separation
+
+\caption{Samples for the testing of the calculation of the success probability of double-spending\label{fig:testCases}}
+
+\end{figure}
+
+The probability for the test case (e) with q = 30\% and n = 6 is used in Chapter \ref{subsection:evalDoubleSpending}.
+
+\subsection{Calculation of the maximal safe transaction value}
+
+For testing the maximal safe transaction value the samples from the evaluation of the successful double spend probability are reused and compared to the figure \ref{fig:maximalSafeTransactionValue} from the ... paper \cite{doublespending}.\linebreak
+
+The additional input parameters were:
+
+\begin{itemize}
+\item Attack duration: 20 Blocks
+\item Discount on stolen goods: 1
+\item Attacked merchants: 5
+\item Block reward: 12.5 BTC
+\end{itemize}
+
+Compared to the original paper the block reward was updated from 25 BTC to the current block reward of 12.5 BTC. This means the maximal safe transaction values need to be doubled to compare them with the correct values.\newline
+
+All test cases of figure \ref{fig:testCases} match the expected result, except for (a) and (b). (a) is off by one due to rounding. The correct result of (b) is infinite BTC, the front-end shows the maximal 32-bit signed integer value of 2,147,483,647 BTC.
+
+... table comparing both
+
+\subsection{Simulation of double-spending: success probability}
+\label{subsection:evalDoubleSpending}
+
+For the empirical testing of double-spending the following script was used. It starts the simulation, waits for a certain time to let the simulation finish and repeats this for a total of 100 times.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=batch]
+ECHO Start of Loop
+
+FOR /L %%i IN (1,1,100) DO (
+  ECHO %%i
+  start chrome "http://localhost:8082/vibe?blockTime=567&numberOfNeighbours=4&numberOfNodes=20&simulateUntil=1531411943382&transactionSize=1&throughput=105&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=100&maxBlockWeight=4000&networkBandwidth=1&strategy=BITCOIN_LIKE_BLOCKCHAIN&transactionPropagationDelay=150&hashRate=30&confirmations=6"
+  timeout /t 40
+)
+\end{lstlisting}
+\end{minipage}
+
+\textbf{Information for replication:} New features might make additional parameters in the URL necessary.
+
+\begin{table}[ht]
+
+\begin{adjustbox}{width=1\textwidth}
+    \begin{tabular}{| l | l | l | l |}
+    \hline
+    \textbf{Outcome} & \textbf{Occurrences} & \textbf{Simulated probability} & \textbf{Expected probability} \\ \hline
+    ATTACK NEITHER SUCCESSFUL NOR FAILED & 45 & - & - \\ \hline
+    ATTACK SUCCESSFUL & 8 & 15.09\% & 15.645\% \\ \hline
+    ATTACK FAILED & 47 & 84.91\% & 84.355\% \\ \hline
+    \textbf{TOTAL} & \textbf{100} & \textbf{100\%} & \textbf{100\%} \\ \hline
+    \end{tabular}
+\end{adjustbox}
+    \caption{Double-spending outcomes and their simulated and expected probabilities\label{table:doubleSpendingSimulatedAndExpected}}
+\end{table} 
+
+After counting the occurrences of the outcomes in the logfile, they were summarized in the table \ref{table:doubleSpendingSimulatedAndExpected}. All simulations were finished in the specified time. The outcome "ATTACK NEITHER SUCCESSFUL NOR FAILED" can happen if the simulation time was too short. This number is ignored for the calculation of the probabilities. It is assumed that the unfinished simulations have a similar probability distribution like the finished ones. The simulated probability of the double-spending attack is with 15.09\% very close to the expected probability of 15.645\%, which was calculated in Chapter \ref{subsection:evalCalcDoubleSpending}. Hereby is shown that the simulation of double-spending has the correct success probability.
+
+\subsection{Simulation: transactions per seconds}
+
+\subsection{Simulation: transaction incentives}
+
+\subsection{Simulation of a double spend: time between blocks}
