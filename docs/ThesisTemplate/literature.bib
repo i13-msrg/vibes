@@ -1,31 +1,52 @@
-@MastersThesis{stoykov2018,
+@MastersThesis{vibes,
 author = {Stoykov, L.},
 title = {VIBES: Fast Blockchain Simulations for Large-scale Peer-to-Peer Networks},
 school = {Technische Universität München},
 year = {2018},
-OPTkey = {•},
-OPTtype = {•},
-OPTaddress = {•},
-OPTmonth = {•},
-OPTnote = {•},
-OPTannote = {•}
 }
 
-@Proceedings{sec&perf,
-author = {A. Gervais, G. K., K. Wüst, V. Glykantzis, H. Ritzdorf, and S. Capkun},
-title = {On the security and performance of proof of work blockchains},
-year = {2016},
-OPTkey = {•},
-OPTeditor = {•},
-OPTvolume = {•},
-OPTnumber = {•},
-OPTseries = {Proceedings of the 23nd ACM SIGSAC Conference on Computer and Communication Security (CCS)},
-OPTaddress = {•},
-OPTmonth = {•},
-OPTorganization = {ACM},
-OPTpublisher = {•},
-OPTnote = {•},
-OPTannote = {•}
+@inproceedings{sec&perf,
+  author    = {Arthur Gervais and
+               Ghassan O. Karame and
+               Karl W{\"{u}}st and
+               Vasileios Glykantzis and
+               Hubert Ritzdorf and
+               Srdjan Capkun},
+  title     = {On the Security and Performance of Proof of Work Blockchains},
+  booktitle = {Proceedings of the 2016 {ACM} {SIGSAC} Conference on Computer and
+               Communications Security, Vienna, Austria, October 24-28, 2016},
+  pages     = {3--16},
+  year      = {2016},
+  crossref  = {DBLP:conf/ccs/2016},
+  url       = {http://doi.acm.org/10.1145/2976749.2978341},
+  doi       = {10.1145/2976749.2978341},
+  timestamp = {Mon, 24 Oct 2016 15:38:42 +0200},
+  biburl    = {https://dblp.org/rec/bib/conf/ccs/GervaisKWGRC16},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@proceedings{DBLP:conf/ccs/2016,
+  editor    = {Edgar R. Weippl and
+               Stefan Katzenbeisser and
+               Christopher Kruegel and
+               Andrew C. Myers and
+               Shai Halevi},
+  title     = {Proceedings of the 2016 {ACM} {SIGSAC} Conference on Computer and
+               Communications Security, Vienna, Austria, October 24-28, 2016},
+  publisher = {{ACM}},
+  year      = {2016},
+  url       = {http://dl.acm.org/citation.cfm?id=2976749},
+  isbn      = {978-1-4503-4139-4},
+  timestamp = {Mon, 24 Oct 2016 15:38:42 +0200},
+  biburl    = {https://dblp.org/rec/bib/conf/ccs/2016},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@proceedings{23ndACM,
+  editor =       {},
+  title =        "Proceedings of the 23nd ACM SIGSAC Conference on Computer and Communication Security (CCS)",
+  booktitle =    "Proceedings of the 23nd ACM SIGSAC Conference on Computer and Communication Security (CCS)",
+  publisher =    {ACM}
 }
 
 @misc{gartner,
@@ -37,9 +58,116 @@ note = {Accessed: 2018-04-15},
 }
 
 @article{doublespending,
-author = {Rosenfeld, M.},
-year = {2014},
-month = {02},
-pages = {},
-title = {Analysis of Hashrate-Based Double Spending}
+  author    = {Meni Rosenfeld},
+  title     = {Analysis of Hashrate-Based Double Spending},
+  journal   = {CoRR},
+  volume    = {abs/1402.2009},
+  year      = {2014},
+  url       = {http://arxiv.org/abs/1402.2009},
+  archivePrefix = {arXiv},
+  eprint    = {1402.2009},
+  timestamp = {Wed, 07 Jun 2017 14:40:32 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/Rosenfeld14},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{weightunits,
+title = {Weight units},
+howpublished = {\url{https://en.bitcoin.it/wiki/Weight_units}},
+note = {Accessed: 2018-07-16},
+}
+
+@Unpublished{seminarPaper,
+author = {F. Schüssler and Y. Kandalaft},
+title = {Bitcoin-like Blockchain Scalability Issues and Improvements},
+note = {Seminar Paper},
+}
+
+@misc{reactgooglecharts,
+title = {React Google Charts},
+howpublished = {\url{https://github.com/RakanNimer/react-google-charts}},
+note = {Accessed: 2018-07-21},
+}
+
+@misc{reactgooglechartsissue1,
+title = {React Google Charts - Issue 197},
+howpublished = {\url{https://github.com/rakannimer/react-google-charts/issues/197
+}},
+note = {Accessed: 2018-07-21},
+}
+
+@misc{reactgooglechartsissue2,
+title = {React Google Charts - Issue 202},
+howpublished = {\url{https://github.com/rakannimer/react-google-charts/issues/202}},
+note = {Accessed: 2018-07-21},
+}
+
+@misc{tweet,
+    author = "{Vitalik Buterin}",
+    title = {{Transaction Spam}},
+    howpublished = {\url{https://twitter.com/VitalikButerin/status/1018990773042405376}},
+    note = {Accessed: 2018-07-21},
+}
+
+@misc{genesis,
+title = {Details on Genesis Block},
+howpublished = {\url{https://bitcoin.stackexchange.com/questions/18454/details-on-genesis-block}},
+note = {Accessed: 2018-07-23},
+}
+
+@inproceedings{bitcoinNG,
+ author = {Eyal, Ittay and Gencer, Adem Efe and Sirer, Emin G\"{u}n and Van Renesse, Robbert},
+ title = {Bitcoin-NG: A Scalable Blockchain Protocol},
+ booktitle = {Proceedings of the 13th Usenix Conference on Networked Systems Design and Implementation},
+ series = {NSDI'16},
+ year = {2016},
+ isbn = {978-1-931971-29-4},
+ location = {Santa Clara, CA},
+ pages = {45--59},
+ numpages = {15},
+ url = {http://dl.acm.org/citation.cfm?id=2930611.2930615},
+ acmid = {2930615},
+ publisher = {USENIX Association},
+ address = {Berkeley, CA, USA},
+} 
+
+@proceedings{13thUsenix,
+  editor =       {},
+  title =        "Proceedings of the 13th USENIX Symposium on Networked Systems Design and Implementation (NSDI ’16)",
+  booktitle =    "Proceedings of the 13th USENIX Symposium on Networked Systems Design and Implementation (NSDI ’16)",
+  publisher =    {Cornell University}
+}
+
+@inproceedings{gateway,
+  author    = {Roman Beck and
+               Jacob Stenum Czepluch and
+               Nikolaj Lollike and
+               Simon Malone},
+  title     = {Blockchain - the Gateway to Trust-Free Cryptographic Transactions},
+  booktitle = {24th European Conference on Information Systems, {ECIS} 2016, Istanbul,
+               Turkey, June 12-15, 2016},
+  pages     = {Research Paper 153},
+  year      = {2016},
+  crossref  = {DBLP:conf/ecis/2016},
+  url       = {http://aisel.aisnet.org/ecis2016\_rp/153},
+  timestamp = {Sat, 12 Nov 2016 17:38:24 +0100},
+  biburl    = {https://dblp.org/rec/bib/conf/ecis/BeckCLM16},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@proceedings{DBLP:conf/ecis/2016,
+  title     = {24th European Conference on Information Systems, {ECIS} 2016, Istanbul,
+               Turkey, June 12-15, 2016},
+  year      = {2016},
+  url       = {http://aisel.aisnet.org/ecis2016/},
+  timestamp = {Sat, 12 Nov 2016 17:38:24 +0100},
+  biburl    = {https://dblp.org/rec/bib/conf/ecis/2016},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@proceedings{ecis2016,
+  editor =       {},
+  title =        "ECIS 2016 Proceedings",
+  booktitle =    "ECIS 2016 Proceedings",
+  publisher =    {AIS Electronic Library (AISeL)}
 }

@@ -12,6 +12,7 @@ interface IConfigurationInputProps {
   configurationKey: ConfigurationKey;
   value: number | null;
   title: string;
+  strategy: string;
 }
 
 export default class ConfigurationInput extends React.Component<IConfigurationInputProps, {}> {
@@ -42,12 +43,38 @@ export default class ConfigurationInput extends React.Component<IConfigurationIn
       type,
       value,
       title,
+      strategy,
     } = this.props;
 
     let classNames = 'configuration-input ';
 
     if (className) {
       classNames += className;
+    }
+
+    if (strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
+      return (
+            <div className={classNames} title={title}>
+                <input
+                    className="configuration-bitcoin-input__input"
+                    onChange={this.handleInputChange}
+                    placeholder={placeholder}
+                    type={type}
+                    value={ConfigurationInput.convertValue(value)}
+                    name={placeholder}
+                />
+                <svg
+                    viewBox={icon.viewBox}
+                    className="configuration-bitcoin-input__icon"
+                >
+                    <use xlinkHref={`#${icon.id}`} />
+                </svg>
+                <div className="configuration-bitcoin-input__description">
+                    {placeholder}
+                </div>
+
+            </div>
+      );
     }
 
     return (

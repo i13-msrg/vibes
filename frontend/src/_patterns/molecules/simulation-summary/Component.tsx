@@ -16,10 +16,8 @@ interface ISimulationSummaryProps {
   lastBlockNumberOfRecipients: number;
   totalNumberOfNodes: number;
   orphans: number;
-  tps: number;
   strategy: string;
   avgBlockTime: number;
-  maxTransactionsPerBlock: number;
 }
 
 export default class SimulationSummary extends React.Component<ISimulationSummaryProps, {}> {
@@ -30,7 +28,6 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
       longestChainLength,
       orphans,
       longestChainSize,
-      longestChainNumberTransactions,
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
       totalNumberOfNodes,
@@ -40,10 +37,8 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
       timesNoOutliers10,
       timesNoOutliers50,
       timesNoOutliers90,
-      tps,
       strategy,
       avgBlockTime,
-      maxTransactionsPerBlock,
     } = this.props;
 
     // map(() => ... yep)
@@ -85,42 +80,10 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
                     </li>
                     <li className="simulation-summary__list-item">
                         <div className="simulation-summary__text">
-                            Blockchain size
-                        </div>
-                        <div className="simulation-summary__result">
-                            {longestChainSize} KB
-                        </div>
-                    </li>
-                    <li className="simulation-summary__list-item">
-                        <div className="simulation-summary__text">
                             Total number of nodes
                         </div>
                         <div className="simulation-summary__result">
                             {totalNumberOfNodes}
-                        </div>
-                    </li>
-                    <li className="simulation-summary__list-item">
-                        <div className="simulation-summary__text">
-                            Total number of processed transactions
-                        </div>
-                        <div className="simulation-summary__result">
-                            {longestChainNumberTransactions}
-                        </div>
-                    </li>
-                    <li className="simulation-summary__list-item">
-                        <div className="simulation-summary__text">
-                            Transactions per second
-                        </div>
-                        <div className="simulation-summary__result">
-                            {tps}
-                        </div>
-                    </li>
-                    <li className="simulation-summary__list-item">
-                        <div className="simulation-summary__text">
-                            Maximal transactions per block
-                        </div>
-                        <div className="simulation-summary__result">
-                            {maxTransactionsPerBlock}
                         </div>
                     </li>
                     <li className="simulation-summary__list-item">

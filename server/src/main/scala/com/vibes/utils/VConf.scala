@@ -40,4 +40,10 @@ object VConf {
   var evilChainLength = 0
   var attackFailed = false
   var attackSuccessfulInBlocks = 0
+
+  // SegWit
+  var transactionFee = 0 // Attacker's target transaction fee in Satoshi
+
+  // Flood Attack
+  var transactionWeight = 0 // transaction weight in weight units
 }

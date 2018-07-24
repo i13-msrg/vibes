@@ -1,6 +1,6 @@
 # Set the java args to high
 
--Xmx1024M
+-Xmx8192M
 
 -XX:ReservedCodeCacheSize=256m
 

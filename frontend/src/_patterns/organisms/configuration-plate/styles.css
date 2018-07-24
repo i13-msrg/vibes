@@ -18,6 +18,13 @@
   align-items: center;
 }
 
+.configuration-plate-bitcoin__content {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .configuration-plate__grid {
   display: grid;
   grid-template: repeat(3, 1fr) / repeat(2, 1fr);
@@ -26,17 +33,10 @@
   margin-bottom: 50px;
 }
 
-.configuration-plate-bitcoin__content {
-  margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .configuration-plate-bitcoin__grid {
   display: grid;
-  grid-template: repeat(1, 1fr) / repeat(2, 1fr);
-  grid-row-gap: 10px;
+  grid-template: repeat(1, 1fr) / repeat(3, 1fr);
+  grid-row-gap: 8px;
   grid-column-gap: 20px;
   margin-bottom: 15px;
 }

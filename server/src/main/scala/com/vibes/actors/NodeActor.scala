@@ -202,7 +202,7 @@ class NodeActor (
       if (VConf.evilChainLength > VConf.goodChainLength && VConf.goodChainLength > VConf.confirmations) {
         logger.debug(s"ATTACK IS SUCCESSFUL.....")
         VConf.attackSuccessful = true
-        VConf.attackSuccessfulInBlocks = node.blockchain.size
+        VConf.attackSuccessfulInBlocks = VConf.evilChainLength
         discoveryActor ! DiscoveryActions.AnnounceNeighbours
       }
 

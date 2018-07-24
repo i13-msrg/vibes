@@ -65,6 +65,14 @@ export interface IStrategy {
   strategy: string;
 }
 
+export interface ITransactionFee {
+  strategy: string;
+}
+
+export interface ITransactionWeight {
+  strategy: string;
+}
+
 export interface IConfiguration extends
   INumberOfNodesConfiguration,
   INumberOfNeighboursConfiguration,
@@ -80,7 +88,9 @@ export interface IConfiguration extends
   IStrategy,
   IHashRate,
   IConfirmations,
-  INeighboursDiscoveryInterval {
+  INeighboursDiscoveryInterval,
+  ITransactionFee,
+  ITransactionWeight {
   [index: string]: any | null;
 }
 

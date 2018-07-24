@@ -102,6 +102,22 @@
   grid-area: simulation-pending-transactions;
 }
 
+.simulation-processed-transactions__grid {
+  display: grid;
+  grid-row-gap: 10px;
+  grid-template-columns: 688px 313px;
+  grid-template-rows: auto;
+  grid-template-areas:
+          "simulation-processed-transactions transaction_summary"
+}
+
+.transaction__summary {
+  padding: 20px;
+  height: 300px;
+  width: 294px;
+  grid-area: transaction_summary;
+}
+
 .simulation-processed-transactions__title {
   font-size: 16px;
   font-weight: 600;
@@ -111,10 +127,9 @@
 }
 
 .simulation-processed-transactions {
-  margin: 10px auto;
   padding: 20px;
-  width: 982px;
-  height: 264px;
+  width: 631px;
+  height: 300px;
   grid-area: simulation-processed-transactions;
 }
 

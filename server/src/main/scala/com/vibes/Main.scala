@@ -66,7 +66,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
             logger.debug(s"GET...")
             get {
               logger.debug(s"WITHREQUESTTIMEOUT...")
-              withRequestTimeout(900.seconds, request => timeoutResponse) {
+              withRequestTimeout(86400.seconds, request => timeoutResponse) { // 24 hours
                 logger.debug(s"PARAMETERS...")
                 parameters(
                   (
@@ -83,7 +83,10 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                     'strategy.as[String],
                     'transactionPropagationDelay.as[Int],
                     'hashRate.as[Int],
-                    'confirmations.as[Int]
+                    'confirmations.as[Int],
+                    'transactionFee.as[Int],
+                    'transactionWeight.as[Int],
+                  'maxBlockWeight.as[Int]
                   )) {
                   (blockTime,
                    numberOfNeighbours,
@@ -98,7 +101,10 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                    strategy,
                    transactionPropagationDelay,
                    hashRate,
-                   confirmations
+                   confirmations,
+                   transactionFee,
+                   transactionWeight,
+                   maxBlockWeight
                   ) =>
                     logger.debug(s"ATTEMPT START... $lock")
                     if (!lock) {
@@ -126,8 +132,18 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         VConf.networkBandwidth = networkBandwidth
                         VConf.strategy = strategy
                         logger.debug(s"STRATEGY... $strategy")
+
                         VConf.transactionPropagationDelay = transactionPropagationDelay
                         logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay MS")
+
+                        VConf.transactionFee = transactionFee
+                        logger.debug(s"FLOOD ATTACK: TRANSACTION FEE... $transactionFee")
+
+                        VConf.transactionWeight = transactionWeight
+                        logger.debug(s"SEGWIT: TRANSACTION WEIGHT... $transactionWeight")
+
+                        VConf.maxBlockWeight = maxBlockWeight
+                        logger.debug(s"SEGWIT: MAX BLOCK WEIGHT... $maxBlockWeight")
 
                         // checks for alternative history attack
                         VConf.hashRate = hashRate
@@ -147,14 +163,14 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
 
                         val masterActor = system.actorOf(MasterActor.props(), "Master")
                         // timeout for the ask pattern
-                        implicit val timeout: Timeout = Timeout(900.seconds)
+                        implicit val timeout: Timeout = Timeout(86400.seconds) // 24 hours
 
                         val reducerIntermediateResult: Future[Promise[ReducerIntermediateResult]] =
                           ask(masterActor, MasterActions.Start).mapTo[Promise[ReducerIntermediateResult]]
 
                         logger.debug(s"reducerIntermediateResult... $reducerIntermediateResult")
 
-                        val resultIntermediateResult = Await.result(reducerIntermediateResult, 900 seconds)
+                        val resultIntermediateResult = Await.result(reducerIntermediateResult, 86400 seconds) // 24 hours
                         logger.debug(s"Await.result reducerIntermediateResult $resultIntermediateResult")
 
                         onComplete(reducerIntermediateResult.flatMap(promise =>
@@ -182,7 +198,11 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.timesAvgNoOutliers._3,
                               intermediateResult.firstBlockNumberOfRecipients,
                               intermediateResult.lastBlockNumberOfRecipients,
-                              intermediateResult.maxTransactionsPerBlock,
+                              intermediateResult.nonSegWitMaxTransactionsPerBlock,
+                              intermediateResult.segWitMaxTransactionsPerBlock,
+                              intermediateResult.nonSegWitMaxTPS,
+                              intermediateResult.segWitMaxTPS,
+                              intermediateResult.segWitMaxBlockWeight,
                               transactionsJson,
                               VConf.numberOfNodes,
                               intermediateResult.orphans,
@@ -197,7 +217,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.o,
                               intermediateResult.alpha,
                               intermediateResult.k,
-                              intermediateResult.tps,
+                              intermediateResult.actualTPS,
                               intermediateResult.avgBlockTime,
                               intermediateResult.simulationStart
                             )

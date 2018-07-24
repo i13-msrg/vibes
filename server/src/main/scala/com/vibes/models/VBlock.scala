@@ -94,10 +94,19 @@ object VBlock extends LazyLogging {
     var processedTransactionsInBlock: Set[VTransaction] = Set.empty
 
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.transactionSize != 0) {
-      // todo think about if to implement SegWit (maxBlockWeight vs maxBlockSize)
-      maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
+      // this part could be moved to Main for constant transaction weight and size to save calculations, but is necessary here for non-constant transaction weight and size
+      if (VConf.maxBlockWeight != 0 && VConf.transactionWeight != 0) {
+        // SegWit is enabled
+        maxTransactionsPerBlock = Math.floor(VConf.maxBlockWeight / VConf.transactionWeight).toInt
+      } else if (VConf.maxBlockSize != 0) {
+        // SegWit is disabled
+        // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
+        maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
+      } else {
+        maxTransactionsPerBlock = node.transactionPool.size
+      }
 
-      // sorts the transaction pool by the transaction fee
+      // sorts the transaction pool by the transaction fee and takes the amount of maxTransactionsPerBlock out of the transaction pool into the winner block
       processedTransactionsInBlock = node.transactionPool.toSeq.sortWith(_.transactionFee > _.transactionFee).take(maxTransactionsPerBlock).toSet
 
       // sets confirmation status of transaction true
@@ -117,7 +126,7 @@ object VBlock extends LazyLogging {
       level = node.blockchain.size,
       timestamp = timestamp,
       recipients = ListBuffer.empty,
-      transactionPoolSize = node.transactionPool.size
+      transactionPoolSize = node.transactionPool.size - processedTransactionsInBlock.size
     )
   }
 }

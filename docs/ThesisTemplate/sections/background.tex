@@ -4,6 +4,7 @@
 Background concepts required for understanding the thesis. 
 
 \section{Bitcoin}
+100.000.000 Satoshi = 1 Bitcoin
 \subsection{Node/ Miner}
 in this work node = miner
 \subsection{Block}
@@ -11,11 +12,27 @@ genesis block
 \subsubsection{Stale Blocks}
 \subsubsection{Orphan Blocks}
 \subsection{Block size}
+\subsection{SegWit}
 
-\section{Alternative History Attack}
+\cite{seminarPaper}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{"figures/P2wpkh-1in-2out_bytes".PNG}
+\caption{Byte map of transaction template.\label{fig:bytemap}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{"figures/P2wpkh-1in-2out_weight".PNG}
+\caption{Weight map of transaction template.\label{fig:weightmap}}
+\end{figure}
+
+\cite{weightunits}
+
+\section{Alternative History Attack\label{subsection:background:alternativhistoryattack}}
 
 \section{VIBES: Fast Blockchain Simulations for Large-scale Peer-to-Peer
 Networks}
+
 \subsection{Prerequisites}
 \subsection{The Actor Model}
 \subsection{Executables and Work Requests}
@@ -26,4 +43,6 @@ Networks}
 \subsection{Executable Types}
 \subsection{Configuration parameters}
 
-\section{Analysis of hashRate-based double-spending}
+\subsection{Summary of existing classes}
+
+\section{Analysis of hash rate-based double-spending}

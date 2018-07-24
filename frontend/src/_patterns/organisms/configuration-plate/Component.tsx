@@ -51,7 +51,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       configurationKey: 'transactionSize',
       icon: transactionSizeIcon,
       placeholder: 'Transaction size',
-      title: 'Transaction size in KBs',
+      title: 'Transaction size in Bs',
     },
     {
       configurationKey: 'throughput',
@@ -109,6 +109,30 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
     },
   ];
 
+  private gridInputsBitcoinSegWit: IGridInput[] = [
+    {
+      configurationKey: 'transactionWeight',
+      icon: transactionSizeIcon,
+      placeholder: 'Transaction weight',
+      title: 'Transaction weight in weight units',
+    },
+    {
+      configurationKey: 'maxBlockWeight',
+      icon: maxBlockIcon,
+      placeholder: 'Maximal block weight',
+      title: 'Maximal block weight in weight units',
+    },
+  ];
+
+  private gridInputsBitcoinFloodAttack: IGridInput[] = [
+    {
+      configurationKey: 'transactionFee',
+      icon: threequarterIcon,
+      placeholder: 'Transaction fee',
+      title: 'Attacker\'s target transaction fee in Satoshi',
+    },
+  ];
+
   constructor(props: IConfigurationPlateProps) {
     super(props);
     this.handleConfigurationChange = this.handleConfigurationChange.bind(this);
@@ -138,6 +162,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                                     icon={item.icon}
                                     value={configuration[item.configurationKey]}
                                     title={item.title}
+                                    strategy={this.props.configuration.strategy}
                                 />,
                             )}
                             <ConfigurationInput
@@ -148,6 +173,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                                 icon={calendarIcon}
                                 value={configuration.simulateUntil}
                                 title="Simulate until"
+                                strategy={this.props.configuration.strategy}
                             />
                         </div>
                         <div className="configuration-plate-options__title">
@@ -164,6 +190,25 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                                     icon={item.icon}
                                     value={configuration[item.configurationKey]}
                                     title={item.title}
+                                    strategy={this.props.configuration.strategy}
+                                />,
+                            )}
+                        </div>
+                        <div className="configuration-plate-options__title">
+                            Segregated Witness Options
+                        </div>
+                        <div className="configuration-plate-bitcoin__grid">
+                            {this.gridInputsBitcoinSegWit.map(item =>
+                                <ConfigurationInput
+                                    key={item.configurationKey}
+                                    placeholder={item.placeholder}
+                                    type="number"
+                                    configurationKey={item.configurationKey}
+                                    onConfigurationChange={this.handleConfigurationChange}
+                                    icon={item.icon}
+                                    value={configuration[item.configurationKey]}
+                                    title={item.title}
+                                    strategy={this.props.configuration.strategy}
                                 />,
                             )}
                         </div>
@@ -181,6 +226,25 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                                     icon={item.icon}
                                     value={configuration[item.configurationKey]}
                                     title={item.title}
+                                    strategy={this.props.configuration.strategy}
+                                />,
+                            )}
+                        </div>
+                        <div className="configuration-plate-options__title">
+                            Flood Attack Options
+                        </div>
+                        <div className="configuration-plate-bitcoin__grid">
+                            {this.gridInputsBitcoinFloodAttack.map(item =>
+                                <ConfigurationInput
+                                    key={item.configurationKey}
+                                    placeholder={item.placeholder}
+                                    type="number"
+                                    configurationKey={item.configurationKey}
+                                    onConfigurationChange={this.handleConfigurationChange}
+                                    icon={item.icon}
+                                    value={configuration[item.configurationKey]}
+                                    title={item.title}
+                                    strategy={this.props.configuration.strategy}
                                 />,
                             )}
                         </div>
@@ -205,6 +269,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                                 icon={item.icon}
                                 value={configuration[item.configurationKey]}
                                 title={item.title}
+                                strategy={this.props.configuration.strategy}
                             />,
                         )}
                         <ConfigurationInput
@@ -215,6 +280,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
                             icon={calendarIcon}
                             value={configuration.simulateUntil}
                             title="Simulate until"
+                            strategy={this.props.configuration.strategy}
                         />
                     </div>
                 </div>

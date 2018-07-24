@@ -38,17 +38,19 @@ class Vibes extends React.Component<{}, IVibesState> {
         numberOfNeighbours: 4,
         numberOfNodes: 10,
         simulateUntil: Date.now() + 3 * 3600000, // 3 hours from now
-        transactionSize: 250, // KB
+        transactionSize: 250000, // B
         throughput: 10,  // average number of transactions per blockTime
         latency: 900, // ms (latency + transfer + verification time),
         neighboursDiscoveryInterval: 3000, // seconds
         maxBlockSize: 1000, // KB
-        maxBlockWeight: 4000, // KB
+        maxBlockWeight: 0, // KB
         networkBandwidth: 1, // MB per second
         strategy: Strategies.GENERIC_SIMULATION.toString(),
         transactionPropagationDelay: 150, // ms
         hashRate: 0, // Percentage of total network
         confirmations: 0, // Blocks
+        transactionFee: 0, // target transaction fee of an attacker in Satoshi
+        transactionWeight: 0, // transaction weight of SegWit transaction
       },
     };
     this.handleStrategyChange = this.handleStrategyChange.bind(this);
@@ -116,17 +118,19 @@ class Vibes extends React.Component<{}, IVibesState> {
         numberOfNeighbours: 4,
         numberOfNodes: 20,
         simulateUntil: Date.now() + 6 * 3600000, // 6 hours from now
-        transactionSize: 1, // KB
+        transactionSize: 218, // B
         throughput: 105,  // average number of transactions per blockTime
         latency: 900, // ms (latency + transfer + verification time),
         neighboursDiscoveryInterval: 3000, // seconds
-        maxBlockSize: 100, // KB
-        maxBlockWeight: 4000, // KB
+        maxBlockSize: 1000, // KB
+        maxBlockWeight: 4000000, // weight
         networkBandwidth: 1, // MB per second
         strategy: strategy.toString(),
         transactionPropagationDelay: 150, // ms
         hashRate: 30, // Percentage of total network
         confirmations: 4, // Blocks
+        transactionFee: 0, // target transaction fee of an attacker in Satoshi
+        transactionWeight: 542, // transaction weight of SegWit transaction
       };
       this.setState({ configuration });
       this.setState({ strategy });
@@ -136,17 +140,19 @@ class Vibes extends React.Component<{}, IVibesState> {
         numberOfNeighbours: 4,
         numberOfNodes: 10,
         simulateUntil: Date.now() + 3 * 3600000, // 3 hours from now
-        transactionSize: 250, // KB
+        transactionSize: 250000, // B
         throughput: 10,  // average number of transactions per blockTime
         latency: 900, // ms (latency + transfer + verification time),
         neighboursDiscoveryInterval: 3000, // seconds
-        maxBlockSize: 1000, // KB
-        maxBlockWeight: 4000, // KB
+        maxBlockSize: 0, // KB
+        maxBlockWeight: 0, // weight
         networkBandwidth: 1, // MB per second
         strategy: strategy.toString(),
         transactionPropagationDelay: 150, // ms
         hashRate: 0, // Percentage of total network
         confirmations: 0, // Blocks
+        transactionFee: 0, // target transaction fee of an attacker in Satoshi
+        transactionWeight: 0, // transaction weight of SegWit transaction
       };
       this.setState({ configuration });
       this.setState({ strategy });

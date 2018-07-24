@@ -11,7 +11,7 @@ Some parts of the evaluations are sample testing for consistency between the inp
 
 For the calculation of the probability of a successful double spend and the maximal safe transaction value sample testing is used. For validating the success probability of simulated double spends empirical testing is applied.
 
-\subsection{Calculation of the probability of a successful double spend}
+\subsection{Expected and calculated probability of a successful double spend}
 \label{subsection:evalCalcDoubleSpending}
 
 The probability of a successful double spend is tested with five samples and the results are compared to the figure \ref{fig:doubleSpend} from the original paper \cite{doublespending}.\linebreak
@@ -42,13 +42,12 @@ All mentioned test cases of figure \ref{fig:testCases} match the expected result
 \subcaptionbox{Sample with input: q = 30\% and n = 6}{\includegraphics[width=0.4\textwidth]{"figures/Testing/q 30 n 6".PNG}}%
 \hfill % <-- Separation
 
-\caption{Samples for the testing of the calculation of the success probability of double-spending\label{fig:testCases}}
-
+\caption{Screenshots Success Probability of Double-Spending\label{fig:testCases}}
 \end{figure}
 
 The probability for the test case (e) with q = 30\% and n = 6 is used in Chapter \ref{subsection:evalDoubleSpending}.
 
-\subsection{Calculation of the maximal safe transaction value}
+\subsection{Expected and calculated maximal safe transaction value}
 
 For testing the maximal safe transaction value the samples from the evaluation of the successful double spend probability are reused and compared to the figure \ref{fig:maximalSafeTransactionValue} from the ... paper \cite{doublespending}.\linebreak
 
@@ -67,7 +66,7 @@ All test cases of figure \ref{fig:testCases} match the expected result, except f
 
 ... table comparing both
 
-\subsection{Simulation of double-spending: success probability}
+\subsection{Expected and simulated success probability of double spending}
 \label{subsection:evalDoubleSpending}
 
 For the empirical testing of double-spending the following script was used. It starts the simulation, waits for a certain time to let the simulation finish and repeats this for a total of 100 times.
@@ -103,8 +102,111 @@ FOR /L %%i IN (1,1,100) DO (
 
 After counting the occurrences of the outcomes in the logfile, they were summarized in the table \ref{table:doubleSpendingSimulatedAndExpected}. All simulations were finished in the specified time. The outcome "ATTACK NEITHER SUCCESSFUL NOR FAILED" can happen if the simulation time was too short. This number is ignored for the calculation of the probabilities. It is assumed that the unfinished simulations have a similar probability distribution like the finished ones. The simulated probability of the double-spending attack is with 15.09\% very close to the expected probability of 15.645\%, which was calculated in Chapter \ref{subsection:evalCalcDoubleSpending}. Hereby is shown that the simulation of double-spending has the correct success probability.
 
-\subsection{Simulation: transactions per seconds}
+\subsection{Expected and simulated transactions per seconds}
 
-\subsection{Simulation: transaction incentives}
+For the evaluation of correctness of the transaction per seconds (tps) of our simulation the formula for the calcuation of \textit{tps} is compared to the implementation.\linebreak
 
-\subsection{Simulation of a double spend: time between blocks}
+
+\begin{equation}
+\text{tps} = \text{transactions per block} / \text{block time}
+\end{equation}
+
+Since the \textit{tps} for the whole simulation is an important key metric, the division is not done for one block, but instead for all blocks.\newline
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=myScalastyle]
+    var tps: Double = longestChainNumberTransactions.toDouble / secondsBetween(VConf.simulationStart, VConf.simulateUntil).getSeconds.toDouble
+\end{lstlisting}
+\end{minipage}
+
+As can be seen, the formulas are identical and the result should therefore be correct. Sample testing is done to check for implementation errors.
+
+\subsubsection{Sample with a simulation duration of six hours}
+
+For the first sample a short simulation of six hours is chosen. The chosen block time is 567 seconds and the chosen throughput is 105 transactions per block (\textit{tpb}).
+
+Calculation of the expected total processed transactions \textit{pt}:
+\begin{equation}
+\textit{pt} = 6 \text{h} / 567 \text{sec} * 105 \text{tpb} = 6*60*60/567 * 105 = 4000
+\end{equation}
+
+Calculation of the expected \textit{tps}:
+\begin{equation}
+\text{tps} = 4000 \text{transactions} / 6 \text{h} = 0.185
+\end{equation}
+
+\begin{figure}
+\centering
+\includegraphics[height=0.3\textwidth]{"figures/Testing/tps 1".PNG}
+\caption{Screenshot Transactions per Second - 6h Simulation Duration\label{fig:tpsSimulation6h}}
+\end{figure}
+
+\begin{table}[ht]
+\begin{adjustbox}{width=0.8\textwidth}
+    \begin{tabular}{| l | l | l | l |}
+    \hline
+    \textbf{Metric} & \textbf{Simulation} & \textbf{Expectation}\\ \hline
+    Block time & 692 & 567\\ \hline
+    Total number of processed transactions & 3000 & 4000 \\ \hline
+    Transactions per second & 0.14 & 0.185\\ \hline
+    \end{tabular}
+\end{adjustbox}
+    \caption{Simulated and expected results of transactions per second: Sample with 6h simulation duration\label{table:tps6hsimulation}}
+\end{table} 
+
+As can be seen in table \ref{table:tps6hsimulation}, for such a short simulation the tps is off by about 30\%. One reason for this significant difference is the the difference in the block time between the simulated and expected values. This can be due to variance. To reduce block time variance a longer simulation time is chosen as a second sample.
+
+URL for reproduction (The simulateUntil parameter has to be adjusted. Due to new features additional parameters might be necessary.):\linebreak
+\url{http://localhost:8082/vibe?blockTime=567&numberOfNeighbours=4&numberOfNodes=20&simulateUntil=1531752759474&transactionSize=1&throughput=105&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=100&maxBlockWeight=4000&networkBandwidth=1&strategy=BITCOIN_LIKE_BLOCKCHAIN&transactionPropagationDelay=150&hashRate=0&confirmations=4} 
+
+\subsubsection{Sample with a duration of 48 hours}
+
+For the second sample a longer simulation of 48 hours is chosen. The chosen block time is still 567 seconds and the chosen throughput is also still 105 transactions per block (\textit{tpb}).
+
+Calculation of the expected total processed transactions:
+\begin{equation}
+\text{pt} = 48h / 567 \text{sec} * 105 \text{tpb} = 48*60*60/567 * 105 = 32000
+\end{equation}
+
+Of course the expected tps stays the same, since only the simulation duration parameter has been changed.
+
+\begin{figure}
+\centering
+\includegraphics[height=0.3\textwidth]{"figures/Testing/tps 2".PNG}
+\caption{Screenshot Transactions per Second - 48h Simulation Duration\label{fig:tpsSimulation48h}}
+\end{figure}
+
+\begin{table}[ht]
+\begin{adjustbox}{width=0.8\textwidth}
+    \begin{tabular}{| l | l | l | l |}
+    \hline
+    \textbf{Metric} & \textbf{Simulation} & \textbf{Expectation}\\ \hline
+    Block time & 539 & 567\\ \hline
+    Total number of processed transactions & 
+31700 & 32000 \\ \hline
+    Transactions per second & 0.18 & 0.185\\ \hline
+    \end{tabular}
+\end{adjustbox}
+    \caption{Simulated and expected results of transactions per second: Sample with 48h simulation duration\label{table:tps48hsimulation}}
+\end{table} 
+
+In the second comparative table \ref{table:tps48hsimulation} it can be observed, that a longer simulation duration leads the simulated block time to be closer to the expected block time. As a result the simulated \textit{tps} is close to the expected value.
+
+URL for reproduction (The simulateUntil parameter has to be adjusted. Due to new features additional parameters might be necessary.):\linebreak
+\url{http://localhost:8082/vibe?blockTime=567&numberOfNeighbours=4&numberOfNodes=20&simulateUntil=1531905360000&transactionSize=1&throughput=105&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=100&maxBlockWeight=4000&networkBandwidth=1&strategy=BITCOIN_LIKE_BLOCKCHAIN&transactionPropagationDelay=150&hashRate=0&confirmations=4}
+
+\subsection{Simulated and expected transaction incentives}
+
+\section{Speed}
+\section{Scalability}
+\subsection{Varying Nodes}
+\subsection{Varying Neighbours}
+\subsection{Varying Transactions}
+\section{Flexibility}
+\section{Extensibility}
+\section{Powerful Visuals}
+\section{Case Studies}
+\subsection{Optimising transactions per second}
+\subsection{Securing a blockchain merchant}
+\subsection{Choosing transaction fees}
+\subsection{Flood attack}

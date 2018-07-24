@@ -16,7 +16,11 @@ export interface ISimulationPayload {
   timesNoOutliers90: number | null;
   firstBlockNumberOfRecipients: number;
   lastBlockNumberOfRecipients: number;
-  maxTransactionsPerBlock: number;
+  nonSegWitMaxTransactionsPerBlock: number;
+  segWitMaxTransactionsPerBlock: number;
+  nonSegWitMaxTPS: number;
+  segWitMaxTPS: number;
+  segWitMaxBlockWeight: number;
   transactions: (ITransaction)[];
   totalNumberOfNodes: number;
   orphans: number;

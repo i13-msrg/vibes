@@ -3,6 +3,7 @@ import { IConfiguration, IStrategy, Strategies } from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
 import AttackSummary from '../../molecules/attack-summary/Component';
+import TransactionSummary from '../../molecules/transaction-summary/Component';
 import BlockTree from '../../molecules/block-tree/Component';
 import SimulationEvents from '../../molecules/simulation-events/Component';
 import Button from '../../atoms/button/Component';
@@ -50,6 +51,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
         }
       }
     }
+
     return multi;
   }
 
@@ -70,6 +72,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
         }
       }
     }
+
+    multi.shift(); // don't know better a way to get rid of empty element at the beginning
 
     const multi2: any[][] = [['Transaction Fees', 'Confirmation Time']];
     for (const item of multi) {
@@ -155,10 +159,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                     totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
                                     orphans={simulationPayload.orphans}
-                                    tps={simulationPayload.tps}
                                     strategy={this.props.strategy}
                                     avgBlockTime={simulationPayload.avgBlockTime}
-                                    maxTransactionsPerBlock={simulationPayload.maxTransactionsPerBlock}
                                 />
                             )}
                         </div>
@@ -279,7 +281,6 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             </div>
                         )}
                     </div>
-
                     <div className="simulation-pending-transactions u-plate">
                         <div className="simulation-pending-transactions__title">
                             Pending Transactions Per Block
@@ -317,6 +318,30 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         )}
                     </div>
 
+                    <div className="simulation-processed-transactions__grid">
+
+                        <div className="transaction__summary u-plate">
+                            <div className="transaction-summary__title">
+                                Transaction Summary
+                            </div>
+                            {simulationPayload && (
+                                <TransactionSummary
+                                    isSegWitEnabled={simulationPayload.segWitMaxTransactionsPerBlock !== 0}
+                                    segWitTheoreticalMaxBlockSize={this.props.maxBlockWeight}
+                                    segWitMaxBlockWeight={simulationPayload.segWitMaxBlockWeight}
+                                    segWitMaxTransactionsPerBlock={simulationPayload.segWitMaxTransactionsPerBlock}
+                                    segWitMaxTPS={simulationPayload.segWitMaxTPS}
+                                    nonSegWitMaxBlockSize={this.props.maxBlockSize}
+                                    nonSegWitMaxTransactionsPerBlock={simulationPayload.nonSegWitMaxTransactionsPerBlock}
+                                    nonSegWitMaxTPS={simulationPayload.nonSegWitMaxTPS}
+                                    actualTPS={simulationPayload.tps}
+                                    blockchainSize={simulationPayload.longestChainSize}
+                                    totalNumberOfProcessedTransactions={simulationPayload.longestChainNumberTransactions}
+                                    blockchainLength={simulationPayload.longestChainLength}
+                                />
+                            )}
+                        </div>
+
                     <div className="simulation-processed-transactions u-plate">
                         <div className="simulation-processed-transactions__title">
                             Processed Transactions Per Block
@@ -353,6 +378,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 />
                             </div>
                         )}
+                    </div>
                     </div>
 
                     <div className="simulation-transaction-count-per-fee u-plate">
@@ -466,10 +492,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                 totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
                                 orphans={simulationPayload.orphans}
-                                tps={simulationPayload.tps}
                                 strategy={this.props.strategy}
                                 avgBlockTime={simulationPayload.avgBlockTime}
-                                maxTransactionsPerBlock={simulationPayload.maxTransactionsPerBlock}
                             />
                         )}
                     </div>
@@ -529,15 +553,33 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   private processedTransactions(simulationPayload: any) {
     let multi: any[][] = [];
     if (this.props.strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
-      multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
+      if (simulationPayload.nonSegWitMaxTransactionsPerBlock !== 0 || simulationPayload.segWitMaxTransactionsPerBlock !== 0) {
+        multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
 
             // I think it is better to have only one calculation of max processed transactions,
             // therefore this value is not calculated here, but instead uses a value from the server.
             // This makes it easier to change the implementation in just one place.
 
-      for (const event of simulationPayload.events) {
-        if (event.eventType === EventTypes.IBlockMine) {
-          multi.push([event.level + 1, event.processedTransactions, simulationPayload.maxTransactionsPerBlock]);
+        for (const event of simulationPayload.events) {
+          if (event.eventType === EventTypes.IBlockMine) {
+            multi.push([event.level + 1, event.processedTransactions,
+              simulationPayload.segWitMaxTransactionsPerBlock !== 0 ?
+                            simulationPayload.segWitMaxTransactionsPerBlock :
+                            simulationPayload.nonSegWitMaxTransactionsPerBlock]);
+          }
+        }
+      } else {
+            // no max limit
+        multi = [['Blocks', 'Processed Transactions']];
+
+            // I think it is better to have only one calculation of max processed transactions,
+            // therefore this value is not calculated here, but instead uses a value from the server.
+            // This makes it easier to change the implementation in just one place.
+
+        for (const event of simulationPayload.events) {
+          if (event.eventType === EventTypes.IBlockMine) {
+            multi.push([event.level + 1, event.processedTransactions]);
+          }
         }
       }
     } else if (this.props.strategy === Strategies.GENERIC_SIMULATION) {
