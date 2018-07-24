@@ -148,7 +148,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                       if (goodBlockchainLength > maliciousBlockchainLength) {
                         return <li className="attack-summary__list-item">
                                 <div className="attack-summary__text">
-                                    Orphan blocks due to attack (at least)
+                                    Wasted blocks due to attack (at least)
                                 </div>
                                 <div className="attack-summary__result">
                                     {maliciousBlockchainLength - 1} Blocks
@@ -157,7 +157,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                       }
                       return <li className="attack-summary__list-item">
                                 <div className="attack-summary__text">
-                                    Orphan blocks due to attack (at least)
+                                    Wasted blocks due to attack (at least)
                                 </div>
                                 <div className="attack-summary__result">
                                     {goodBlockchainLength - 1} Blocks
