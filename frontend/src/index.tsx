@@ -114,23 +114,45 @@ class Vibes extends React.Component<{}, IVibesState> {
   private handleStrategyChange(strategy: Strategies) {
     if (strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
       const configuration: IConfiguration = {
-        blockTime: 567, // seconds
+        // settings for home pc
+        strategy: strategy.toString(),
+        simulateUntil: Date.now() + 6 * 3600000, // 6 hours from now
+        blockTime: 600, // seconds
         numberOfNeighbours: 4,
         numberOfNodes: 20,
-        simulateUntil: Date.now() + 6 * 3600000, // 6 hours from now
-        transactionSize: 218, // B
-        throughput: 105,  // average number of transactions per blockTime
-        latency: 900, // ms (latency + transfer + verification time),
         neighboursDiscoveryInterval: 3000, // seconds
-        maxBlockSize: 1000, // KB
-        maxBlockWeight: 4000000, // weight
+        latency: 900, // ms (latency + transfer + verification time),
+        transactionSize: 1000, // B
+        maxBlockSize: 50, // KB
+        throughput: 50,  // average number of transactions per blockTime
+        transactionWeight: 2000, // transaction weight of SegWit transaction
+        maxBlockWeight: 200000, // weight
         networkBandwidth: 1, // MB per second
-        strategy: strategy.toString(),
         transactionPropagationDelay: 150, // ms
         hashRate: 30, // Percentage of total network
         confirmations: 4, // Blocks
         transactionFee: 0, // target transaction fee of an attacker in Satoshi
-        transactionWeight: 542, // transaction weight of SegWit transaction
+
+          // realistic settings
+          /**
+           * blockTime: 567, // seconds
+           * numberOfNeighbours: 4,
+           * numberOfNodes: 20,
+           * simulateUntil: Date.now() + 6 * 3600000, // 6 hours from now
+           * transactionSize: 218, // B
+           * throughput: 105,  // average number of transactions per blockTime
+           * latency: 900, // ms (latency + transfer + verification time),
+           * neighboursDiscoveryInterval: 3000, // seconds
+           * maxBlockSize: 1000, // KB
+           * maxBlockWeight: 4000000, // weight
+           * networkBandwidth: 1, // MB per second
+           * strategy: strategy.toString(),
+           * transactionPropagationDelay: 150, // ms
+           * hashRate: 30, // Percentage of total network
+           * confirmations: 4, // Blocks
+           * transactionFee: 0, // target transaction fee of an attacker in Satoshi
+           * transactionWeight: 542, // transaction weight of SegWit transaction
+           */
       };
       this.setState({ configuration });
       this.setState({ strategy });

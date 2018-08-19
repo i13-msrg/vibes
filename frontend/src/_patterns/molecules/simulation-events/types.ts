@@ -30,4 +30,5 @@ export interface ITransaction {
   confirmation: boolean;
   confirmationLevel: number;
   creationLevel: number;
+  isFloodAttack: boolean;
 }

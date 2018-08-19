@@ -65,7 +65,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
       longerLength = Math.min(
                 Math.max(maliciousBlockchainLength, goodBlockchainLength),
                 attackDuration + 1,
-                successfulAttackInBlocks + 1,
+                successfulAttackInBlocks,
             );
     } else {
       longerLength = Math.min(

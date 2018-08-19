@@ -66,11 +66,11 @@ export interface IStrategy {
 }
 
 export interface ITransactionFee {
-  strategy: string;
+  transactionFee: number;
 }
 
 export interface ITransactionWeight {
-  strategy: string;
+  transactionWeight: number;
 }
 
 export interface IConfiguration extends

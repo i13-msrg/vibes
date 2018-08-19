@@ -10,6 +10,7 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.MasterActions
 import com.vibes.actors.{MasterActor, ReducerIntermediateResult}
@@ -23,7 +24,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future, Promise}
 import scala.language.postfixOps
 import scala.util.Success
-import com.typesafe.config.ConfigFactory
 
 object Main extends App with FailFastCirceSupport with LazyLogging {
   val conf = ConfigFactory.load
@@ -86,7 +86,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                     'confirmations.as[Int],
                     'transactionFee.as[Int],
                     'transactionWeight.as[Int],
-                  'maxBlockWeight.as[Int]
+                    'maxBlockWeight.as[Int]
                   )) {
                   (blockTime,
                    numberOfNeighbours,
@@ -136,7 +136,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         VConf.transactionPropagationDelay = transactionPropagationDelay
                         logger.debug(s"TRANSACTION PROPAGATION DELAY... $transactionPropagationDelay MS")
 
-                        VConf.transactionFee = transactionFee
+                        VConf.floodAttackTransactionFee = transactionFee
                         logger.debug(s"FLOOD ATTACK: TRANSACTION FEE... $transactionFee")
 
                         VConf.transactionWeight = transactionWeight
@@ -148,6 +148,9 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         // checks for alternative history attack
                         VConf.hashRate = hashRate
                         if (hashRate > 0) {
+                          // either double spending OR flood attack
+                          VConf.floodAttackTransactionFee = 0
+
                           logger.debug(s"ALTERNATIVE HISTORY ATTACK")
                           logger.debug(s"ATTACKER'S HASH RATE... $hashRate%")
                           VConf.isAlternativeHistoryAttack = true
@@ -160,6 +163,28 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                         } else {
                           VConf.isAlternativeHistoryAttack = false
                         }
+
+
+                        // sets up block limit and segwit
+                        if (VConf.transactionSize != 0) {
+                          // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
+                          VConf.nonSegWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
+                          VConf.segWitActive = false
+                          VConf.segWitMaxTransactionsPerBlock = 0
+                          logger.debug(s"SegWitInActive... ${VConf.nonSegWitMaxTransactionsPerBlock}")
+                        }
+                        if (VConf.maxBlockWeight != 0 && VConf.transactionWeight != 0) {
+                          VConf.segWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockWeight / VConf.transactionWeight).toInt
+                          VConf.segWitActive = true
+                          logger.debug(s"SegWitActive... ${VConf.segWitMaxTransactionsPerBlock}")
+                        }
+
+                        // sets up flood attack
+                          if (VConf.segWitActive && VConf.floodAttackTransactionFee > 0) {
+                            VConf.floodAttackTransactionPool = VConf.segWitMaxTransactionsPerBlock * 2
+                          } else if (VConf.floodAttackTransactionFee > 0) {
+                            VConf.floodAttackTransactionPool = VConf.nonSegWitMaxTransactionsPerBlock * 2
+                          }
 
                         val masterActor = system.actorOf(MasterActor.props(), "Master")
                         // timeout for the ask pattern
@@ -205,7 +230,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.segWitMaxBlockWeight,
                               transactionsJson,
                               VConf.numberOfNodes,
-                              intermediateResult.orphans,
+                              intermediateResult.staleBlocks,
                               intermediateResult.attackSucceeded,
                               intermediateResult.successfulAttackInBlocks,
                               intermediateResult.probabilityOfSuccessfulAttack,
@@ -219,7 +244,10 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                               intermediateResult.k,
                               intermediateResult.actualTPS,
                               intermediateResult.avgBlockTime,
-                              intermediateResult.simulationStart
+                              intermediateResult.simulationStart,
+                              intermediateResult.confirmedFloodAttackTransactions,
+                              intermediateResult.floodAttackSpentTransactionFees,
+                              intermediateResult.confirmedTransactionsBelowTargetTransactionFee
                             )
                           })) { extraction =>
                           lock = false

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IConfiguration, IStrategy, Strategies } from '../../../common/types';
+import { IConfiguration, Strategies } from '../../../common/types';
 import DataMap from '../../organisms/datamap/Component';
 import SimulationSummary from '../../molecules/simulation-summary/Component';
 import AttackSummary from '../../molecules/attack-summary/Component';
@@ -11,6 +11,7 @@ import fetchEvents, { ISimulationPayload } from './fetchSimulationPayload';
 import EventsRange from '../../molecules/events-range/Component';
 import { Chart } from 'react-google-charts';
 import { EventTypes } from '../../molecules/simulation-events/types';
+import FloodAttackSummary from '../../molecules/flood-attack-summary/Component';
 
 // Uncaught Error: Google Charts loader.js can only be loaded once.
 // This error seems to be on the side of the package.
@@ -86,24 +87,13 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   private static timeBetweenBlocks(simulationPayload: any) {
     const multi: any[][] = [['Blocks', 'Time'], [1,
       (new Date(simulationPayload.events[0].timestamp).getTime() -
-            new Date(simulationPayload.simulationStart).getTime()) / 1000 / 60]];
+                new Date(simulationPayload.simulationStart).getTime()) / 1000 / 60]];
 
     for (let i = 1; i < simulationPayload.events.length; i += 1) {
       if (simulationPayload.events[i].eventType === EventTypes.IBlockMine) {
         multi.push([simulationPayload.events[i].level + 1,
           (new Date(simulationPayload.events[i].timestamp).getTime()
                         - new Date(simulationPayload.events[i - 1].timestamp).getTime()) / 1000 / 60]);
-      }
-    }
-    return multi;
-  }
-
-  private static pendingTransactions(simulationPayload: any) {
-    const multi: any[][] = [['Blocks', 'Pending Transactions']];
-
-    for (const event of simulationPayload.events) {
-      if (event.eventType === EventTypes.IBlockMine) {
-        multi.push([event.level + 1, event.transactionPoolSize]);
       }
     }
     return multi;
@@ -158,7 +148,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
                                     lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                     totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
-                                    orphans={simulationPayload.orphans}
+                                    staleBlocks={simulationPayload.staleBlocks}
                                     strategy={this.props.strategy}
                                     avgBlockTime={simulationPayload.avgBlockTime}
                                 />
@@ -243,7 +233,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 )}
                             </div>
                         </div>
-                    : '' }
+                        : ''}
 
                     <div className="simulation-time-between-blocks u-plate">
                         <div className="simulation-time-between-blocks__title">
@@ -287,9 +277,9 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                         </div>
                         {simulationPayload && (
                             <div className={'pending-transactions-chart-container'}>
-                                <Chart
+                                {this.props.transactionFee > 0 && this.props.hashRate === 0 ? <Chart
                                     chartType="AreaChart"
-                                    data={Simulation.pendingTransactions(simulationPayload)}
+                                    data={this.pendingTransactions(simulationPayload)}
                                     options={{
                                       hAxis: {
                                         title: 'Blocks',
@@ -305,7 +295,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                       series: {
                                         1: { curveType: 'function' },
                                       },
-                                      legend: 'none',
+                                      focusTarget: 'category',
+                                      legend: { position: 'bottom' },
                                       tooltip: {
                                         isHtml: true,
                                       },
@@ -313,13 +304,41 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     graph_id="Pending Transactions AreaChart"
                                     width="100%"
                                     height="264px"
-                                />
+                                /> :
+                                    <Chart
+                                      chartType="AreaChart"
+                                      data={this.pendingTransactions(simulationPayload)}
+                                      options={{
+                                        hAxis: {
+                                          title: 'Blocks',
+                                          gridlines: { count: -1 },
+                                          minValue: 1,
+                                          viewWindow: {
+                                            min: 1,
+                                          },
+                                        },
+                                        vAxis: {
+                                          title: 'Pending Transactions',
+                                        },
+                                        series: {
+                                          1: { curveType: 'function' },
+                                        },
+                                        legend: 'none',
+                                        tooltip: {
+                                          isHtml: true,
+                                        },
+                                      }}
+                                      graph_id="Pending Transactions AreaChart"
+                                      width="100%"
+                                      height="264px"
+                                    />
+                                },
                             </div>
-                        )}
+                          )
+                        }
                     </div>
 
                     <div className="simulation-processed-transactions__grid">
-
                         <div className="transaction__summary u-plate">
                             <div className="transaction-summary__title">
                                 Transaction Summary
@@ -332,7 +351,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     segWitMaxTransactionsPerBlock={simulationPayload.segWitMaxTransactionsPerBlock}
                                     segWitMaxTPS={simulationPayload.segWitMaxTPS}
                                     nonSegWitMaxBlockSize={this.props.maxBlockSize}
-                                    nonSegWitMaxTransactionsPerBlock={simulationPayload.nonSegWitMaxTransactionsPerBlock}
+                                    nonSegWitMaxTransactionsPerBlock={simulationPayload.
+                                        nonSegWitMaxTransactionsPerBlock}
                                     nonSegWitMaxTPS={simulationPayload.nonSegWitMaxTPS}
                                     actualTPS={simulationPayload.tps}
                                     blockchainSize={simulationPayload.longestChainSize}
@@ -342,79 +362,132 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                             )}
                         </div>
 
-                    <div className="simulation-processed-transactions u-plate">
-                        <div className="simulation-processed-transactions__title">
-                            Processed Transactions Per Block
-                        </div>
-                        {simulationPayload && (
-                            <div className={'processed-transactions-chart-container'}>
-                                <Chart
-                                    chartType="LineChart"
-                                    data={this.processedTransactions(simulationPayload)}
-                                    options={{
-                                      hAxis: {
-                                        title: 'Blocks',
-                                        gridlines: { count: -1 },
-                                        minValue: 1,
-                                        viewWindow: {
-                                          min: 1,
-                                        },
-                                      },
-                                      vAxis: {
-                                        title: 'Processed Transactions',
-                                      },
-                                      series: {
-                                        1: { curveType: 'function' },
-                                      },
-                                      legend: { position: 'bottom' },
-                                      focusTarget: 'category',
-                                      tooltip: {
-                                        isHtml: true,
-                                      },
-                                    }}
-                                    graph_id="Processed Transactions LineChart"
-                                    width="100%"
-                                    height="264px"
-                                />
+                        <div className="simulation-processed-transactions u-plate">
+                            <div className="simulation-processed-transactions__title">
+                                Processed Transactions Per Block
                             </div>
-                        )}
-                    </div>
+                            {simulationPayload && (
+                                <div className={'processed-transactions-chart-container'}>
+                                    <Chart
+                                        chartType="LineChart"
+                                        data={this.processedTransactions(simulationPayload)}
+                                        options={{
+                                          hAxis: {
+                                            title: 'Blocks',
+                                            gridlines: { count: -1 },
+                                            minValue: 1,
+                                            viewWindow: {
+                                              min: 1,
+                                            },
+                                          },
+                                          vAxis: {
+                                            title: 'Processed Transactions',
+                                          },
+                                          series: {
+                                            1: { curveType: 'function' },
+                                          },
+                                          legend: { position: 'bottom' },
+                                          focusTarget: 'category',
+                                          tooltip: {
+                                            isHtml: true,
+                                          },
+                                        }}
+                                        graph_id="Processed Transactions LineChart"
+                                        width="100%"
+                                        height="264px"
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="simulation-transaction-count-per-fee u-plate">
-                        <div className="simulation-transaction-count-per-fee__title">
-                            Transaction Confirmation Status Per Transaction Fee
-                        </div>
-                        {simulationPayload && (
-                            <div className={'transaction-count-per-fee-chart-container'}>
-                                <Chart
-                                    chartType="AreaChart"
-                                    data={Simulation.transactionConfirmationStatusPerFee(simulationPayload)}
-                                    options={{
-                                      hAxis: {
-                                        title: 'Transaction Fees (in Satoshi)',
-                                        gridlines: { count: -1 },
-                                      },
-                                      vAxis: {
-                                        title: 'Transactions',
-                                      },
-                                      series: {
-                                        1: { curveType: 'function' },
-                                      },
-                                      focusTarget: 'category',
-                                      tooltip: {
-                                        isHtml: true,
-                                      },
-                                      legend: { position: 'bottom' },
-                                      colors: ['#9ACD32', '#FF0000'],
-                                    }}
-                                    graph_id="Confirmation Status AreaChart"
-                                    width="100%"
-                                    height="264px"
-                                />
+                    {this.props.transactionFee > 0 && this.props.hashRate === 0 ?
+
+                        <div className="simulation-flood-attack__grid">
+                            <div className="flood-attack__summary u-plate">
+                                <div className="flood-attack-summary__title">
+                                    Flood Attack Summary
+                                </div>
+                                {simulationPayload && (
+                                    <FloodAttackSummary
+                                      confirmedFloodAttackTransactions={simulationPayload.confirmedFloodAttackTransactions}
+                                      floodAttackSpentTransactionFees={simulationPayload.floodAttackSpentTransactionFees}
+                                      confirmedTransactionsBelowTargetTransactionFee={simulationPayload.confirmedTransactionsBelowTargetTransactionFee}
+                                    />
+                                  )
+                                }
                             </div>
-                        )}
-                    </div>
+                        <div className="simulation-flood-attack u-plate">
+                            <div className="simulation-flood-attack__title">
+                                Transaction Confirmation Status Per Transaction Fee
+                            </div>
+                            {simulationPayload && (
+                                <div className={'transaction-count-per-fee-chart-container'}>
+                                    <Chart
+                                        chartType="AreaChart"
+                                        data={Simulation.transactionConfirmationStatusPerFee(simulationPayload)}
+                                        options={{
+                                          hAxis: {
+                                            title: 'Transaction Fees (in Satoshi)',
+                                            gridlines: { count: -1 },
+                                          },
+                                          vAxis: {
+                                            title: 'Transactions',
+                                          },
+                                          series: {
+                                            1: { curveType: 'function' },
+                                          },
+                                          focusTarget: 'category',
+                                          tooltip: {
+                                            isHtml: true,
+                                          },
+                                          legend: { position: 'bottom' },
+                                          colors: ['#9ACD32', '#FF0000'],
+                                        }}
+                                        graph_id="Confirmation Status AreaChart"
+                                        width="100%"
+                                        height="264px"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        </div>
+                        :
+                        <div className="simulation-transaction-count-per-fee u-plate">
+                            <div className="simulation-transaction-count-per-fee__title">
+                                Transaction Confirmation Status Per Transaction Fee
+                            </div>
+                            {simulationPayload && (
+                                <div className={'transaction-count-per-fee-chart-container'}>
+                                    <Chart
+                                        chartType="AreaChart"
+                                        data={Simulation.transactionConfirmationStatusPerFee(simulationPayload)}
+                                        options={{
+                                          hAxis: {
+                                            title: 'Transaction Fees (in Satoshi)',
+                                            gridlines: { count: -1 },
+                                          },
+                                          vAxis: {
+                                            title: 'Transactions',
+                                          },
+                                          series: {
+                                            1: { curveType: 'function' },
+                                          },
+                                          focusTarget: 'category',
+                                          tooltip: {
+                                            isHtml: true,
+                                          },
+                                          legend: { position: 'bottom' },
+                                          colors: ['#9ACD32', '#FF0000'],
+                                        }}
+                                        graph_id="Confirmation Status AreaChart"
+                                        width="100%"
+                                        height="264px"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    }
 
                     <div className="confirmation-time-per-fee u-plate">
                         <div className="confirmation-time-per-fee__title">
@@ -491,7 +564,7 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 firstBlockNumberOfRecipients={simulationPayload.firstBlockNumberOfRecipients}
                                 lastBlockNumberOfRecipients={simulationPayload.lastBlockNumberOfRecipients}
                                 totalNumberOfNodes={simulationPayload.totalNumberOfNodes}
-                                orphans={simulationPayload.orphans}
+                                staleBlocks={simulationPayload.staleBlocks}
                                 strategy={this.props.strategy}
                                 avgBlockTime={simulationPayload.avgBlockTime}
                             />
@@ -540,6 +613,38 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
     );
   }
 
+  private pendingTransactions(simulationPayload: any) {
+    if (this.props.transactionFee > 0 && this.props.hashRate === 0) {
+      const floodAttackData: any[][] = [['Blocks', 'Pending Transactions', 'Winning Miner - Pending Transactions',
+        'Flood Attack Transactions']];
+      for (const event of simulationPayload.events) {
+        if (event.eventType === EventTypes.IBlockMine) {
+          let pendingFloodAttackTransactions = 0;
+          let pendingTransactions = 0;
+          for (const transaction of simulationPayload.transactions) {
+            if (event.level >= transaction.creationLevel &&
+                            (transaction.confirmationLevel > event.level || transaction.confirmationLevel === -1)) {
+              if (transaction.isFloodAttack) {
+                pendingFloodAttackTransactions = pendingFloodAttackTransactions + 1;
+              }
+              pendingTransactions = pendingTransactions + 1;
+            }
+          }
+          floodAttackData.push([event.level + 1, pendingTransactions, event.transactionPoolSize, pendingFloodAttackTransactions]);
+        }
+      }
+      return floodAttackData;
+    }
+    const data: any[][] = [['Blocks', 'Pending Transactions']];
+
+    for (const event of simulationPayload.events) {
+      if (event.eventType === EventTypes.IBlockMine) {
+        data.push([event.level + 1, event.transactionPoolSize]);
+      }
+    }
+    return data;
+  }
+
   private fetchEvents() {
     this.setState({ isFetching: true });
     fetchEvents(this.props)
@@ -553,28 +658,66 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
   private processedTransactions(simulationPayload: any) {
     let multi: any[][] = [];
     if (this.props.strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
-      if (simulationPayload.nonSegWitMaxTransactionsPerBlock !== 0 || simulationPayload.segWitMaxTransactionsPerBlock !== 0) {
-        multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
+      if (simulationPayload.nonSegWitMaxTransactionsPerBlock !== 0 ||
+          simulationPayload.segWitMaxTransactionsPerBlock !== 0) {
+        if (this.props.transactionFee > 0 && this.props.hashRate === 0) {
+          multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions', 'Flood Attack Transactions',
+            'Transactions below Target']];
 
-            // I think it is better to have only one calculation of max processed transactions,
-            // therefore this value is not calculated here, but instead uses a value from the server.
-            // This makes it easier to change the implementation in just one place.
+              // I think it is better to have only one calculation of max processed transactions,
+              // therefore this value is not calculated here, but instead uses a value from the server.
+              // This makes it easier to change the implementation in just one place.
 
-        for (const event of simulationPayload.events) {
-          if (event.eventType === EventTypes.IBlockMine) {
-            multi.push([event.level + 1, event.processedTransactions,
-              simulationPayload.segWitMaxTransactionsPerBlock !== 0 ?
-                            simulationPayload.segWitMaxTransactionsPerBlock :
-                            simulationPayload.nonSegWitMaxTransactionsPerBlock]);
+          for (const event of simulationPayload.events) {
+            let floodAttackTransactions = 0;
+            let transactionsBelowTarget = 0;
+            for (const transaction of simulationPayload.transactions) {
+              if (event.level === transaction.confirmationLevel && transaction.confirmation) {
+                if (transaction.isFloodAttack) {
+                  floodAttackTransactions = floodAttackTransactions + 1;
+                }
+                if (transaction.transactionFee < this.props.transactionFee) {
+                  transactionsBelowTarget = transactionsBelowTarget + 1;
+                }
+              }
+            }
+
+            if (event.eventType === EventTypes.IBlockMine) {
+              multi.push([
+                event.level + 1,
+                event.processedTransactions,
+                simulationPayload.segWitMaxTransactionsPerBlock !== 0 ?
+                                  simulationPayload.segWitMaxTransactionsPerBlock :
+                                  simulationPayload.nonSegWitMaxTransactionsPerBlock,
+                floodAttackTransactions,
+                transactionsBelowTarget,
+              ],
+                      );
+            }
+          }
+        } else {
+          multi = [['Blocks', 'Processed Transactions', 'Maximum Possible Transactions']];
+
+              // I think it is better to have only one calculation of max processed transactions,
+              // therefore this value is not calculated here, but instead uses a value from the server.
+              // This makes it easier to change the implementation in just one place.
+
+          for (const event of simulationPayload.events) {
+            if (event.eventType === EventTypes.IBlockMine) {
+              multi.push([event.level + 1, event.processedTransactions,
+                simulationPayload.segWitMaxTransactionsPerBlock !== 0 ?
+                              simulationPayload.segWitMaxTransactionsPerBlock :
+                              simulationPayload.nonSegWitMaxTransactionsPerBlock]);
+            }
           }
         }
       } else {
-            // no max limit
+                // no max limit
         multi = [['Blocks', 'Processed Transactions']];
 
-            // I think it is better to have only one calculation of max processed transactions,
-            // therefore this value is not calculated here, but instead uses a value from the server.
-            // This makes it easier to change the implementation in just one place.
+                // I think it is better to have only one calculation of max processed transactions,
+                // therefore this value is not calculated here, but instead uses a value from the server.
+                // This makes it easier to change the implementation in just one place.
 
         for (const event of simulationPayload.events) {
           if (event.eventType === EventTypes.IBlockMine) {

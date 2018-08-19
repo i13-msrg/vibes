@@ -23,7 +23,7 @@ export interface ISimulationPayload {
   segWitMaxBlockWeight: number;
   transactions: (ITransaction)[];
   totalNumberOfNodes: number;
-  orphans: number;
+  staleBlocks: number;
   attackSucceeded: number;
   successfulAttackInBlocks: number;
   probabilityOfSuccessfulAttack: number;
@@ -38,6 +38,9 @@ export interface ISimulationPayload {
   tps: number;
   avgBlockTime: number;
   simulationStart: string;
+  confirmedFloodAttackTransactions: number;
+  floodAttackSpentTransactionFees: number;
+  confirmedTransactionsBelowTargetTransactionFee: number;
 }
 
 export default function fetchSimulationPayload(configuration: IConfiguration): Promise<ISimulationPayload> {

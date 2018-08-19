@@ -161,6 +161,22 @@ class MasterActor extends Actor with LazyLogging{
               // interval of mining
               currentNodeActors = Random.shuffle(currentNodeActors)
               val actorsVector = currentNodeActors.toVector
+
+              // checks if flood attack is active
+              if (VConf.floodAttackTransactionFee > 0) {
+                logger.debug(s"VConf.floodTransactionPool... ${VConf.floodAttackTransactionPool}")
+
+                (1 to VConf.floodAttackTransactionPool).foreach { _ =>
+                  val randomActorFrom = actorsVector(Random.nextInt(actorsVector.size))
+                  val randomActorTo = actorsVector(Random.nextInt(actorsVector.size))
+                  val now = priorityWorkRequest.timestamp
+                  randomActorFrom ! NodeActions.IssueTransactionFloodAttack(
+                    randomActorTo,
+                    now.plusMillis(50)
+                  )
+                }
+              }
+
               // distribute randomly requests to NodeActors to create throughput number of transactions within blockTime
               (1 to VConf.throughPut).foreach { index =>
                 val randomActorFrom = actorsVector(Random.nextInt(actorsVector.size))
@@ -175,7 +191,6 @@ class MasterActor extends Actor with LazyLogging{
                   now.plusMillis(VConf.blockTime * 1000 / (index + 1))
                 )
               }
-
               // clear all workRequests
               workRequests = SortedSet.empty
               // let the first actor mine the block

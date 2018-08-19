@@ -51,7 +51,8 @@ export default class TransactionSummary extends React.Component<ITransactionSumm
                         SegWit theoretical block weight limit
                         </div>
                         <div className="transaction-summary__result">
-                            {segWitTheoreticalMaxBlockSize !== null ?  segWitTheoreticalMaxBlockSize.toLocaleString() : 0} B
+                            {segWitTheoreticalMaxBlockSize !== null ?
+                                segWitTheoreticalMaxBlockSize.toLocaleString() : 0} B
                         </div>
                     </li>
                     : '' }
@@ -70,7 +71,8 @@ export default class TransactionSummary extends React.Component<ITransactionSumm
                             Non-SegWit maximal block size
                         </div>
                         <div className="transaction-summary__result">
-                            {nonSegWitMaxBlockSize !== null ?  (nonSegWitMaxBlockSize * 1000).toLocaleString() : 0} B
+                            {(nonSegWitMaxBlockSize !== null && nonSegWitMaxBlockSize !== 0) ?
+                                (nonSegWitMaxBlockSize * 1000).toLocaleString() : '∞'} B
                         </div>
                     </li>
                     <li className="simulation-summary__list-item">
@@ -96,7 +98,8 @@ export default class TransactionSummary extends React.Component<ITransactionSumm
                             Non-SegWit maximal transactions per block
                         </div>
                         <div className="transaction-summary__result">
-                            {nonSegWitMaxTransactionsPerBlock}
+                            {(nonSegWitMaxTransactionsPerBlock !== null && nonSegWitMaxTransactionsPerBlock !== 0) ?
+                                nonSegWitMaxTransactionsPerBlock : '∞'}
                         </div>
                     </li>
                     {isSegWitEnabled ?
@@ -114,7 +117,7 @@ export default class TransactionSummary extends React.Component<ITransactionSumm
                             Non-SegWit maximal transactions per second
                         </div>
                         <div className="transaction-summary__result">
-                            {nonSegWitMaxTPS}
+                            {(nonSegWitMaxTPS !== null && nonSegWitMaxTPS !== 0) ? nonSegWitMaxTPS : '∞'}
                         </div>
                     </li>
                     <li className="simulation-summary__list-item">

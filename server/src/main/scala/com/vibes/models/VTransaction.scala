@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorRef
 import com.typesafe.scalalogging.LazyLogging
-import com.vibes.utils.VExecution
+import com.vibes.utils.{VConf, VExecution}
 import io.circe.{Encoder, Json}
 import org.joda.time.DateTime
 import io.circe.syntax._
@@ -22,6 +22,7 @@ class VTransaction(
   var confirmation: Boolean,
   var creationLevel: Int,
   var confirmationLevel: Int,
+  var isFloodAttack: Boolean,
   private val recipients: ListBuffer[VRecipient]
 ) {
   def canEqual(a: Any): Boolean = a.isInstanceOf[VTransaction]
@@ -46,9 +47,10 @@ class VTransaction(
     confirmation: Boolean = confirmation,
     creationLevel: Int = creationLevel,
     confirmationLevel: Int = confirmationLevel,
+    isFloodAttack: Boolean = isFloodAttack,
     recipients: ListBuffer[VRecipient] = recipients,
   ): VTransaction = {
-    new VTransaction(id, origin, recipient, amount, transactionFee, confirmation, creationLevel, confirmationLevel, recipients)
+    new VTransaction(id, origin, recipient, amount, transactionFee, confirmation, creationLevel, confirmationLevel, isFloodAttack, recipients)
   }
 
   def createExecutableWorkRequest(
@@ -77,6 +79,7 @@ object VTransaction extends LazyLogging{
       ("confirmation", transaction.confirmation.asJson),
       ("confirmationLevel", transaction.confirmationLevel.asJson),
       ("creationLevel", transaction.creationLevel.asJson),
+      ("isFloodAttack", transaction.isFloodAttack.asJson),
     )
   }
 
@@ -93,11 +96,14 @@ object VTransaction extends LazyLogging{
     potentialTransactions.diff(confirmedTransactions)
   }
 
-  def createOne(from: ActorRef, to: ActorRef, timestamp: DateTime, creationLevel: Int): VTransaction = {
+  def createOne(from: ActorRef, to: ActorRef, timestamp: DateTime, creationLevel: Int, isFloodAttack: Boolean): VTransaction = {
     val amount = Random.nextInt(1000)
-    val transactionFee = Random.nextInt(125)
+    var transactionFee = Random.nextInt(125)
+    if (isFloodAttack) {
+      transactionFee = VConf.floodAttackTransactionFee
+    }
     val confirmation = false
-    val confirmationLevel: Int = 0
+    val confirmationLevel: Int = -1
     new VTransaction(
       UUID.randomUUID().toString,
       from,
@@ -107,6 +113,7 @@ object VTransaction extends LazyLogging{
       confirmation,
       creationLevel,
       confirmationLevel,
+      isFloodAttack,
       ListBuffer.empty
     )
   }

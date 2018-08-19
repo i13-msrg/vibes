@@ -15,7 +15,7 @@ interface ISimulationSummaryProps {
   firstBlockNumberOfRecipients: number;
   lastBlockNumberOfRecipients: number;
   totalNumberOfNodes: number;
-  orphans: number;
+  staleBlocks: number;
   strategy: string;
   avgBlockTime: number;
 }
@@ -26,7 +26,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
     const {
       duration,
       longestChainLength,
-      orphans,
+      staleBlocks,
       longestChainSize,
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
@@ -72,10 +72,10 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
                     </li>
                     <li className="simulation-summary__list-item">
                         <div className="simulation-summary__text">
-                            Total number of orphan blocks
+                            Total number of stale blocks
                         </div>
                         <div className="simulation-summary__result">
-                            {orphans}
+                            {staleBlocks}
                         </div>
                     </li>
                     <li className="simulation-summary__list-item">

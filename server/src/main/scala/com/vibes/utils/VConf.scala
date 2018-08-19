@@ -16,12 +16,13 @@ object VConf {
 
   var strategy = "GENERIC_SIMULATION" // mb
 
-  // variables for Proof of Work
+  // variables for Bitcoin-like Simulation
   var maxBlockSize = 1000 // kb
   var maxBlockWeight = 4000 // kb https://en.bitcoin.it/wiki/Weight_units
   var segWitEnabled = true // https://en.bitcoin.it/wiki/Segregated_Witness
   var networkBandwidth = 1 // mb/s
   var distanceBetweenNodes = 1 // km
+  var nonSegWitMaxTransactionsPerBlock = 2147483647
 
   // variables for Alternative History Attack
   var isAlternativeHistoryAttack = false
@@ -42,8 +43,11 @@ object VConf {
   var attackSuccessfulInBlocks = 0
 
   // SegWit
-  var transactionFee = 0 // Attacker's target transaction fee in Satoshi
+  var segWitActive = false
+  var transactionWeight = 0 // transaction weight in weight units
+  var segWitMaxTransactionsPerBlock = 0
 
   // Flood Attack
-  var transactionWeight = 0 // transaction weight in weight units
+  var floodAttackTransactionFee = 0 // attacker's target transaction fee in Satoshi
+  var floodAttackTransactionPool = 0 // current transaction pool size of transactions with fee bigger or equal to flood attack target transaction fee
 }

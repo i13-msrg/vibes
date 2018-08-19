@@ -103,6 +103,7 @@
 }
 
 .simulation-processed-transactions__grid {
+  margin: 10px auto;
   display: grid;
   grid-row-gap: 10px;
   grid-template-columns: 688px 313px;
@@ -179,4 +180,36 @@
   width: 982px;
   height: 264px;
   grid-area: simulation-time-between-blocks;
+}
+
+.simulation-flood-attack__grid {
+  margin: 10px auto;
+  display: grid;
+  grid-row-gap: 10px;
+  grid-template-columns: 688px 313px;
+  grid-template-rows: auto;
+  grid-template-areas:
+          "simulation-flood-attack flood-attack_summary"
+}
+
+.flood-attack__summary {
+  padding: 20px;
+  height: 300px;
+  width: 294px;
+  grid-area: flood-attack_summary;
+}
+
+.simulation-flood-attack__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-flood-attack {
+  padding: 20px;
+  width: 631px;
+  height: 300px;
+  grid-area: simulation-flood-attack;
 }

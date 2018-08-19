@@ -64,7 +64,7 @@ case class ReducerIntermediateResult(
   segWitMaxTPS: Double,
   segWitMaxBlockWeight: Int,
   transactions: List[VTransaction],
-  orphans: Int,
+  staleBlocks: Int,
   attackSucceeded: Int,
   successfulAttackInBlocks: Int,
   probabilityOfSuccessfulAttack: Double,
@@ -78,7 +78,10 @@ case class ReducerIntermediateResult(
   k: Int,
   actualTPS: Double,
   avgBlockTime: Int,
-  simulationStart: String
+  simulationStart: String,
+  confirmedFloodAttackTransactions: Int,
+  floodAttackSpentTransactionFees: Int,
+  confirmedTransactionsBelowTargetTransactionFee: Int
 )
 
 object ReducerActor extends LazyLogging {
@@ -176,28 +179,24 @@ object ReducerActor extends LazyLogging {
 
     // works only for constant transaction size and weight, otherwise an array is necessary
     var segWitMaxBlockWeight = 0 // nonSegWitMaxBlockSize = VConf.maxBlockSize
-    var segWitMaxTransactionsPerBlock = 0
-    var nonSegWitMaxTransactionsPerBlock = 2147483647
     var maxTransactionsPerBlock = 0
     var segWitMaxTPS: Double = 0
     var nonSegWitMaxTPS: Double = 0
     if (VConf.transactionSize != 0) {
       // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
-      nonSegWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
-      maxTransactionsPerBlock = nonSegWitMaxTransactionsPerBlock
-      nonSegWitMaxTPS = nonSegWitMaxTransactionsPerBlock.toDouble / VConf.blockTime.toDouble
+      maxTransactionsPerBlock = VConf.nonSegWitMaxTransactionsPerBlock
+      nonSegWitMaxTPS = VConf.nonSegWitMaxTransactionsPerBlock.toDouble / VConf.blockTime.toDouble
       nonSegWitMaxTPS = (math rint nonSegWitMaxTPS * 1000) / 1000
     }
     if (VConf.maxBlockWeight != 0 && VConf.transactionWeight != 0) {
-      segWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockWeight / VConf.transactionWeight).toInt
-      segWitMaxBlockWeight = segWitMaxTransactionsPerBlock * VConf.transactionSize
-      maxTransactionsPerBlock = segWitMaxTransactionsPerBlock
-      segWitMaxTPS = segWitMaxTransactionsPerBlock.toDouble / VConf.blockTime.toDouble
+      segWitMaxBlockWeight = VConf.segWitMaxTransactionsPerBlock * VConf.transactionSize
+      maxTransactionsPerBlock = VConf.segWitMaxTransactionsPerBlock
+      segWitMaxTPS = VConf.segWitMaxTransactionsPerBlock.toDouble / VConf.blockTime.toDouble
       segWitMaxTPS = (math rint segWitMaxTPS * 1000) / 1000
     }
-    logger.debug(s"MAXIMAL POSSIBLE SEGWIT TRANSACTIONS PER BLOCK... $segWitMaxTransactionsPerBlock")
+    logger.debug(s"MAXIMAL POSSIBLE SEGWIT TRANSACTIONS PER BLOCK... ${VConf.segWitMaxTransactionsPerBlock}")
     logger.debug(s"MAXIMAL POSSIBLE SEGWIT BLOCK SIZE... $segWitMaxBlockWeight WEIGHT")
-    logger.debug(s"MAXIMAL POSSIBLE NONSEGWIT TRANSACTIONS PER BLOCK... $nonSegWitMaxTransactionsPerBlock")
+    logger.debug(s"MAXIMAL POSSIBLE NONSEGWIT TRANSACTIONS PER BLOCK... ${VConf.nonSegWitMaxTransactionsPerBlock}")
     logger.debug(s"MAXIMAL SEGWIT TPS... $segWitMaxTPS")
     logger.debug(s"MAXIMAL NONSEGWIT TPS... $nonSegWitMaxTPS")
 
@@ -213,6 +212,7 @@ object ReducerActor extends LazyLogging {
     logger.debug(s"TRANSACTION SIZE OF LAST NODE TRANSACTION POOL... ${lastNode.transactionPool.size}")
     var transactions: List[VTransaction] = longestChain.flatMap(_.transactions) ++ lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet)
     logger.debug(s"TRANSACTION SIZE OF LONGEST CHAIN... ${longestChain.flatMap(_.transactions).size}")
+    logger.debug(s"LAST NODE... ${lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet).size}")
     logger.debug(s"TRANSACTION SIZE... ${transactions.size}")
     transactions = transactions.sortBy((transaction: VTransaction) => transaction.transactionFee)
 
@@ -224,9 +224,6 @@ object ReducerActor extends LazyLogging {
     val avgBlockTimeDouble: Double = secondsBetween(VConf.simulationStart, longestChain.head.timestamp).getSeconds.toDouble / longestChain.size
     val avgBlockTime: Int = (math rint avgBlockTimeDouble).toInt
     logger.debug(s"AVG BLOCK TIME... $avgBlockTime... SHOULD BE ${VConf.blockTime}")
-
-    val orphans = blocks.size - longestChainLength
-    logger.debug(s"ORPHANS... $orphans")
 
     val simulationStart: String = VConf.simulationStart.toString()
     logger.debug(s"SIMULATION START... $simulationStart")
@@ -289,6 +286,27 @@ object ReducerActor extends LazyLogging {
       goodBlockchainLength = VConf.goodChainLength
     }
 
+    var staleBlocks = 0
+    if(VConf.attackSuccessful) {
+      staleBlocks = blocks.size - longestChainLength - goodBlockchainLength
+    } else {
+      // malicious chain can be longer despite not winning
+      staleBlocks = Math.max(blocks.size - longestChainLength - maliciousBlockchainLength,0)
+    }
+    logger.debug(s"STALE BLOCKS... $staleBlocks")
+
+    var confirmedFloodAttackTransactions = 0
+    var floodAttackSpentTransactionFees = 0
+    var confirmedTransactionsBelowTargetTransactionFee = 0
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.floodAttackTransactionFee > 0) {
+      confirmedFloodAttackTransactions = longestChain.flatMap(_.transactions).count(_.isFloodAttack)
+      logger.debug(s"CONFIRMED FLOOD ATTACK TRANSACTIONS... $confirmedFloodAttackTransactions")
+      floodAttackSpentTransactionFees = longestChain.flatMap(_.transactions).count(_.isFloodAttack) * VConf.floodAttackTransactionFee
+      logger.debug(s"SPENT TRANSACTIONS FEES... $floodAttackSpentTransactionFees IN SATOSHI")
+      confirmedTransactionsBelowTargetTransactionFee = longestChain.flatMap(_.transactions).count(_.transactionFee < VConf.floodAttackTransactionFee)
+      logger.debug(s"CONFIRMED TRANSACTIONS BELOW TARGET TRANSACTION FEE... $confirmedTransactionsBelowTargetTransactionFee")
+    }
+
     ReducerIntermediateResult(
       events.sortBy(_.timestamp),
       duration,
@@ -299,13 +317,13 @@ object ReducerActor extends LazyLogging {
       timesAvgNoOutliers,
       firstBlockNumberOfRecipients,
       lastBlockNumberOfRecipients,
-      nonSegWitMaxTransactionsPerBlock,
-      segWitMaxTransactionsPerBlock,
+      VConf.nonSegWitMaxTransactionsPerBlock,
+      VConf.segWitMaxTransactionsPerBlock,
       nonSegWitMaxTPS,
       segWitMaxTPS,
       segWitMaxBlockWeight,
       transactions,
-      orphans,
+      staleBlocks,
       attackSucceeded,
       successfulAttackInBlocks,
       probabilityOfSuccessfulAttack,
@@ -319,7 +337,10 @@ object ReducerActor extends LazyLogging {
       k,
       actualTPS,
       avgBlockTime,
-      simulationStart
+      simulationStart,
+      confirmedFloodAttackTransactions,
+      floodAttackSpentTransactionFees,
+      confirmedTransactionsBelowTargetTransactionFee
     )
   }
 }

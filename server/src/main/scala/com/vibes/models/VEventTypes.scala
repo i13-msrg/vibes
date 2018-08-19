@@ -64,7 +64,7 @@ case class ReducerResult(
   segWitMaxBlockWeight: Int,
   transactions: List[Json],
   totalNumberOfNodes: Int,
-  orphans: Int,
+  staleBlocks: Int,
   attackSucceeded: Int,
   successfulAttackInBlocks: Int,
   probabilityOfSuccessfulAttack: Double,
@@ -78,7 +78,10 @@ case class ReducerResult(
   k: Int,
   tps: Double,
   avgBlockTime: Int,
-  simulationStart: String
+  simulationStart: String,
+  confirmedFloodAttackTransactions: Int,
+  floodAttackSpentTransactionFees: Int,
+  confirmedTransactionsBelowTargetTransactionFee: Int
 )
 
 object ReducerResult {

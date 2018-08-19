@@ -87,8 +87,8 @@ class NodeActor (
     executables += exWorkRequest -> value
   }
 
-  private def addExecutableForIssueTransaction(toActor: ActorRef, timestamp: DateTime): Unit = {
-    val transaction = VTransaction.createOne(self, toActor, timestamp, node.blockchain.size)
+  private def addExecutableForIssueTransaction(toActor: ActorRef, timestamp: DateTime, isFloodAttack: Boolean): Unit = {
+    val transaction = VTransaction.createOne(self, toActor, timestamp, node.blockchain.size, isFloodAttack)
     val exWorkRequest =
       transaction.createExecutableWorkRequest(self, self, timestamp, VExecution.ExecutionType.IssueTransaction)
     val value = () => {
@@ -322,7 +322,7 @@ class NodeActor (
       node = node.exchangeNeighbours(neighbours)
 
     case NodeActions.IssueTransaction(toActor, time) =>
-      addExecutableForIssueTransaction(toActor, time)
+      addExecutableForIssueTransaction(toActor, time, false)
 
     case NodeActions.ReceiveTransaction(origin, transaction, timestamp) =>
       if (node.isTransactionNew(transaction)) {
@@ -335,6 +335,9 @@ class NodeActor (
 
     case NodeActions.End =>
       reducerActor ! ReducerActions.ReceiveNode(node)
+
+    case NodeActions.IssueTransactionFloodAttack(toActor, time) =>
+      addExecutableForIssueTransaction(toActor, time, true)
   }
 }
 

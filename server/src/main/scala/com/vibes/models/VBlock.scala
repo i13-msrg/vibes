@@ -103,6 +103,7 @@ object VBlock extends LazyLogging {
         // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
         maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
       } else {
+        // any number of transactions is accepted
         maxTransactionsPerBlock = node.transactionPool.size
       }
 
@@ -117,6 +118,11 @@ object VBlock extends LazyLogging {
     } else {
       maxTransactionsPerBlock = node.transactionPool.size
       processedTransactionsInBlock = node.transactionPool
+    }
+
+    // sets flood transaction pool to ensure buffer
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.floodAttackTransactionFee > 0 ) {
+      VConf.floodAttackTransactionPool = processedTransactionsInBlock.count(_.isFloodAttack)
     }
 
     VBlock(
