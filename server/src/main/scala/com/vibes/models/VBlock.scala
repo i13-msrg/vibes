@@ -100,8 +100,7 @@ object VBlock extends LazyLogging {
         maxTransactionsPerBlock = Math.floor(VConf.maxBlockWeight / VConf.transactionWeight).toInt
       } else if (VConf.maxBlockSize != 0) {
         // SegWit is disabled
-        // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
-        maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
+        maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
       } else {
         // any number of transactions is accepted
         maxTransactionsPerBlock = node.transactionPool.size

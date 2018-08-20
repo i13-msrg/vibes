@@ -167,8 +167,7 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
 
                         // sets up block limit and segwit
                         if (VConf.transactionSize != 0) {
-                          // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
-                          VConf.nonSegWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
+                          VConf.nonSegWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
                           VConf.segWitActive = false
                           VConf.segWitMaxTransactionsPerBlock = 0
                           logger.debug(s"SegWitInActive... ${VConf.nonSegWitMaxTransactionsPerBlock}")

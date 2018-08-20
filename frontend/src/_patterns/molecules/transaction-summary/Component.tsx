@@ -72,7 +72,7 @@ export default class TransactionSummary extends React.Component<ITransactionSumm
                         </div>
                         <div className="transaction-summary__result">
                             {(nonSegWitMaxBlockSize !== null && nonSegWitMaxBlockSize !== 0) ?
-                                (nonSegWitMaxBlockSize * 1000).toLocaleString() : '∞'} B
+                                (nonSegWitMaxBlockSize).toLocaleString() : '∞'} B
                         </div>
                     </li>
                     <li className="simulation-summary__list-item">

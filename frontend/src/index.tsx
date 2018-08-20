@@ -123,7 +123,7 @@ class Vibes extends React.Component<{}, IVibesState> {
         neighboursDiscoveryInterval: 3000, // seconds
         latency: 900, // ms (latency + transfer + verification time),
         transactionSize: 1000, // B
-        maxBlockSize: 50, // KB
+        maxBlockSize: 50000, // B
         throughput: 50,  // average number of transactions per blockTime
         transactionWeight: 2000, // transaction weight of SegWit transaction
         maxBlockWeight: 200000, // weight
@@ -135,23 +135,23 @@ class Vibes extends React.Component<{}, IVibesState> {
 
           // realistic settings
           /**
-           * blockTime: 567, // seconds
-           * numberOfNeighbours: 4,
-           * numberOfNodes: 20,
-           * simulateUntil: Date.now() + 6 * 3600000, // 6 hours from now
-           * transactionSize: 218, // B
-           * throughput: 105,  // average number of transactions per blockTime
+           * blockTime: 600, // seconds
+           * numberOfNeighbours: 10,
+           * numberOfNodes: 10500,
+           * simulateUntil: Date.now() + 0.5 * 3600000, // half hour
+           * transactionSize: 600, // B
+           * throughput: 1300,  // average number of transactions per blockTime
            * latency: 900, // ms (latency + transfer + verification time),
            * neighboursDiscoveryInterval: 3000, // seconds
-           * maxBlockSize: 1000, // KB
+           * maxBlockSize: 1000000, // B
            * maxBlockWeight: 4000000, // weight
            * networkBandwidth: 1, // MB per second
            * strategy: strategy.toString(),
            * transactionPropagationDelay: 150, // ms
-           * hashRate: 30, // Percentage of total network
-           * confirmations: 4, // Blocks
+           * hashRate: 0, // Percentage of total network
+           * confirmations: 0, // Blocks
            * transactionFee: 0, // target transaction fee of an attacker in Satoshi
-           * transactionWeight: 542, // transaction weight of SegWit transaction
+           * transactionWeight: 1200, // transaction weight of SegWit transaction
            */
       };
       this.setState({ configuration });

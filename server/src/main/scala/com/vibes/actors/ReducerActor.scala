@@ -177,6 +177,9 @@ object ReducerActor extends LazyLogging {
 
     logger.debug(s"TOTAL TRANSACTION POOL... ${longestChain.head.transactionPoolSize}")
 
+    val simulationStart: String = VConf.simulationStart.toString()
+    logger.debug(s"SIMULATION START... $simulationStart")
+
     // works only for constant transaction size and weight, otherwise an array is necessary
     var segWitMaxBlockWeight = 0 // nonSegWitMaxBlockSize = VConf.maxBlockSize
     var maxTransactionsPerBlock = 0
@@ -195,10 +198,15 @@ object ReducerActor extends LazyLogging {
       segWitMaxTPS = (math rint segWitMaxTPS * 1000) / 1000
     }
     logger.debug(s"MAXIMAL POSSIBLE SEGWIT TRANSACTIONS PER BLOCK... ${VConf.segWitMaxTransactionsPerBlock}")
-    logger.debug(s"MAXIMAL POSSIBLE SEGWIT BLOCK SIZE... $segWitMaxBlockWeight WEIGHT")
+    logger.debug(s"MAXIMAL POSSIBLE SEGWIT BLOCK WEIGHT... $segWitMaxBlockWeight")
     logger.debug(s"MAXIMAL POSSIBLE NONSEGWIT TRANSACTIONS PER BLOCK... ${VConf.nonSegWitMaxTransactionsPerBlock}")
+
+    // tps stuff
     logger.debug(s"MAXIMAL SEGWIT TPS... $segWitMaxTPS")
     logger.debug(s"MAXIMAL NONSEGWIT TPS... $nonSegWitMaxTPS")
+    var actualTPS: Double = longestChainNumberTransactions.toDouble / secondsBetween(VConf.simulationStart, VConf.simulateUntil).getSeconds.toDouble
+    actualTPS = (math rint actualTPS * 1000) / 1000
+    logger.debug(s"AVERAGE TPS... $actualTPS")
 
     events = longestChain.flatMap { block =>
       var blockEvents: List[VEventType] = List.empty
@@ -209,24 +217,16 @@ object ReducerActor extends LazyLogging {
       blockEvents
     }
 
+    // logger.debug(s"LAST NODE... ${lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet).size}")
     logger.debug(s"TRANSACTION SIZE OF LAST NODE TRANSACTION POOL... ${lastNode.transactionPool.size}")
     var transactions: List[VTransaction] = longestChain.flatMap(_.transactions) ++ lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet)
     logger.debug(s"TRANSACTION SIZE OF LONGEST CHAIN... ${longestChain.flatMap(_.transactions).size}")
-    logger.debug(s"LAST NODE... ${lastNode.transactionPool.diff(longestChain.flatMap(_.transactions).toSet).size}")
     logger.debug(s"TRANSACTION SIZE... ${transactions.size}")
     transactions = transactions.sortBy((transaction: VTransaction) => transaction.transactionFee)
-
-
-    var actualTPS: Double = longestChainNumberTransactions.toDouble / secondsBetween(VConf.simulationStart, VConf.simulateUntil).getSeconds.toDouble
-    actualTPS = (math rint actualTPS * 1000) / 1000
-    logger.debug(s"TPS... $actualTPS")
 
     val avgBlockTimeDouble: Double = secondsBetween(VConf.simulationStart, longestChain.head.timestamp).getSeconds.toDouble / longestChain.size
     val avgBlockTime: Int = (math rint avgBlockTimeDouble).toInt
     logger.debug(s"AVG BLOCK TIME... $avgBlockTime... SHOULD BE ${VConf.blockTime}")
-
-    val simulationStart: String = VConf.simulationStart.toString()
-    logger.debug(s"SIMULATION START... $simulationStart")
 
     var successfulAttackInBlocks = 0
     var probabilityOfSuccessfulAttack : Double = 0
@@ -282,13 +282,20 @@ object ReducerActor extends LazyLogging {
         logger.debug(s"ATTACK NEITHER SUCCESSFUL NOR FAILED")
       }
 
+      // zero confirmations -> always successful attack
+      if (VConf.confirmations == 0) {
+        logger.debug(s"ATTACK SUCCESSFUL DUE TO ZERO CONFIRMATIONS")
+      }
+
       maliciousBlockchainLength = VConf.evilChainLength
       goodBlockchainLength = VConf.goodChainLength
+      logger.debug(s"GOOD BLOCKCHAIN LENGTH... $goodBlockchainLength")
+      logger.debug(s"EVIL BLOCKCHAIN LENGTH... $maliciousBlockchainLength")
     }
 
     var staleBlocks = 0
     if(VConf.attackSuccessful) {
-      staleBlocks = blocks.size - longestChainLength - goodBlockchainLength
+      staleBlocks = Math.max(blocks.size - longestChainLength - goodBlockchainLength,0)
     } else {
       // malicious chain can be longer despite not winning
       staleBlocks = Math.max(blocks.size - longestChainLength - maliciousBlockchainLength,0)

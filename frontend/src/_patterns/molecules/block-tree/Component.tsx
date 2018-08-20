@@ -74,7 +74,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             );
     }
 
-    const blocktreeBuffer = [];
+    const blockTreeBuffer = [];
     for (let i = 1; i < longerLength; i = i + 1) {
       if (attackSucceeded !== 1) {
         if (goodBlockchainLength > i && maliciousBlockchainLength > i) {
@@ -86,7 +86,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
                             <tr key={i + '-arrow'}>
@@ -95,7 +95,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           }
           const row = (
                         <tr key={i + '-row'}>
@@ -104,7 +104,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                             <td>{i + 1}</td>
                         </tr>
                     );
-          blocktreeBuffer.unshift(row);
+          blockTreeBuffer.unshift(row);
         } else if (maliciousBlockchainLength > i) {
           if (i === 1) {
             const arrow = (
@@ -114,7 +114,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
                             <tr key={i + '-arrow'}>
@@ -123,7 +123,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           }
           const row = (
                         <tr key={i + '-row'}>
@@ -132,7 +132,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                             <td>{i + 1}</td>
                         </tr>
                     );
-          blocktreeBuffer.unshift(row);
+          blockTreeBuffer.unshift(row);
         } else if (goodBlockchainLength > i) {
           if (i === 1) {
             const arrow = (
@@ -142,7 +142,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
                             <tr key={i + '-arrow'}>
@@ -151,7 +151,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           }
 
           const row = (
@@ -161,7 +161,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                             <td>{i + 1}</td>
                         </tr>
                     );
-          blocktreeBuffer.unshift(row);
+          blockTreeBuffer.unshift(row);
         }
       } else {
         if (goodBlockchainLength > i && maliciousBlockchainLength > i) {
@@ -173,7 +173,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
                             <tr key={i + '-arrow'}>
@@ -182,7 +182,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           }
           const row = (
                         <tr key={i + '-row'}>
@@ -191,7 +191,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                             <td>{i + 1}</td>
                         </tr>
                     );
-          blocktreeBuffer.unshift(row);
+          blockTreeBuffer.unshift(row);
         } else {
           if (i === 1) {
             const arrow = (
@@ -201,7 +201,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
                             <tr key={i + '-arrow'}>
@@ -210,7 +210,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                                 <td/>
                             </tr>
                         );
-            blocktreeBuffer.unshift(arrow);
+            blockTreeBuffer.unshift(arrow);
           }
           const row = (
                         <tr key={i + '-row'}>
@@ -219,7 +219,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                             <td>{i + 1}</td>
                         </tr>
                     );
-          blocktreeBuffer.unshift(row);
+          blockTreeBuffer.unshift(row);
         }
       }
     }
@@ -236,7 +236,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
                         <td>Block Level</td>
                     </tr>
 
-                    {blocktreeBuffer}
+                    {blockTreeBuffer}
 
                     <tr>
                         <td colSpan={2}>{validBlock}</td>

@@ -17,8 +17,8 @@ object VConf {
   var strategy = "GENERIC_SIMULATION" // mb
 
   // variables for Bitcoin-like Simulation
-  var maxBlockSize = 1000 // kb
-  var maxBlockWeight = 4000 // kb https://en.bitcoin.it/wiki/Weight_units
+  var maxBlockSize = 1000000 // b
+  var maxBlockWeight = 4000000 // weight units https://en.bitcoin.it/wiki/Weight_units
   var segWitEnabled = true // https://en.bitcoin.it/wiki/Segregated_Witness
   var networkBandwidth = 1 // mb/s
   var distanceBetweenNodes = 1 // km

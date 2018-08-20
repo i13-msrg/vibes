@@ -84,7 +84,7 @@ export default class ConfigurationPlate extends React.Component<IConfigurationPl
       configurationKey: 'maxBlockSize',
       icon: maxBlockIcon,
       placeholder: 'Max block size',
-      title: 'Maximum block size in KBs',
+      title: 'Maximum block size in Bs',
     },
     {
       configurationKey: 'networkBandwidth',
