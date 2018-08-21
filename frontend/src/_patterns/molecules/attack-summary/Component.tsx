@@ -43,16 +43,15 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                         </div>
                         <div className="attack-summary__result">
                             {(() => {
-                                if (confirmations === 0) {
-                                    return 'was successful';
-                                } else {
-                                    switch (attackSucceeded) {
-                                        case -1:    return 'failed';
-                                        case 0:     return 'neither failed nor succeeded';
-                                        case 1:     return 'was successful';
-                                        default:    return '';
-                                    }
-                                }
+                              if (confirmations === 0) {
+                                return 'was successful';
+                              }
+                              switch (attackSucceeded) {
+                                case -1:    return 'failed';
+                                case 0:     return 'neither failed nor succeeded';
+                                case 1:     return 'was successful';
+                                default:    return '';
+                              }
                             })()}
                         </div>
                     </li>

@@ -630,7 +630,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
               pendingTransactions = pendingTransactions + 1;
             }
           }
-          floodAttackData.push([event.level + 1, pendingTransactions, event.transactionPoolSize, pendingFloodAttackTransactions]);
+          floodAttackData.push(
+              [event.level + 1, pendingTransactions, event.transactionPoolSize, pendingFloodAttackTransactions]);
         }
       }
       return floodAttackData;
