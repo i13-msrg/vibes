@@ -63,7 +63,7 @@ class MasterActor extends Actor with LazyLogging{
   /**
     * Used for detailed logging to know what is happening in very large scale simulations
     */
-  private var detailedLoggingEnabled: Boolean = true
+  private var detailedLoggingEnabled: Boolean = false
 
   /**
     * Makes sure to update neighbours table at roughly lastNeighbourDiscoveryDate time intervals
@@ -161,7 +161,7 @@ class MasterActor extends Actor with LazyLogging{
 
             // if simulation over, announce end
             if (VConf.simulateUntil.isBefore(priorityWorkRequest.timestamp)) {
-              logger.debug(s"Announce End ${self.path}")
+              logger.debug(s"Announce End ${self.path} ${priorityWorkRequest.timestamp}")
               nodeRepoActor ! NodeRepoActions.AnnounceEnd
             } else if (priorityWorkRequest.executionType == VExecution.ExecutionType.MineBlock) {
               // if mining of a block should be performed,
@@ -186,7 +186,7 @@ class MasterActor extends Actor with LazyLogging{
               }
 
               // distribute randomly requests to NodeActors to create throughput number of transactions within blockTime
-              logger.debug(s"Transactions are requested ${self.path}")
+              logger.debug(s"Transactions are requested ${priorityWorkRequest.timestamp}")
               (1 to VConf.throughPut).foreach { index =>
                 val randomActorFrom = actorsVector(Random.nextInt(actorsVector.size))
                 val randomActorTo   = actorsVector(Random.nextInt(actorsVector.size))
@@ -218,7 +218,7 @@ class MasterActor extends Actor with LazyLogging{
               // and now A2 will be able to correctly workRequest with the most recent peace of executable on top
               // (which is propagate transaction)
               if (detailedLoggingEnabled) {
-                logger.debug(s"Transactions are propagated ${self.path}")
+                logger.debug(s"Transactions are propagated ${priorityWorkRequest.timestamp}")
               }
               var propagateWorkRequests: List[VExecution.WorkRequest] =
                 List.empty
@@ -262,7 +262,7 @@ class MasterActor extends Actor with LazyLogging{
               // The "from" actor will propagate the block and then cast a new workRequest, the receiving actor
               // will receive the block and in ReceiveBlock cast a new workRequest as well
               if (detailedLoggingEnabled) {
-                logger.debug(s"Blocks are propagated ${self.path}")
+                logger.debug(s"Blocks are propagated ${priorityWorkRequest.timestamp}")
               }
               workRequests = workRequests.tail
               workRequests = workRequests.filter(_.fromActor != priorityWorkRequest.toActor)

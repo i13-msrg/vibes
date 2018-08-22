@@ -140,10 +140,10 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
 
                     <li className="attack-summary__list-item">
                         <div className="attack-summary__text">
-                            Maximum safe transaction value
+                            Maximal safe transaction value
                         </div>
                         <div className="attack-summary__result">
-                            {maximumSafeTransactionValue} BTC
+                            {maximumSafeTransactionValue === 2147483647 ? '∞' : maximumSafeTransactionValue} BTC
                         </div>
                     </li>
 
