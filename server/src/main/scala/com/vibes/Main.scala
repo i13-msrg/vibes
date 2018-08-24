@@ -164,7 +164,6 @@ object Main extends App with FailFastCirceSupport with LazyLogging {
                           VConf.isAlternativeHistoryAttack = false
                         }
 
-
                         // sets up block limit and segwit
                         if (VConf.transactionSize != 0) {
                           VConf.nonSegWitMaxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt

@@ -1,11 +1,13 @@
 \chapter{Approach}\label{chapter:approach}
-In this chapter the changes to the existing VIBES framework are presented one by one. First the reasons for each improvement are described. Then the prerequisites for every change and the design and architecture are shown. Finally the implementation is explained. The implementation is split into frontend and backend. Since the frontend is only displaying the information from the backend the focus is on the backend, where the changes to the actual behaviour of the simlation are done. The frontend, the console output and the log file show the results of the backend and can therefore be used for the evaluation.
+In this chapter, the changes to the existing VIBES framework are presented one by one. The reasons for each improvement are described. The prerequisites for every change and the design and architecture are shown. The implementation details are explained.
+
+The implementation is split into frontend and backend. Since the frontend is only displaying the information from the backend, the focus of this thesis is on the backend where the changes to the actual behaviour of the simulation are done. The frontend, the console output, and the log file show the results of the backend and can be used for the evaluation.
 
 \section{Bitcoin-like Blockchain Simulation}
-Extending the previous \textit{Generic Simulation} to \textit{Bitcoin-like Blockchain Simulation} made lots of changes necessary, especially in the frontend. More abstract ways to implement different strategies in the backend in Scala were researched. The backend differentiates between the currently only two strategies mainly with If-clauses. This seemed to be the best option, which avoids creating unnecessary complexity. It was also recommended by the author of VIBES. Bloated methods due to having multiple strategies in one method can be avoided by outsourcing strategy-specific parts to their own method(s).
+Extending the previous \textit{Generic Simulation} to \textit{Bitcoin-like Blockchain Simulation} made lots of changes necessary, especially in the frontend. More abstract ways to implement different strategies in the backend in Scala were researched. The backend differentiates between the currently only two strategies mainly with If-clauses. This seemed to be the best option, which avoids creating unnecessary complexity. It was also recommended by the author of VIBES. Bloated methods due to having multiple strategies in one method can be avoided by outsourcing strategy-specific parts into their own methods.
 
 \section{Time-outs and Configuration}
-Previously the frontend could only display the information from the backend, if the simulation results were sent within 60 seconds. After checking the existing time-outs in the project and researching the default time-outs of the used frameworks, the problem was found in the akka.http.server.idle-timeout default setting. This default setting of 60 seconds was changed in \textit{\textbackslash vibes\textbackslash server\textbackslash src\textbackslash main\textbackslash resources\textbackslash application.conf} to infinite.
+Previously the frontend could only display the information from the backend if the simulation results were sent within 60 seconds. After checking the existing time-outs in the project and researching the default time-outs of the used frameworks, the problem was found in the akka.http.server.idle-timeout default setting. This default setting of 60 seconds was changed in \textit{\textbackslash vibes\textbackslash server\textbackslash src\textbackslash main\textbackslash resources\textbackslash application.conf} to infinite.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[style=myScalastyle,label=lst:akkahttp,caption={application.conf}]
@@ -18,27 +20,27 @@ akka.http {
 \end{lstlisting}
 \end{minipage}
 
-Currently the time-out for providing the information to the frontend is set to 24 hours in \textit{Main.scala}.
+Currently, the time-out for providing the information to the frontend is set to 24 hours in \textit{Main.scala}.
 
 \section{Lazy Logging}
-Previously logging only occurred in the console. This made debugging of long simulations difficult. Especially for the evaluation of any implementations a log file is necessary. For this reason the Scala modules \textit{logback} and \textit{scala-logging} were integrated into the project. Every important event is logged into \textit{/logfile.log}.
+Previously logging only occurred in the console. This made debugging of long simulations difficult. Especially for the evaluation of any implementations, a log file is necessary. For this reason, the Scala modules \textit{logback} and \textit{scala-logging} were integrated into the project. Every important event is logged into \textit{/logfile.log}.
 
 \section{Time between Blocks}
-The time between the blocks or also called block time is a very important metric. It can be used to check the system health. Due to the nature of the algorithm, a new block can be immediately found after the last one or it can take longer than usual. This can lead to unusual behaviour, as nodes might not have enough time to send transactions, synchronise their transactions pools or the blockchain. Therefore the block time can also be used to explain unusual behaviour. For the implementation of the Time between Blocks Figure \ref{fig:timeBetweenBlocks} next to the event timestamps only the beginning of the Simulation was additional necessary to calculate the time of the first block.
+The time between the blocks or also called block time is a very important metric. It can be used to check the overall system health. Due to the nature of the bitcoin protocol, a new block can immediately be found after the last one. Very short block times can lead to unusual behaviour, as nodes might not have enough time to send transactions, synchronise their transactions pools or the blockchain. Therefore the block time can explain unusual behaviour. The user interface needs the corresponding data to display the time between blocks chart in Figure  \ref{fig:timeBetweenBlocks}. To calculate the duration of the first block, a new timestamp was introduced to save the start time of the simulation.
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/Time between Blocks".PNG}
 \caption{Screenshot Time between Blocks
 \label{fig:timeBetweenBlocks}}
 \end{figure}
 
-\section{Block size limit \label{subsection:blocksizelimit}}
-One of the biggest unresolved issues of Bitcoin-like Blockchains is scalability. The main metric to measure scalability is transactions per seconds \textit{tps}. One drawback of this metric is that it contains no information about the transaction size or the usefullness of the transaction. Previously VIBES had no block size limit. This means infinite transactions can be processed and changing input parameters has no effect on the scalability. To be able to investigate the effects of different input parameters on the scalability, the introduction of a block size limit is necessary. This allows a more accurate simulation of Bitcoin. The block size limit is for example necessary to analyse the implications of Segwit2x according to VIBES \cite{vibes}.
+\section{Block Size Limit \label{subsection:blocksizelimit}}
+Previously VIBES had no block size limit. This means infinite transactions can be processed and changing input parameters has no effect on the scalability. To be able to investigate the effects of different input parameters on the scalability, the introduction of a block size limit is necessary. This allows a more accurate simulation of bitcoin. The block size limit is, for example, necessary to analyse the implications of Segwit2x according to VIBES \cite{vibes}.
 
-The only prerequisites is to add one additional \textbf{configuration parameter} \textit{maxBlockSize}: the maximal block size in KB, the current default value is 1.000 KB.
+The only prerequisite is to add an additional \textbf{configuration parameter} \textit{maxBlockSize}: the maximal block size in B, the current default value is 50.000 B.
 
-The design and architecture changes of the backend mainly happen in the model VBlock. All generated blocks obey the block size limit depending on if the simulation is a Bitcoin-like Blockchain Simulation.
+The design and architecture changes of the backend mainly happen in the model VBlock. All generated blocks obey the block size limit depending on if the simulation is a Bitcoin-like Blockchain Simulation. If the block size limit is set to zero, the simulator assumes the block size is unlimited and the maximum number of transactions per block is infinite.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[style=myScalastyle,label=lst:blocksizelimit,caption={VBlock with focus on block size limit}]
@@ -47,7 +49,7 @@ object VBlock extends LazyLogging {
     var maxTransactionsPerBlock : Int = 0
     var processedTransactionsInBlock: Set[VTransaction] = Set.empty
 
-    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN") {
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.maxBlockWeight != 0) {
       maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt    
       
       // takes the amount of maxTransactionsPerBlock out of the transaction pool into the winner block
@@ -71,35 +73,51 @@ object VBlock extends LazyLogging {
 \end{lstlisting}
 \end{minipage}
 
-The Listing \ref{lst:blocksizelimit} shows only the essential lines of code. First, the maximal transactions per block is calculated via the maximal block size and the transaction size. For simplicity the transaction size is constant, therefore this calculation is simple. Due to rounding down the actual block size can't be bigger than the limit. Finally the transaction are taken out of the transaction pool and later this variable is used in the creation of the winner block.
+The Listing \ref{lst:blocksizelimit} shows only the essential lines of code. First, the maximum number of transactions per block is calculated via the maximum block size and the transaction size. For simplicity VIBES chose to have a constant transaction size, therefore this calculation is simple and it could also be done only once. It was a conscious decision to implement it in this way to make the implementation of variable transaction sizes in the future easier. Rounding down the maximal transactions per block makes sure the actual block size is smaller than the limit. Finally, the transactions are taken out of the transaction pool and later this set of transactions is used in the creation of the winner block.
 
-\section{SegWit \label{subsection:segwit}}
+\section{Segregated Witness \label{subsection:segwit}}
+In Chapter \ref{subsection:blocksizelimit} the block size limit was implemented to make the simulation more accurate and similar to the actual bitcoin network. In this subchapter, one step further is taken. To accurately simulate the bitcoin network the block size limit needs to replaced by a block weight limit like the actual bitcoin network did with the softfork SegWit.
 
-In Chapter \ref{subsection:blocksizelimit} the block size limit was implemented to make the simulation more accurate and similar to the actual Bitcoin Network. In this subsection one step further is taken. To accurately simulate the Bitcoin Network the block size limit needs to replaced by a block weight limit like the actual Bitcoin Network did with the soft fork SegWit on 24th August 2017.
-
-For a very simple implementation of SegWit, one could maybe just introduce a boolean segWitEnabled and replace the already existing block size limit with a block weight limit and transaction size with transaction weight. Since the comparison between non-SegWit und SegWit figures could be a very interesting use-case, new \textbf{configuration parameters} are introduced instead.
+For a very simple implementation of SegWit, one could maybe just introduce a boolean segWitEnabled and replace the already existing block size limit with a block weight limit and the transaction size with a transaction weight. Since the comparison between non-SegWit und SegWit key figures could be a very interesting use-case, new \textbf{configuration parameters} are introduced instead.
 
 \begin{itemize}
 \item \textit{blockWeightLimit}: maximal block weight limit in weight unit
 \item \textit{transactionWeight}: witness data per transaction in weight unit
 \end{itemize}
 
-For the simulation part of the backend a new condition is added to the VBlock object.
+As can be seen in Listing \ref{lst:blockweightlimit} a new condition for SegWit is added to the VBlock object.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[style=myScalastyle,label=lst:blockweightlimit,caption={VBlock with focus on block weight limit}]
+    if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.transactionSize != 0) {
+      // this part could be moved to Main for constant transaction weight and size to save calculations, but is necessary here for non-constant transaction weight and size
       if (VConf.maxBlockWeight != 0 && VConf.transactionWeight != 0) {
         // SegWit is enabled
         maxTransactionsPerBlock = Math.floor(VConf.maxBlockWeight / VConf.transactionWeight).toInt
-      } else {
+      } else if (VConf.maxBlockSize != 0) {
         // SegWit is disabled
-        // multiplies by 1000 because maxBlockSize is in KB and transaction size is in B
-        maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize * 1000 / VConf.transactionSize).toInt
+        maxTransactionsPerBlock = Math.floor(VConf.maxBlockSize / VConf.transactionSize).toInt
+      } else {
+        // any number of transactions is accepted
+        maxTransactionsPerBlock = node.transactionPool.size
       }
+
+      // sorts the transaction pool by the transaction fee and takes the amount of maxTransactionsPerBlock out of the transaction pool into the winner block
+      processedTransactionsInBlock = node.transactionPool.toSeq.sortWith(_.transactionFee > _.transactionFee).take(maxTransactionsPerBlock).toSet
+
+      // sets confirmation status of transaction true
+      processedTransactionsInBlock.foreach { _.confirmation = true }
+
+      // sets confirmation level of transaction
+      processedTransactionsInBlock.foreach { _.confirmationLevel = node.blockchain.size }
+    } else {
+      maxTransactionsPerBlock = node.transactionPool.size
+      processedTransactionsInBlock = node.transactionPool
+    } ... }    
 \end{lstlisting}
 \end{minipage}
 
-Numbers for the SegWit vs Non-SegWit analysis are provided in the frontend. These are calculated in the ReducerActor as can be seen in Listing \ref{lst:blockweightlimitCalculations}. The SegWit theoretical block weight limit and the Non-SegWit maximal block size are given input values. The SegWit maximal block weight considers the transaction size and is more realistic than the theoretical block weight limit. Additionally both maximal transactions per block and transactions per second values show the differences between SegWit and Non-SegWit while the actual simulation values are also shown in Figure \ref{fig:TransactionSummary}.
+Comparisons between the SegWit vs Non-SegWit metrics are provided in the frontend. These are calculated in the ReducerActor as can be seen in Listing \ref{lst:blockweightlimitCalculations}. The SegWit theoretical block weight limit and the Non-SegWit maximal block size are given input values. The SegWit maximal block weight considers the transaction size and is more realistic than the theoretical block weight limit. Additionally, both maximal transactions per block and transactions per second values show the differences between SegWit and Non-SegWit while the actual simulation values are also shown in Figure \ref{fig:TransactionSummary}.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[style=myScalastyle,label=lst:blockweightlimitCalculations,
@@ -128,15 +146,20 @@ caption={Calculations for the comparisons in the ReducerActor}]
 \end{lstlisting}
 \end{minipage}
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[height=0.5\textwidth]{"figures/Testing/TransactionSummary".PNG}
 \caption{Screenshot Transaction Summary\label{fig:TransactionSummary}}
 \end{figure}
 
-\section{Transaction per second}
+\section{Transactions per Second}
+One of the biggest unresolved issues of bitcoin-like blockchains is scalability. The main metric to measure scalability is transactions per second (\textit{tps}). One drawback of this metric is that it contains no information about the transaction size or the usefulness of the transaction.
 
-Figure \ref{fig:TransactionSummary} also shows the average transaction per second. The \textit{tps} is also called throughput or transaction rate. The average \textit{tps} is - as the Listing \ref{lst:tps} shows - calculated over the duration of the whole simulation and then given to the frontend.
+According to the research paper Bitcoin-NG the \textit{tps} of bitcoin pre-SegWit was limited to only 1 to 3.5 \textit{tps} for typical transaction sizes due to the block size at 1 MB \cite{bitcoinNG}. For bitcoin heavy transaction loads are an obstacle for a more widespread usage \cite{gateway}. A payment processor like VISA handles 4,000 transactions per second on average and has been stress-tested in 2013 to handle 47,000 transactions per second. In comparison, bitcoin can only handle 7 transactions per second, due to the fact that block sizes are restricted to have a maximum size of 1 MB.
+
+Of course, SegWit increased those numbers.
+
+The transactions per second (\textit{tps}) is also called throughput or transaction rate, Figure \ref{fig:TransactionSummary} also shows the average \textit{tps}. The average \textit{tps} is - as the Listing \ref{lst:tps} shows - calculated over the duration of the whole simulation and then given to the frontend.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[style=myScalastyle,label=lst:tps,
@@ -146,35 +169,35 @@ caption={Calculations for the tps in the ReducerActor}]
 \end{lstlisting}
 \end{minipage}
 
-According to Bitcoin-NG the \textit{tps} of Bitcoin pre-SegWit was limited to only 1 to 3.5 \textit{tps} for typical transaction sizes due to the block size at 1 MB \cite{bitcoinNG}. For Bitcoin heavy transaction loads are an obstacle for a more widespread use \cite{gateway}. A payment processor like VISA handles 4,000 transaction per second on average and has been stress-tested in 2013 to handle 47,000 transactions per second. In comparison, Bitcoin can only handle 7 transactions per second, due to the fact that block sizes are restricted to have a maximum size of 1 MB.
+In our tool the \textit{average transactions per second} can be higher than the \textit{SegWit maximal transactions per second} or the \textit{non-SegWit maximal transactions per second}. This should happen when the simulated block time is shorter than the input simulation time and the blocks are full. The \textit{average transactions per second} is based on the simulated block time, the maximal tps values are based on the input simulation time.
 
-\section{Processed and pending transactions per block}
+\section{Processed and Pending Transactions per Block}
 
-After introducing a block size limit in Chapter \ref{subsection:blocksizelimit} and SegWit in Chapter \ref{subsection:segwit} for the evaluation of correctness about transactions in general it is necessary to know what actually happens in the blocks. This means visualizations about the pending transactions and processed transactions per block would be very insightful.
+After introducing the block size limit in Chapter \ref{subsection:blocksizelimit} and SegWit in Chapter \ref{subsection:segwit} it would be very insightful to have visualisations about how many transactions are actually included in blocks and how many transactions are pending. This would also be very helpful for the evaluation of correctness.
 
-For the pending transactions per block Figure \ref{fig:pendingTransactions} changes in the models VBlock and VEventTypes and the ReducterActor were done. Every block has the transaction pool size minus the included amount of transaction at the time of the block creation as a new attribute.
+Changes in the models VBlock and VEventTypes and the ReducterActor were done for the pending transactions per block chart in Figure \ref{fig:pendingTransactions}. As a new attribute, every block has the transaction pool size minus the included number of transactions at the time of the block creation.
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/pendingTransactions".PNG}
 \caption{Screenshot Pending Transactions per Block
 \label{fig:pendingTransactions}}
 \end{figure}
 
-For the processed transactions per block Figure \ref{fig:processedTransactions} changes to the same classes and additionally Main were done. The new attribute processed transactions of a block describes the transactions which were included by the node. This is shown as the blue line, the red line shows the maximum possible transactions depending on if the block size limit or SegWit are enabled. If the block size limit and SegWit are disabled (equal to zero), then the transaction limit per block is unlimited and the red line isn't shown.
+Changes to the same classes and additionally the Main object were done for the processed transactions per block chart in Figure \ref{fig:processedTransactions}. The new attribute processed transactions of a block describes the transactions which were included by the winning miner. This is shown as the blue line, the red line shows the maximal possible transactions depending on if there is a block size limit or if SegWit is enabled. If the block size limit and SegWit are disabled (equal to zero), then the transaction limit per block is unlimited and the red line isn't shown.
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/processedTransactions".PNG}
 \caption{Screenshot Processed Transactions Per Block
 \label{fig:processedTransactions}}
 \end{figure}
 
-Both Figures \ref{fig:pendingTransactions} and \ref{fig:processedTransactions} show that the first block contains no pending and no processed transactions. The reason for this is that the nodes do not send transactions before the genesis block is mined. One reason for having an empty genesis block is the fact that no Bitcoin exists before the first block, so no transaction fees can be paid and no Bitcoin can be send. But also transactions with zero transactions fees and zero Bitcoin sent can be valid and included in blocks. These transactions would be considered transaction spam. The miners just have no incentive to include zero fee transactions. Bitcoin's genesis block contains one transaction \cite{genesis}. In the end, this question about having zero, one or lots of transactions in the genesis block seems to be a question of personal preference. One disadvantage of having zero or one transaction in the genesis block is that it distorts transactions metrics like \textit{tps} for a low number of blocks or transactions.
+Both Figures \ref{fig:pendingTransactions} and \ref{fig:processedTransactions} show that the first block contains no pending and no processed transactions. The reason for this is that no transactions are received before the genesis block is mined. One reason for having an empty genesis block is the fact that no bitcoin exists before the first block, so no transaction fees can be paid and no bitcoin can be sent (assuming no premine like in Ethereum). But also transactions with zero transactions fees and zero bitcoin sent can be valid and included in blocks. These transactions would be considered transaction spam. The miners have no financial incentive to include zero fee transactions. Bitcoin's genesis block contains one transaction \cite{genesis}. In the end, this question about having zero, one or lots of transactions in the genesis block seems to be a question of personal preference. One disadvantage of having only zero or one transaction in the genesis block is that it distorts transactions metrics like \textit{tps} for a very small number of blocks or transactions.
 
-\section{Transaction incentives and confirmation status}
+\section{Transaction Incentives and Confirmation Status}
 
-In Bitcoin there are two types of incentives for miners, block rewards and transaction incentives or also called transaction fees. Previously these mining incentives were not considered. To make a more realistic simulation transaction incentives are added to the simulation. This allows analysis for example for determining the necessary price to include a transaction in a block within a certain time. It can also be used in future work for example about mining pools. Since research questions about transaction incentives are closely linked to the confirmation status new data structures are needed to easily access information about the creation time and confirmation time of transactions.
+In bitcoin there are two types of incentives for miners, block rewards and transaction incentives or also called transaction fees. Previously these mining incentives were not considered in VIBES. To make a more realistic simulation, transaction incentives are added to the simulation. This allows analysis, for example, for determining the necessary price to include a transaction in a block within a certain time. It can also be used in future work about mining pools. Since research questions about transaction incentives are closely linked to the confirmation status, new data structures are needed to easily access information about the creation time and confirmation time of transactions.
 
 New variables for the transaction incentives and confirmation status are added to the VTransaction model. 
 
@@ -185,46 +208,111 @@ New variables for the transaction incentives and confirmation status are added t
 \item \textit{confirmationLevel}: block level when the transaction was included in a block
 \end{itemize}
 
-Transactions are assigned a random integer between 0 and 124 as transaction fee in Satoshi. This is about the same range as in reality, but the distribution is different. The real distribution can change from one moment to the next and is difficult to model. When a transaction gets included into a block, its transaction status changes from \textit{false} to \textit{true}.
+Transactions are assigned a random integer between 0 and 124 as the transaction fee in Satoshi. This is about the same range as in reality, but the distribution is different. The real distribution can change from one moment to the next and is difficult to model. When a transaction gets included in a block, its transaction status changes from \textit{false} to \textit{true}.
 
-To show the results of this implementation two charts were created. For these charts a slightly higher transaction throughput than block transaction capacity was chosen to show, because this shows the interesting in which the miners can choose between including transactions with high or low transaction incentives into their block.
+Two charts were created to show the results of this implementation. For these charts a slightly higher transaction throughput than block transaction capacity was chosen because this shows an interesting case. In this case, the miners can prefer transactions with high transaction fees over transactions with low fees.
 
-\begin{figure}
+Figure \ref{fig:TransactionIncentives1} shows the transaction confirmation status per transaction fee. The abscissa shows the transaction fees from 0 to 124 in Satoshi, the ordinate shows the number of transactions. The red area shows the unconfirmed and the green area shows the confirmed transactions. It can be clearly seen, the red area is only really big from 0 to 7 Satoshi. This means most of the pending transactions are the ones with the lowest transaction incentives.
+
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/TransactionIncentives1".PNG}
 \caption{Screenshot Transaction Confirmation Status per Transaction Fee
 \label{fig:TransactionIncentives1}}
 \end{figure}
 
-Figure \ref{fig:TransactionIncentives1} shows the transaction confirmation status per transaction fee. The abscissa shows the transaction fees from 0 to 124 in Satoshi, the ordinate shows the amount of transactions. The red area shows the unconfirmed and the green area shows the confirmed transactions. It can be clearly seen, that the red area is only really big from 0 to 7 Satoshi. This means most of the pending transactions are the ones with the lowest transaction incentives.
+The red area exists even if the block size limit or block weight limit is smaller than the actual transaction throughput because the nodes are sending transactions even after the last block of the simulation was mined.
 
-Even in the case of block size limit or SegWit maximal transactions per block smaller than transaction throughput the red area exists. The reason  is the nodes are sending transactions even after the last block was mined.
-
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/TransactionIncentives2".PNG}
 \caption{Screenshot Average Transaction Confirmation Time per Transaction Fee
 \label{fig:TransactionIncentives2}}
 \end{figure}
 
-The next Figure \ref{fig:TransactionIncentives2} shows the average transaction confirmation time per transaction fee. The abscissa shows the transaction fee again, the ordinate shows the confirmation time in blocks. Both Figures are from the same simulation. Therefore we can see that the average confirmation time for transaction fees 0 to 3 is zero blocks. The reason for this is that there are no confirmed transactions in this range. Maybe this visualisation is not perfect, since it may lead to the conclusion that transactions with fees from 0 to 3 are instantly included in a block. But infinity blocks is hard to visualise and taking the first non zero confirmation time would also be misleading. The highest confirmation time is the point where the transactions barely get included into blocks. After this bottleneck all transactions get included in about the same time.
+The next Figure \ref{fig:TransactionIncentives2} shows the average transaction confirmation time per transaction fee. The abscissa shows again the transaction fee, the ordinate shows the confirmation time in blocks. Both Figures are from the same simulation. Therefore we can see that the average confirmation time for transaction fees 0 to 3 is zero blocks. The reason is that there are no confirmed transactions in this range. Maybe this visualisation is not perfect, since it may lead to the conclusion that transactions with fees from 0 to 3 are instantly included in a block. But infinite confirmation time in blocks is hard to visualise and taking the first nonzero confirmation time would also be misleading. The highest confirmation time is the point where the transactions barely get included into blocks. After this bottleneck, all transactions get included in about the same time.
 
-For the generation of both charts all created transactions are sent from the backend to the frontend. The frontend then summarizes the transactions per transaction fee, this could also be done by the backend. Sending all transactions ever created in a simulation to the frontend is probably a bottleneck for simulations with a very large number of transactions. The reason for this design decision is the flexibility to create or change charts to analyse different aspects of transactions. During development no issues were found. For simulations with a very large number of blocks parts of the previously created frontend would also be a bottleneck, since also every created block is sent to it.
+For the generation of both charts, all created transactions are sent from the backend to the frontend. The frontend then summarizes the transactions per transaction fee, this could also be done by the backend. Sending all transactions ever created to the frontend is very likely a bottleneck for simulations with a very large number of transactions. The reason for this design decision is the flexibility to create or change charts to analyse different aspects of transactions. So far no issues were found during development. Parts of the previously created frontend are also a bottleneck for simulations with a very large number of blocks or nodes since every created block and every node is sent to the frontend. A solution for this issue could be a database.
 
-VIBES offers the possibility to change the parameters sent to the frontend fast and easily. For simulations with a very large number of transactions and/ or a very large number of blocks the frontend could be changed or the sought after data can also be output via log file or console.
+VIBES offers the possibility to change the parameters sent to the frontend fast and easily. For simulations with a very large number of transactions and/or a very large number of blocks the frontend could be changed, or the sought after data can also be output via log file or console.
 
-\section{Alternative history attack}
-A 51\% attack is one of the most commonly discussed attacks on the Bitcoin protocol. It belongs to the group of alternative history attacks.  Due to the way it works see Chapter \ref{subsection:background:alternativhistoryattack} complex changes are required.
+\section{Transaction Spam}
+The transaction spam or also called flood attack has one configuration parameter in the frontend, which is the target transaction fee. The target transaction fee is the minimal fee that the attacker wants everyone in the network to pay for transactions.
+
+\subsubsection{Main}
+In the \textit{Main} class changes were made to set up the flood attack. Currently the implementation only allows one attack at a time, either double-spending or flood attack. If both attacks have a valid input, the implementation prefers the double-spending attack.
+
+The flood attack transaction buffer is also set up in the \textit{Main}. Very short block times can lead to no regular transactions being sent, therefore a buffer is needed. The size of the buffer is two times the maximal tpb.
+
+\subsubsection{NodeActions}
+\textit{NodeActions} implements a new case class to issue transactions in a flood attack.
+
+\subsubsection{VTransaction}
+\textit{VTransaction} implements a new transaction attribute to enable analysis about how many flood attack transactions were pending or processed at a certain time.
+
+\subsubsection{VConf}
+\textit{VConf} implements \textit{transactionFee} as the target transaction fee and \textit{floodTransactionPool} as an easy way to access the current number of flood attack transactions.
+
+\subsubsection{MasterActor}
+If a flood attack is active, the \textit{MasterActor} is responsible to make the flood attack transaction happen by assigning random nodes to send these transactions. In future work the nodes could be configurable. The number of sent transactions depends on the number of confirmed flood attack transactions in the last block. In reality the attacker might not have the time to always check the number of confirmed flood attack transactions, the attacker could mitigate this by a larger buffer.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=myScalastyle,label=lst:floodAttack1,
+caption={caption text}]
+              // checks if flood attack is active
+              if (VConf.floodAttackTransactionFee > 0) {
+                logger.debug(s"VConf.floodTransactionPool... ${VConf.floodAttackTransactionPool}")
+
+                (1 to VConf.floodAttackTransactionPool).foreach { _ =>
+                  val randomActorFrom = actorsVector(Random.nextInt(actorsVector.size))
+                  val randomActorTo = actorsVector(Random.nextInt(actorsVector.size))
+                  val now = priorityWorkRequest.timestamp
+                  randomActorFrom ! NodeActions.IssueTransactionFloodAttack(
+                    randomActorTo,
+                    now.plusMillis(50)
+                  )
+                }
+              }
+\end{lstlisting}
+\end{minipage}
+             
+\subsubsection{NodeActor}
+The \textit{NodeActor} needed a new method and a new case for the flood attack.
+
+\subsubsection{ReducerActor}
+The \textit{ReducerActor} calculates how many Satoshi were spent by the attacker on transaction fees, it checks how many transactions were confirmed below the target transaction fee and how many flood attack transactions are in the blockchain.
+
+\subsubsection{VEventTypes}
+The \textit{VEventTypes} had to be adjusted to export the data to the user interface.
+
+\subsubsection{Frontend}
+Figure \ref{fig:TransactionSpam} shows the changes to the user interface in case of a flood attack. The number of pending flood attack transactions is added to the pending transactions per block chart, this number should stay constant at about two times maximal tpb.
+
+The green line in the processed transactions per block chart shows the processed flood attack transactions per block. It can be seen at block 11, very short block times can lead to a block full of flood attack transactions.
+
+The flood attack summary shows us the number of confirmed flood attack transactions, the number of bitcoin spent and the confirmed transactions below the target transaction fee.
+
+The next two charts are also interesting, they confirm no transaction below the target transaction fee was confirmed. The target transaction fee in this simulation was 30 Satoshi, as can be seen.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=1\textwidth]{"figures/transactionSpam2".PNG}
+\caption{Screenshot Transaction Spam
+\label{fig:TransactionSpam}}
+\end{figure}
+
+\section{Alternative History Attack}
+A 51\% attack is one of the most commonly discussed attacks on the bitcoin protocol. It belongs to the group of alternative history attacks. Complex changes are required due how it works which is explained in Chapter \ref{subsection:background:alternativhistoryattack}.
 
 \subsection{Prerequisites\label{prerequisites}}
 
-To simulate an alternative history attack additional \textbf{configuration parameters} are necessary. These parameters are used for the actual simulation of the attack, the calculation of the success probability of the attack and the maximum safe transaction value.
+To simulate an alternative history attack additional \textbf{configuration parameters} are necessary. These parameters are used for the actual simulation of the attack, the calculation of the success probability of the attack and the maximal safe transaction value.
 
 \begin{itemize}
 \item \textit{isAlternativeHistoryAttack}: if an alternative history attack is simulated as a boolean
-\item \textit{hashRate}: attacker's hashRate as a percentage of the total hashRate of the Bitcoin Network
+\item \textit{hashRate}: attacker's hashRate as a percentage of the total hashRate of the bitcoin network
 \item \textit{confirmations}: the amount of confirmations the attacked merchants are waiting for to accept a transaction
-\item \textit{attackDuration}: the attacker gives up after mining a certain amount of blocks and not succeeding or if it is not possible any more to surpass the level of the honest blockchain
+\item \textit{attackDuration}: the attacker gives up after mining a certain number of blocks and not succeeding or if it is not possible anymore to surpass the level of the honest blockchain
 \item \textit{discountOnStolenGoods}: discount of the stolen goods by the attacker, a value from 0 (= full discount) to 1 (= no discount)
 \item \textit{amountOfAttackedMerchants}: the attack is carried out against a certain amount of merchants at the same time
 \item \textit{blockReward}: current block reward in BTC
@@ -232,30 +320,30 @@ To simulate an alternative history attack additional \textbf{configuration param
 
 \subsection{Design and Architecture}
 
-\subsubsection{Simulating the attack}
+\subsubsection{Simulating the Attack}
 
 In the following the attacker's nodes, blockchain or blocks are interchangeably described as evil, private or malicious and the honest networks' nodes as good or public.
 
-The solution for the simulation of an alternative history attack selects nodes as attacking nodes according to the attacker's hash rate as a percentage of the total Bitcoin Network.
-The good and the evil nodes both can mine the genesis block. The genesis block is then the first block in both the good and the evil blockchain. For simplicity we assume that the attacker successfully sent the transactions to the attacked merchants in the second block of the honest blockchain. Immediately after the genesis block is mined, the evil nodes start mining together on their own evil blockchain. It is necessary for all nodes to update their neighbour nodes to only have their corresponding nodes as neighbours. The synchronising of the blockchain is only possible for the same type of node. As a counterexample the attacker's hash rate would suffer if the evil nodes could not synchronise their blocks properly if a high percentage of their neighbours are honest nodes.
+The solution for the simulation of an alternative history attack selects nodes as attacking nodes according to the attacker's hash rate as a percentage of the total bitcoin network.
+The good and the evil nodes both can mine the genesis block. The genesis block is then the first block in both the good and the evil blockchain. For simplicity, we assume that the attacker successfully sent the transactions to the attacked merchants in the second block of the honest blockchain. Immediately after the genesis block is mined, the evil nodes start mining together on their own evil blockchain. It is necessary for all nodes to update their neighbour nodes to only have their corresponding nodes as neighbours. The synchronising of the blockchain is only possible for the same type of node. As a counterexample, the attacker's hash rate would suffer if the evil nodes could not synchronise their blocks properly if a high percentage of their neighbours are honest nodes.
 
-Finally the success of the simulated attack is decided if the attacker's blockchain level can surpass the honest blockchain's block level after waiting for the Merchants confirmation and before the attack duration ends. The attack can succeed, fail or be undecided. For example if a huge percentage of the network is malicious, then the honest network is likely to need a long time to reach the needed block level for the Merchants confirmation.
+Finally, the success of the simulated attack is decided if the attacker's blockchain level can surpass the honest blockchain's block level after waiting for the Merchants confirmation and before the attack duration ends. The attack can succeed, fail or be undecided. For example, if a huge percentage of the network is malicious, then the honest network is likely to need a long time to reach the needed block level for the Merchants confirmation.
 
-In the case of success or failure the two networks need to merge back together by updating their neighbours, allowing the synchronising of all blocks and taking the winning blockchain.
+In the case of success or failure, the two networks need to merge back together by updating their neighbours, allowing the synchronising of all blocks and taking the winning blockchain.
 
-\subsubsection{Calculating the success probability  \cite{doublespending}}
+\subsubsection{Calculating the Success Probability}
 
 To be able to validate the results of the Bitcoin-like Blockchain Simulation with an Alternative History Attack a correct reference value for the success probability is required. Therefore the success probability of an Alternative History Attack needs to be calculated.
 
 Before the formula to calculate the success probability of an alternative history attack is shown, the variables need to be explained.
-$q$ is \textit{hashRate}, the attacker's percentage of the hash rate of the total network. $p$ is $1-q$ and the percentage of the honest network.
+$q$ is \textit{hashRate}, the attacker's percentage of the hash rate of the total network. $p$ is $1-q$ and the percentage of the honest network \cite{doublespending}.
 
 \begin{equation}
 p + q = 1
 \end{equation}
 
 It is the goal to calculate the success probability $r$. If the attacker's hash rate $q$ is equal or bigger than $p$, then the success probability of the attacker is 100\%.
-Due to the implementation the behaviour of the implementation can deviate from the 100\%. For example the variables \textit{attackDuration}, \textit{confirmations} or the simulation duration can have an impact.
+Due to the implementation the behaviour of the implementation can deviate from the 100\%. For example, the variables \textit{attackDuration}, \textit{confirmations} or the simulation duration can have an impact.
 If $q < p$, then the upper complex formula with binomial coefficients needs to be calculated.
 
 \begin{equation}
@@ -278,37 +366,34 @@ One difference between this formula and the implementation is the attack duratio
 \end{cases}
 \end{equation}
 
-\subsubsection{Calculating the maximal safe transaction value  \cite{doublespending}}
+\subsubsection{Calculating the Maximal Safe Transaction Value \label{subsubsection:CalculatingTheMaximalSafeTransactionValue}}
+Using the success probability from Equation \eqref{eq:successProbability} we can calculate the maximal safe transaction value \cite{doublespending}. \textit{B} is the block reward, \textit{o} is the attack duration, \textit{$\alpha$} is the discount on stolen goods, and \textit{k} is the number of attacked merchants.
 
-
-\eqref{eq:successProbability}
-
-\begin{equation}
-\dfrac{(1 - r) oB}{ k  (\alpha + r - 1)}
+\begin{equation}\label{eq:maximalSafeTransactionValue}
+\dfrac{(1 - r) oB}{ k (\alpha + r - 1)}
 \end{equation}
 
 \subsection{Implementation}
-
-The implementation of double-spending is complex due to the need of splitting up the nodes and having two separate blockchains running at the same time and after the double-spending attack the nodes are merging back together to work on one blockchain.
+The implementation of double-spending is complex due to the need of splitting up the nodes and having two separate blockchains running at the same time and after the double-spending attack the two networks are merging back together to work on one blockchain.
 
 \subsubsection{VConf}
 The VConf implements the new parameters for the alternative history attack which are mentioned in the Prerequisites (Chapter \ref{prerequisites}).
 
 \subsubsection{Main}
-The simulation and also the attack starts in Main. Main checks if an alternative history attack happens and sets up the configuration. After the end of the simulation Main also sends the results back to the frontend.
+The simulation and also the attack starts in Main. Main checks if an alternative history attack happens and sets up the configuration. After the end of the simulation, Main also sends the results back to the frontend.
 
 \subsubsection{VNode}
 The VNode Model needs a new parameter \textit{isMalicious} as Option[Boolean].
 
 \subsubsection{NodeRepoActor}
-In case of an attack NodeRepoActor creates/registers nodes with their corresponding type Option[Boolean] in the predefined ratio according to the attacker's hash rate. Malicious nodes are set to Some(true).
+In case of an attack, NodeRepoActor creates/registers nodes with their corresponding type Option[Boolean] in the predefined ratio according to the attacker's hash rate. Malicious nodes are set to Some(true).
 
 \subsubsection{DiscoveryActor}
-The DiscoveryActor updates the neighbours according to the defined Neighbours Discovery Interval. In the case of an active attack the nodes are only allowed to receive neighbours of the same type (malicious/non-malicious).
+The DiscoveryActor updates the neighbours according to the defined Neighbours Discovery Interval. In the case of an active attack, the nodes are only allowed to receive neighbours of the same type (malicious/non-malicious).
 
 \subsubsection{NodeActor}
-The node with the smallest timestamp is allowed to add his block in the NodeActor. Here several conditions are checked to make sure only in valid cases the blocks are added. In the case of an attack also the status of the attack is determined in the \textit{addBlockIfAlternativeHistoryAttack} function.
-In the case of an preRestart the configuration is reset.
+The node with the smallest timestamp is allowed to add his block in the NodeActor. Here several conditions are checked to make sure that only in valid cases the blocks are added. In the case of an attack also the status of the attack is determined in the \textit{addBlockIfAlternativeHistoryAttack} function.
+In the case of a preRestart, the configuration is reset.
 NodeActor has new property \textit{isEvil}.
 
 \subsubsection{VBlock}
@@ -320,61 +405,34 @@ The ReducerActor calculates the maximal safe transaction value and the success p
 \subsubsection{VEventTypes}
 VEventTypes provides the new figures to the Main.
 
-The block tree and branch selection visualization of the frontend was inspired by the double-spending paper \cite{doublespending}. Figure \ref{fig:AttackerWins} shows a successful attack. In this case the attack was successful immediately after the public branch reached the Merchants confirmation requirement. The blocks of the winning branch are shown as black squares and the losing branch's blocks are white. The public branch is always on the left side, the attacker's branch in the middle and the right column shows the block level. For better visibility in case of the attack succeeding only the necessary valid blocks are shown.
-todo: update graphic
+\subsubsection{Frontend}
+The block tree and branch selection visualization of the frontend was inspired by the double-spending paper \cite{doublespending}.
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/AttackerWins".PNG}
-\caption{Screenshot Block Tree, Branch Selection and Attack Summary - Attacker wins
+\caption{Screenshot Block Tree, Branch Selection, and Attack Summary - Attacker wins
 \label{fig:AttackerWins}}
 \end{figure}
 
-Figure \ref{fig:AttackerLoses} shows a failed attack. As can be seen, the attack failed due to the public branch reaching the end of the attack duration without the attacker's branch overtaking once.
-todo: better graphic
+Figure \ref{fig:AttackerWins} shows a successful attack. In this case, the attack was successful immediately after the public branch reached the merchants' confirmation requirement. The blocks of the winning branch are shown as black squares and the losing branch's blocks are white. The public branch is always on the left side, the attacker's branch in the middle and the right column shows the block level. In case of a successful attack, only the necessary valid blocks are shown for better visibility.
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{"figures/Testing/AttackerLoses".PNG}
-\caption{Screenshot Block Tree, Branch Selection and Attack Summary - Attacker loses
+\caption{Screenshot Block Tree, Branch Selection, and Attack Summary - Attacker loses
 \label{fig:AttackerLoses}}
 \end{figure}
 
-\section{Transaction Spam}
-In July 2018 the Ethereum Network was effected by transaction spam or also called a flood attack. Such an "attacker" in principle trades their own money to increase the transaction costs for everyone. Only intended functionality and valid transactions is used. Even Vitalik Buterin tweeted about it \cite{tweet}. The tweet can be seen in Figure \ref{fig:transactionSpam}. This transaction spam is also possible in the Bitcoin Network. Interesting research questions arise about the costs, which an malicious actor has to pay to make the Bitcoin Network unusable or too uneconomical to use for certain use-cases. In economics this is called crowding out.
+Figure \ref{fig:AttackerLoses} shows a failed attack. As can be seen, the attack failed due to the public branch reaching the end of the attack duration without the attacker's branch overtaking once. The attack duration limit is the reason even attacks with 100\% success probability can fail, since the attack duration is only considered in the formula for the maximal safe transaction value \eqref{eq:maximalSafeTransactionValue} but not in the formula for the success probability \eqref{eq:successProbability}.
 
-\begin{figure}
-\centering
-\includegraphics[height=0.3\textwidth]{"figures/tweet".PNG}
-\caption{Screenshot Tweet from Vitalik Buterin about Transaction Spam
-\label{fig:transactionSpam}}
-\end{figure}
+Figure \ref{fig:AttackUndecided} shows an undecided attack. The outcome "ATTACK NEITHER SUCCESSFUL NOR FAILED" can happen if the simulation time was too short.
 
-\section{Technology Choice / Backend}
+\subsubsection{Zero Confirmations: Race or Finney Attack}
+%\section{Zero Confirmations: Race or Finney Attack}
+In the case of zero confirmations the simulation assumes the attack was successful because of a race or Finney attack.
 
 \section{Frontend}
+The React Google Charts package was used for all the charts \cite{reactgooglecharts}. During development, some error messages appeared about \textit{loader.js} which is working correctly now \cite{reactgooglechartsissue1} \cite{reactgooglechartsissue2}.
 
-talk about tech stack
-
-The React Google Charts package was used for all the charts \cite{reactgooglecharts}. During development some error messages appeared about \textit{loader.js}, which seem to be all fixed now \cite{reactgooglechartsissue1} \cite{reactgooglechartsissue2}.
-
-One of the main focuses of this paper is the frontend. Previously not everything captured by VIBES was visualised. This paper added lots of interesting graphics like block tree and branch selection, block time, pending transactions, processed transactions, transaction status and transactions fees and also new figures about double-spending, transactions and orphans to the frontend. But there may still very interesting information that has not yet been analysed or visualized. These graphics and figures were chosen to validate the correctness of the changes to the backend and can also be used for research questions about double-spending, transaction fees, transaction status, tps etc.
-
-\begin{figure}
-\centering
-\includegraphics[width=1\textwidth]{"figures/configuration".PNG}
-\caption{Screenshot Configuration
-\label{fig:configuration}}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=1\textwidth]{"figures/simulation".PNG}
-\caption{Screenshot Simulation
-\label{fig:simulation}}
-\end{figure}
-
-minor other stuff:
-Masteractor: asserts
-VBlock: assert error messages
-check if simulation in past
+One of the main focuses of this paper is the frontend. Previously not everything captured by VIBES was visualised. This paper added lots of interesting graphics like block tree and branch selection, block time, pending transactions, processed transactions, transaction status and transactions fees and also new figures about double-spending, transactions and staleBlocks to the frontend. But there may still very interesting information that has not yet been analysed or visualized. These graphics and figures were chosen to validate the correctness of the changes to the backend and can also be used for research questions about double-spending, transaction fees, transaction status, tps etc.

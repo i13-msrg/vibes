@@ -53,6 +53,9 @@
 \usepackage{CJKutf8}
 \usepackage{longtable}
 \usepackage{adjustbox}
+\usepackage{url}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
 
 \lstdefinestyle{myScalastyle}{
   frame=tb,
@@ -140,9 +143,9 @@
 	\bigskip
 	{\huge \bf München} \\
 	\bigskip \bigskip \bigskip
-	{\huge \bf Fakultät für Information Systems} \\
+	{\huge \bf Fakultät für Informatik} \\
 	\bigskip \bigskip \bigskip
-	{\Large \bf Master's Thesis in Informatik} \\
+	{\Large \bf Master's Thesis in Information Systems} \\
 	\bigskip \bigskip \bigskip \bigskip \bigskip
 	{\Large  Bitcoin-like Blockchain Simulation System} \\        
 	\bigskip \bigskip \bigskip \bigskip
@@ -252,6 +255,9 @@ München, xx.xx.20xx\\\\\\\\\\\\
 \input{sections/appendices}
 
 \newpage
+
+\def\UrlBreaks{\do\/\do-}
+
 \bibliographystyle{ieeetr}
 \bibliography{IEEEabrv,literature}
 \end{document}

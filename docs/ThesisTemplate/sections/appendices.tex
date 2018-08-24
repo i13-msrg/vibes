@@ -2,18 +2,107 @@
 \addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
 \chapter{Appendix}
 
-\section{First}
+\section{Installation and Usage Instructions}
+\subsection{Installation Frontend}
+\subsubsection{Install npm}
+You need to install the npm package manager as documented: \url{https://www.npmjs.com/}
 
-First Appendix
+\subsubsection{Install yarn}
+Then install yarn: \url{https://yarnpkg.com/lang/en/docs/install/}
 
-\begin{figure}
+\subsubsection{Install package.json dependencies}
+After the installation is done you can navigate to the frontend folder of the project and run \textit{yarn install}.
+
+\subsection{Installation Backend}
+\subsubsection{SBT}
+The only thing you need to install is SBT (interactive scala build tool) as documented: \url{https://www.scala-sbt.org/}
+
+\subsection{Run}
+\subsubsection{Windows}
+Navigate to the root folder and run \textit{start frontend and backend.bat} to start the frontend and backend server. Go to \url{http://localhost:8080/} with your browser.
+
+\subsubsection{Linux}
+Run \textit{yarn dev} to start the frontend, run \textit{sbt server/run} to start the backend. 
+
+\subsection{Inspecting the output of the backend}
+Start your backend. Then enter the following URL into the browser of your choice after you have adjusted the timestamp of the simulateUntil parameter.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=batch]
+http://localhost:8082/vibe?strategy=BITCOIN_LIKE_BLOCKCHAIN&simulateUntil=1534457813308&blockTime=600&numberOfNeighbours=4&numberOfNodes=20&neighboursDiscoveryInterval=3000&latency=900&transactionSize=1000&maxBlockSize=50&throughput=50&transactionWeight=2000&maxBlockWeight=200000&networkBandwidth=1&transactionPropagationDelay=150&hashRate=40&confirmations=2&transactionFee=0
+\end{lstlisting}
+\end{minipage}
+
+The browser shows the simulation results that are fetched by the frontend from the backend.
+
+\section{Source code}
+Available at \url{https://github.com/i13-msrg/vibes/tree/FabianSchuessler}.
+
+\section{Simulations}
+The simulateUntil parameter of the following URLs to reproduce the evaluation results has to be adjusted. New features might make additional parameters necessary.
+
+\subsubsection{Expected and Simulated Success Probability of Double Spending\label{evalDoubleSpending}}
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=batch]
+ECHO Start of Loop
+
+FOR /L %%i IN (1,1,100) DO (
+  ECHO %%i
+  start chrome "http://localhost:8082/vibe?blockTime=567&numberOfNeighbours=4&numberOfNodes=20&simulateUntil=1531411943382&transactionSize=1&throughput=105&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=100&maxBlockWeight=4000&networkBandwidth=1&strategy=BITCOIN_LIKE_BLOCKCHAIN&transactionPropagationDelay=150&hashRate=30&confirmations=6"
+  timeout /t 40
+)
+\end{lstlisting}
+\end{minipage}
+
+\subsubsection{Expected and Simulated Transactions per Second - 6 hours\label{6hoursURL}}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=batch]
+http://localhost:8082/vibe?blockTime=567&numberOfNeighbours=4&numberOfNodes=20&simulateUntil=1531752759474&transactionSize=1&throughput=105&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=100&maxBlockWeight=4000&networkBandwidth=1&strategy=BITCOIN_LIKE_BLOCKCHAIN&transactionPropagationDelay=150&hashRate=0&confirmations=4
+\end{lstlisting}
+\end{minipage}
+
+\subsubsection{Expected and Simulated Transactions per Second - 48 hours\label{48hoursURL}}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[style=batch]
+http://localhost:8082/vibe?blockTime=567&numberOfNeighbours=4&numberOfNodes=20&simulateUntil=1531905360000&transactionSize=1&throughput=105&latency=900&neighboursDiscoveryInterval=3000&maxBlockSize=100&maxBlockWeight=4000&networkBandwidth=1&strategy=BITCOIN_LIKE_BLOCKCHAIN&transactionPropagationDelay=150&hashRate=0&confirmations=4
+\end{lstlisting}
+\end{minipage}
+
+\section{Tables}
+
+\begin{figure}[!htb]
 \includegraphics[width=\textwidth]{"figures/Testing/The probability of a successful double spend".PNG}
-\caption{The probability of a successful double spend, as a function of the attacker's hashrate \textit{q} and the number of confirmations \textit{n}. The abscissa shows the confirmations \textit{n} and the ordinate shows the attacker's hashrate \textit{q}.\label{fig:doubleSpend}}
+\caption{The probability of a successful double spend, as a function of the attacker's hashrate \textit{q} and the number of confirmations \textit{n}. The abscissa shows the confirmations \textit{n} and the ordinate shows the attacker's hashrate \textit{q}. \cite{doublespending}\label{fig:doubleSpend}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[!htb]
 \includegraphics[width=\textwidth]{"figures/Testing/maximalSafeTransactionValue".PNG}
-\caption{The maximal safe transaction value, in BTC, as a function of the attacker's hashrate \textit{q} and the number of confirmations \textit{n}. The abscissa shows the confirmations \textit{n} and the ordinate shows the attacker's hashrate \textit{q}.\label{fig:maximalSafeTransactionValue}}
+\caption{The maximal safe transaction value, in BTC, as a function of the attacker's hashrate \textit{q} and the number of confirmations \textit{n}. The abscissa shows the confirmations \textit{n} and the ordinate shows the attacker's hashrate \textit{q}. \cite{doublespending}\label{fig:maximalSafeTransactionValue}}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=1\textwidth]{"figures/Testing/AttackUndecided".PNG}
+\caption{Screenshot Block Tree, Branch Selection, and Attack Summary - Attack undecided
+\label{fig:AttackUndecided}}
+\end{figure}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=1\textwidth]{"figures/consoleBackend".PNG}
+\caption{Screenshot Backend Console
+\label{fig:simulation}}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=1\textwidth]{"figures/bbssOnAWS".PNG}
+\caption{Screenshot BBSS on AWS
+\label{fig:BBSSonAWS}}
 \end{figure}
 
 \end{appendices}
