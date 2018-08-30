@@ -93,6 +93,7 @@ object VBlock extends LazyLogging {
     var maxTransactionsPerBlock : Int = 0
     var processedTransactionsInBlock: Set[VTransaction] = Set.empty
 
+    // block size limit & SegWit
     if (VConf.strategy == "BITCOIN_LIKE_BLOCKCHAIN" && VConf.transactionSize != 0) {
       // this part could be moved to Main for constant transaction weight and size to save calculations, but is necessary here for non-constant transaction weight and size
       if (VConf.maxBlockWeight != 0 && VConf.transactionWeight != 0) {

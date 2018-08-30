@@ -48,7 +48,7 @@ export default class AttackSummary extends React.Component<IAttackSummaryProps, 
                               }
                               switch (attackSucceeded) {
                                 case -1:    return 'failed';
-                                case 0:     return 'neither failed nor succeeded';
+                                case 0:     return 'not yet decided';
                                 case 1:     return 'was successful';
                                 default:    return '';
                               }

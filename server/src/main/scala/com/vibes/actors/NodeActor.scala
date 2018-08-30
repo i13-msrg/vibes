@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 
 /*
 * The NodeActor represents both a full Node and a miner in the blockchain network. As
-* described in Chapter 6, it is a good opportunity for future work to differentiate between
+* described in VIBES Chapter 6, it is a good opportunity for future work to differentiate between
 * both.
 * In VIBES, each NodeActor has its own blockchain, pool of pending transactions
 * (candidates for the next block) and neighbours. It also works to solve the next block in
@@ -32,6 +32,12 @@ import scala.concurrent.duration._
 * rolls back any orphan blocks and adds any valid transactions from orphan blocks back
 * to the transaction pool if they are not already included in the chain. Besides blocks, the
 * NodeActor also takes care to propagate and create transactions in the network.
+*
+* In BBSS Chapter 4, the approach for transaction spam and alternative history attacks is
+* described. In case of an active alternative history attack the nodes only accept blocks by
+* miners of the same honesty attribute type. The status of the attack is checked and if the
+* attack is finished, the neighbours are updated to allow neighbours of a different honesty type.
+*
 */
 class NodeActor (
   masterActor: ActorRef,
@@ -65,6 +71,7 @@ class NodeActor (
   private var executables: SortedMap[VExecution.WorkRequest, VExecution.Value] = SortedMap.empty
 
   var blockList: Set[VBlock] = Set.empty
+
 
   private def addExecutablesForMineBlock(now: DateTime): Unit = {
     val timestamp = node.createTimestampForNextBlock(now)
@@ -150,13 +157,9 @@ class NodeActor (
   // method only for alternative history attack
   private def addBlockIfAlternativeHistoryAttack(timestamp: DateTime, newBlock: VBlock): Unit = {
     if (node.isMalicious.contains(true)) {
-      logger.debug(s"EVIL BLOCK MINED AT LEVEL ${node.blockchain.size + 1} .....")
-      // logger.debug(s"EVIL BLOCK MINED AT LEVEL ${node.blockchain.size + 1} BY NODE ${node.id}.....")
-      // logger.debug(s"$timestamp, ${self.path}")
+      logger.debug(s"EVIL BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}")
     } else {
-      logger.debug(s"GOOD BLOCK MINED AT LEVEL ${node.blockchain.size + 1} .....")
-      // logger.debug(s"GOOD BLOCK MINED AT LEVEL ${node.blockchain.size + 1} BY NODE ${node.id}.....")
-      // logger.debug(s"$timestamp, ${self.path}")
+      logger.debug(s"GOOD BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}")
     }
 
     // checks if to add block
@@ -283,6 +286,7 @@ class NodeActor (
 
     case NodeActions.ReceiveBlock(origin, block, now, hash) =>
       if (VConf.isAlternativeHistoryAttack) {
+        // in case of alternative history attack, only propagate external blocks for certain conditions
         if (block.level + 1 > node.blockchain.size && (node.isMalicious.contains(true) == block.origin.isMalicious.contains(true) || block.level == 0) && !VConf.attackSuccessful && !VConf.attackFailed) {
           val incomingBlock = block.addRecipient(origin, node, now)
 
