@@ -19,7 +19,7 @@ npm-debug.log*
 Thumbs.db
 .vscode
 .sbtrc
-
+docs/ThesisTemplate
 
 # Frontend
 frontend/node_modules
