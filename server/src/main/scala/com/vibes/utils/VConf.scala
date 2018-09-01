@@ -30,7 +30,7 @@ object VConf {
   var confirmations = 4 // Confirmations the attacked Merchant is waiting for
 
   // todo following attack parameter could be made into input parameters
-  var attackDuration = 20 // attacker gives up after x blocks, in the original paper the attack duration is 20
+  var attackDuration = 50 // attacker gives up after x blocks, in the original paper the attack duration is 20
   var discountOnStolenGoods = 1 // discount of stolen goods, 1=no discount
   var amountOfAttackedMerchants = 5 // attack carried out against k merchants
   var blockReward : Double = 12.5 // current block reward in BTC

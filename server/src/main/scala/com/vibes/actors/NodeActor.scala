@@ -157,9 +157,9 @@ class NodeActor (
   // method only for alternative history attack
   private def addBlockIfAlternativeHistoryAttack(timestamp: DateTime, newBlock: VBlock): Unit = {
     if (node.isMalicious.contains(true)) {
-      logger.debug(s"EVIL BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}")
+      logger.debug(s"EVIL BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
     } else {
-      logger.debug(s"GOOD BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}")
+      logger.debug(s"GOOD BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
     }
 
     // checks if to add block
@@ -203,7 +203,7 @@ class NodeActor (
 
       // checks if attack succeeded
       if (VConf.evilChainLength > VConf.goodChainLength && VConf.goodChainLength > VConf.confirmations) {
-        logger.debug(s"ATTACK IS SUCCESSFUL.....")
+        logger.debug(s"ATTACK SUCCEEDED NOW..... $timestamp, ${self.path}")
         VConf.attackSuccessful = true
         VConf.attackSuccessfulInBlocks = VConf.evilChainLength
         discoveryActor ! DiscoveryActions.AnnounceNeighbours
@@ -211,7 +211,7 @@ class NodeActor (
 
       // checks if attack failed
       if (((VConf.evilChainLength > VConf.attackDuration && VConf.goodChainLength > VConf.confirmations) || VConf.goodChainLength > VConf.attackDuration) && !VConf.attackSuccessful) {
-        logger.debug(s"ATTACK FAILED.....  $timestamp, ${self.path}")
+        logger.debug(s"ATTACK FAILED NOW.....  $timestamp, ${self.path}")
         VConf.attackFailed = true
         discoveryActor ! DiscoveryActions.AnnounceNeighbours
       }

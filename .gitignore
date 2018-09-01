@@ -1,7 +1,6 @@
 .idea
 *.class
-*.log
-logs
+logfile.log
 dist/
 target/
 node_modules/

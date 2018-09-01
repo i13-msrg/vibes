@@ -273,13 +273,13 @@ object ReducerActor extends LazyLogging {
 
       if (VConf.attackFailed) {
         attackSucceeded = -1
-        logger.debug(s"ATTACK FAILED")
+        logger.debug(s"RESULT: ATTACK FAILED")
       } else if (VConf.attackSuccessful) {
         successfulAttackInBlocks = VConf.attackSuccessfulInBlocks
         attackSucceeded = 1
-        logger.debug(s"ATTACK SUCCESSFUL")
+        logger.debug(s"RESULT: ATTACK IS SUCCESSFUL")
       } else {
-        logger.debug(s"ATTACK NEITHER SUCCESSFUL NOR FAILED")
+        logger.debug(s"RESULT: ATTACK YET UNDECIDED")
       }
 
       // zero confirmations -> always successful attack
