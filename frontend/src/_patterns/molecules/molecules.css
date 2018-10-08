@@ -1,3 +1,7 @@
-@import 'simmulation-events/styles.css';
+@import 'simulation-events/styles.css';
 @import 'events-range/styles.css';
 @import 'simulation-summary/styles.css';
+@import 'attack-summary/styles.css';
+@import 'transaction-summary/styles.css';
+@import 'block-tree/styles.css';
+@import 'flood-attack-summary/styles.css';

@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
 import com.vibes.models.{VBlock, VNode, VTransaction}
 import com.vibes.utils.{VConf, VExecution}
@@ -12,17 +13,41 @@ import org.joda.time.DateTime
 import scala.collection.SortedMap
 import scala.concurrent.duration._
 
-/**
-  * A node in a blockchain network. Currently represents both miner & a full node
-  */
-class NodeActor(
+/*
+* The NodeActor represents both a full Node and a miner in the blockchain network. As
+* described in VIBES Chapter 6, it is a good opportunity for future work to differentiate between
+* both.
+* In VIBES, each NodeActor has its own blockchain, pool of pending transactions
+* (candidates for the next block) and neighbours. It also works to solve the next block in
+* the chain. A Node has its own priority queue of executables and the next solution of
+* a block by this Node is represented by the first executable of type MineBlock in the queue.
+* As a reminder, a NodeActor’s executables types are either MineBlock, IssueTransaction,
+* PropagateTransaction or PropagateBlock.
+* A vote is represented by a best guess (timestamped work request) sent to the
+* Coordinator. The NodeActor sends votes to the Coordinator and is only allowed to
+* execute a piece of work once the Coordinator has granted a permission based on the votes.
+* Moreover, this Actor receives and propagates blocks from other Nodes in the network. If
+* a received block comes from a longer chain, the Actor takes care to follow synchronization
+* steps described in Section 2.7. The Node synchronizes its blockchain, pool of transactions,
+* rolls back any orphan blocks and adds any valid transactions from orphan blocks back
+* to the transaction pool if they are not already included in the chain. Besides blocks, the
+* NodeActor also takes care to propagate and create transactions in the network.
+*
+* In BBSS Chapter 4, the approach for transaction spam and alternative history attacks is
+* described. In case of an active alternative history attack the nodes only accept blocks by
+* miners of the same honesty attribute type. The status of the attack is checked and if the
+* attack is finished, the neighbours are updated to allow neighbours of a different honesty type.
+*
+*/
+class NodeActor (
   masterActor: ActorRef,
   nodeRepoActor: ActorRef,
   discoveryActor: ActorRef,
   reducerActor: ActorRef,
   lat: Double,
-  lng: Double
-) extends Actor {
+  lng: Double,
+  isEvil: Option[Boolean]
+) extends Actor with LazyLogging {
   implicit val timeout: Timeout = Timeout(20.seconds)
   private var node = new VNode(
     id = UUID.randomUUID().toString,
@@ -32,32 +57,45 @@ class NodeActor(
     neighbourActors = Set.empty,
     nextRecipient = None,
     lat = lat,
-    long = lng
+    long = lng,
+    isMalicious = isEvil
   )
 
   /**
     * Every node has a priority queue of executables, current implementation utilizes TreeMap / SortedMap instead
     * because I'd also need to filter the Queue by criteria later. Node workRequest with those executables to the MasterActor
-    * and the Node with the smallest timestamp for workRequestd executable receives the right to fast-forward the network
+    * and the Node with the smallest timestamp for workRequested executable receives the right to fast-forward the network
     * aka run the executable and its Queue. The executable is then removed from the Queue, then the appropriate Nodes
     * recompute their Queues and workRequest again recursively
     */
   private var executables: SortedMap[VExecution.WorkRequest, VExecution.Value] = SortedMap.empty
 
+  var blockList: Set[VBlock] = Set.empty
+
+
   private def addExecutablesForMineBlock(now: DateTime): Unit = {
-    val timestamp     = node.createTimestampForNextBlock(now)
+    val timestamp = node.createTimestampForNextBlock(now)
     val exWorkRequest = node.createExecutableWorkRequest(self, timestamp, VExecution.ExecutionType.MineBlock)
+
     val value = () => {
-      println(s"BLOCK MINED AT SIZE ${node.blockchain.size}..... $timestamp, ${self.path}")
-      node = node.addBlock(VBlock.createWinnerBlock(node, timestamp))
+      val newBlock = VBlock.createWinnerBlock(node, timestamp)
+
+      if (VConf.isAlternativeHistoryAttack) {
+        addBlockIfAlternativeHistoryAttack(timestamp, newBlock)
+      } else {
+        logger.debug(s"BLOCK MINED AT LEVEL ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
+        node = node.addBlock(newBlock)
+      }
+
+      reducerActor ! ReducerActions.AddBlock(newBlock)
       addExecutablesForPropagateOwnBlock(timestamp)
       nodeRepoActor ! NodeRepoActions.AnnounceNextWorkRequestAndMine(timestamp)
     }
     executables += exWorkRequest -> value
   }
 
-  private def addExecutableForIssueTransaction(toActor: ActorRef, timestamp: DateTime): Unit = {
-    val transaction = VTransaction.createOne(self, toActor, timestamp)
+  private def addExecutableForIssueTransaction(toActor: ActorRef, timestamp: DateTime, isFloodAttack: Boolean): Unit = {
+    val transaction = VTransaction.createOne(self, toActor, timestamp, node.blockchain.size, isFloodAttack)
     val exWorkRequest =
       transaction.createExecutableWorkRequest(self, self, timestamp, VExecution.ExecutionType.IssueTransaction)
     val value = () => {
@@ -72,7 +110,7 @@ class NodeActor(
     node.neighbourActors.foreach { neighbour =>
       val exWorkRequest = node.createExecutableWorkRequest(
         neighbour,
-        timestamp.plusMillis(VConf.propagationDelay),
+        timestamp.plusMillis(VConf.blockPropagationDelay),
         VExecution.ExecutionType.PropagateOwnBlock
       )
       val hash = node.createBlockchainHash()
@@ -89,7 +127,7 @@ class NodeActor(
       val exWorkRequest = transaction
         .createExecutableWorkRequest(self,
                                      neighbour,
-                                     timestamp.plusMillis(150), // todo
+                                     timestamp.plusMillis(VConf.transactionPropagationDelay), // todo
                                      VExecution.ExecutionType.PropagateTransaction)
       val value = () => {
         neighbour ! NodeActions.ReceiveTransaction(node, transaction, exWorkRequest.timestamp)
@@ -102,10 +140,13 @@ class NodeActor(
   private def addExecutablesForPropagateExternalBlock(now: DateTime): Unit = {
     node.neighbourActors.foreach { neighbour =>
       val workRequest = node.createExecutableWorkRequest(neighbour,
-                                                         now.plusMillis(VConf.propagationDelay),
+                                                         now.plusMillis(VConf.blockPropagationDelay),
                                                          VExecution.ExecutionType.PropagateExternalBlock)
       val hash = node.createBlockchainHash()
       val value = () => {
+        if (node.blockchain.isEmpty) {
+          logger.debug(s"empty ${self.path}")
+        }
         neighbour ! NodeActions.ReceiveBlock(node, node.blockchain.head, workRequest.timestamp, hash)
         self ! NodeActions.CastNextWorkRequestOnly
       }
@@ -113,19 +154,94 @@ class NodeActor(
     }
   }
 
+  // method only for alternative history attack
+  private def addBlockIfAlternativeHistoryAttack(timestamp: DateTime, newBlock: VBlock): Unit = {
+    if (node.isMalicious.contains(true)) {
+      logger.debug(s"EVIL BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
+    } else {
+      logger.debug(s"GOOD BLOCK MINED AT LEVEL..... ${node.blockchain.size + 1}..... $timestamp, ${self.path}")
+    }
+
+    // checks if to add block
+    if (VConf.attackSuccessful) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: VConf.attackSuccessful")
+      node = node.addBlock(newBlock)
+    } else if (VConf.attackFailed) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: VConf.attackFailed")
+      node = node.addBlock(newBlock)
+    } else if (newBlock.level == 1 && node.isMalicious != newBlock.origin.isMalicious) { // block zero is the common block
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: newBlock.level == 1")
+      node = node.addBlock(newBlock)
+    } else if (newBlock.level == 0) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: newBlock.level == 0")
+      node = node.addBlock(newBlock)
+    } else if (node.isMalicious == newBlock.origin.isMalicious && node.blockchain.head.timestamp.isBefore(newBlock.timestamp)) {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: added newBlock")
+      node = node.addBlock(newBlock)
+    } else {
+      logger.debug(s"addBlockIfAlternativeHistoryAttack: Didn't add newBlock  ${newBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
+    }
+
+    // checks if attack is finished
+    if (!VConf.attackFailed && !VConf.attackSuccessful) {
+      // sets good and evil chain length
+      if (node.blockchain.size == 1) {
+        VConf.evilChainLength = node.blockchain.size
+        VConf.goodChainLength = node.blockchain.size
+      } else if (node.isMalicious.contains(true)) {
+        if (node.blockchain.size > VConf.evilChainLength) {
+          VConf.evilChainLength = node.blockchain.size
+        }
+      } else if (node.isMalicious.contains(false)) {
+        if (node.blockchain.size > VConf.goodChainLength) {
+          VConf.goodChainLength = node.blockchain.size
+        }
+      }
+
+      // prints chain lengths
+      logger.debug(s"GOOD CHAIN LENGTH: ${VConf.goodChainLength}; BAD CHAIN LENGTH ${VConf.evilChainLength}")
+
+      // checks if attack succeeded
+      if (VConf.evilChainLength > VConf.goodChainLength && VConf.goodChainLength > VConf.confirmations) {
+        logger.debug(s"ATTACK SUCCEEDED NOW..... $timestamp, ${self.path}")
+        VConf.attackSuccessful = true
+        VConf.attackSuccessfulInBlocks = VConf.evilChainLength
+        discoveryActor ! DiscoveryActions.AnnounceNeighbours
+      }
+
+      // checks if attack failed
+      if (((VConf.evilChainLength > VConf.attackDuration && VConf.goodChainLength > VConf.confirmations) || VConf.goodChainLength > VConf.attackDuration) && !VConf.attackSuccessful) {
+        logger.debug(s"ATTACK FAILED NOW.....  $timestamp, ${self.path}")
+        VConf.attackFailed = true
+        discoveryActor ! DiscoveryActions.AnnounceNeighbours
+      }
+
+      // updates neighbours to make only evil nodes work with evil nodes and good nodes with good nodes after one common block
+      if (newBlock.level == 0) {
+        discoveryActor ! DiscoveryActions.AnnounceNeighbours
+      }
+    }
+  }
+
   override def preStart(): Unit = {
-    println(s"NodeActor started ${self.path}")
+    logger.debug(s"NodeActor started ${self.path}")
 
     discoveryActor ! DiscoveryActions.ReceiveNode(node)
   }
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
-    println(s"PRERESTART.... ${self.path}")
+    VConf.attackSuccessful = false
+    VConf.goodChainLength = 0
+    VConf.evilChainLength = 0
+    VConf.attackFailed = false
+    logger.debug(s"REASON.... $reason")
+    logger.debug(s"MESSAGE.... $message")
+    logger.debug(s"PRERESTART.... ${self.path}")
   }
 
   override def receive: Receive = {
     case NodeActions.StartSimulation(now) =>
-      println(s"StartSimulation ${now} ${self}")
+      logger.debug(s"StartSimulation $now $self")
       addExecutablesForMineBlock(now)
 
       self ! NodeActions.CastNextWorkRequestOnly
@@ -169,17 +285,40 @@ class NodeActor(
       head._2()
 
     case NodeActions.ReceiveBlock(origin, block, now, hash) =>
-      if (block.level + 1 > node.blockchain.size) {
+      if (VConf.isAlternativeHistoryAttack) {
+        // in case of alternative history attack, only propagate external blocks for certain conditions
+        if (block.level + 1 > node.blockchain.size && (node.isMalicious.contains(true) == block.origin.isMalicious.contains(true) || block.level == 0) && !VConf.attackSuccessful && !VConf.attackFailed) {
+          val incomingBlock = block.addRecipient(origin, node, now)
 
-        val incomingBlock = block.addRecipient(origin, node, now)
+          if (NodeActor.shouldSynch(node, hash)) {
+            node = node.synch(origin, origin.blockchain, now)
+          } else {
+              logger.debug(s"NodeActions.ReceiveBlock: Added newBlock  ${node.isMalicious}, ${origin.isMalicious}, ${incomingBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
+              node = node.addBlock(incomingBlock)
+          }
+          addExecutablesForPropagateExternalBlock(now)
+        } else if (block.level + 1 > node.blockchain.size && (VConf.attackSuccessful || VConf.attackFailed)) {
+          val incomingBlock = block.addRecipient(origin, node, now)
 
-        if (NodeActor.shouldSynch(node, hash)) {
-          node = node.synch(origin, origin.blockchain, now)
-        } else {
-          node = node.addBlock(incomingBlock)
+          if (NodeActor.shouldSynch(node, hash)) {
+            node = node.synch(origin, origin.blockchain, now)
+          } else {
+              logger.debug(s"NodeActions.ReceiveBlock: Added newBlock  ${node.isMalicious}, ${origin.isMalicious}, ${incomingBlock.level}, ${VConf.attackSuccessful} and ${VConf.attackFailed}")
+              node = node.addBlock(incomingBlock)
+          }
+          addExecutablesForPropagateExternalBlock(now)
         }
+      } else {
+        if (block.level + 1 > node.blockchain.size) {
+          val incomingBlock = block.addRecipient(origin, node, now)
 
-        addExecutablesForPropagateExternalBlock(now)
+          if (NodeActor.shouldSynch(node, hash)) {
+            node = node.synch(origin, origin.blockchain, now)
+          } else {
+            node = node.addBlock(incomingBlock)
+          }
+          addExecutablesForPropagateExternalBlock(now)
+        }
       }
       self ! NodeActions.CastNextWorkRequestOnly
 
@@ -187,7 +326,7 @@ class NodeActor(
       node = node.exchangeNeighbours(neighbours)
 
     case NodeActions.IssueTransaction(toActor, time) =>
-      addExecutableForIssueTransaction(toActor, time)
+      addExecutableForIssueTransaction(toActor, time, false)
 
     case NodeActions.ReceiveTransaction(origin, transaction, timestamp) =>
       if (node.isTransactionNew(transaction)) {
@@ -200,6 +339,9 @@ class NodeActor(
 
     case NodeActions.End =>
       reducerActor ! ReducerActions.ReceiveNode(node)
+
+    case NodeActions.IssueTransactionFloodAttack(toActor, time) =>
+      addExecutableForIssueTransaction(toActor, time, true)
   }
 }
 
@@ -210,8 +352,9 @@ object NodeActor {
     discoveryActor: ActorRef,
     reducerActor: ActorRef,
     lat: Double,
-    lng: Double
-  ): Props = Props(new NodeActor(masterActor, nodeRepoActor, discoveryActor, reducerActor, lat, lng))
+    lng: Double,
+    isEvil: Option[Boolean] = None
+  ): Props = Props(new NodeActor(masterActor, nodeRepoActor, discoveryActor, reducerActor, lat, lng, isEvil))
   def shouldSynch(node: VNode, hash: Int): Boolean = {
     node.createBlockchainHash() != hash
   }

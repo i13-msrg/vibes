@@ -25,3 +25,38 @@
   top: 14px;
   left: 14px;
 }
+
+
+.configuration-bitcoin-input__input {
+  background-color: var(--blue);
+  width: 195px;
+  padding-left: 120px;
+  height: 51px;
+  border: none;
+  font-size: 14px;
+  font-weight: 300;
+  color: white;
+  appearance: none;
+  text-align: right;
+
+&::placeholder {
+   color: white;
+ }
+}
+
+.configuration-bitcoin-input__icon {
+  width: 24px;
+  color: white;
+  position: absolute;
+  top: 14px;
+  left: 14px;
+}
+
+.configuration-bitcoin-input__description {
+  position: absolute;
+  top: 20px;
+  left: 50px;
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+}

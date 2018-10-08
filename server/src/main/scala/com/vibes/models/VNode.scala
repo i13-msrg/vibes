@@ -10,7 +10,7 @@ import org.joda.time.DateTime
 import scala.util.Random
 import scala.util.hashing.MurmurHash3
 
-class VNode(
+class VNode (
   val id: String,
   val actor: ActorRef,
   val blockchain: List[VBlock],
@@ -18,7 +18,8 @@ class VNode(
   val neighbourActors: Set[ActorRef],
   val nextRecipient: Option[ActorRef],
   val lat: Double,
-  val long: Double
+  val long: Double,
+  val isMalicious: Option[Boolean]
 ) {
   def copy(
     id: String = id,
@@ -28,9 +29,10 @@ class VNode(
     neighbourActors: Set[ActorRef] = neighbourActors,
     nextRecipient: Option[ActorRef] = nextRecipient,
     lat: Double = lat,
-    long: Double = long
+    long: Double = long,
+    isMalicious: Option[Boolean] = isMalicious
   ): VNode = {
-    new VNode(id, actor, blockchain, transactionPool, neighbourActors, nextRecipient, lat, long)
+    new VNode(id, actor, blockchain, transactionPool, neighbourActors, nextRecipient, lat, long, isMalicious)
   }
 
   def createExecutableWorkRequest(toActor: ActorRef,
@@ -102,12 +104,14 @@ class VNode(
     }
 
     val newTransactionPool = VTransaction.createNewTransactionPool(longerBlockchain, tail, transactionPool)
+
     // add itself as a recipient to all unreceived blocks
     longerBlockchain.foreach { block =>
       if (!block.containsRecipient(this)) {
         block.addRecipient(origin, this, now)
       }
     }
+
     copy(
       blockchain = longerBlockchain,
       transactionPool = newTransactionPool

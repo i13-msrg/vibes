@@ -1,7 +1,8 @@
 package com.vibes.actors
 
-import akka.actor.{Actor, ActorContext, ActorRef, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions._
 import com.vibes.utils.{VConf, VExecution}
 import org.joda.time._
@@ -40,7 +41,7 @@ import scala.util.Random
   * while blocking all others. The current solution blocks only in particular cases, therefore is much faster,
   * but messier.
   */
-class MasterActor extends Actor {
+class MasterActor extends Actor with LazyLogging{
   implicit val timeout: Timeout = Timeout(20.seconds)
 
   /**
@@ -58,6 +59,11 @@ class MasterActor extends Actor {
     */
   private var currentNodeActors: Set[ActorRef]         = Set.empty
   private var numberOfWorkRequests: Map[ActorRef, Int] = Map.empty
+
+  /**
+    * Used for detailed logging to know what is happening in very large scale simulations
+    */
+  private var detailedLoggingEnabled: Boolean = false
 
   /**
     * Makes sure to update neighbours table at roughly lastNeighbourDiscoveryDate time intervals
@@ -89,7 +95,7 @@ class MasterActor extends Actor {
   (1 to VConf.numberOfNodes).foreach(_ => nodeRepoActor ! NodeRepoActions.RegisterNode)
 
   override def preStart(): Unit = {
-    println(s"MasterActor started ${self.path}")
+    logger.debug(s"MasterActor started ${self.path}")
   }
 
   override def receive: Receive = {
@@ -100,17 +106,19 @@ class MasterActor extends Actor {
         * and start
         */
       context.system.scheduler.scheduleOnce(3000.millisecond) {
+        logger.debug(s"Announce Neighbours ${self.path}")
         discoveryActor ! DiscoveryActions.AnnounceNeighbours
       }
 
       context.system.scheduler.scheduleOnce(7000.millisecond) {
+        logger.debug(s"Announce Start ${self.path}")
         nodeRepoActor ! NodeRepoActions.AnnounceStart(DateTime.now)
       }
 
       sender ! currentPromise
 
     case MasterActions.FinishEvents(events) =>
-      println("FINISH EVENTS...")
+      logger.debug("FINISH EVENTS...")
       currentPromise.success(events)
 
     case MasterActions.CastWorkRequest(workRequest) =>
@@ -128,31 +136,32 @@ class MasterActor extends Actor {
           // the last workRequest goes on
           currentNodeActors += workRequest.fromActor
           // assert no workRequest should be received more than once
-          assert(!workRequests.contains(workRequest))
+          assert(!workRequests.contains(workRequest), "no workRequest should be received more than once")
           workRequests += workRequest
 
           // have all workRequests been collected?
           if (workRequests.size == VConf.numberOfNodes) {
-            // number of actors that requested work should be the smae of number of nodes (aka each requested work once)
-            assert(currentNodeActors.size == VConf.numberOfNodes)
+            // number of actors that requested work should be the same of number of nodes (aka each requested work once)
+            assert(currentNodeActors.size == VConf.numberOfNodes, "number of actors that requested work should be the same of number of nodes (aka each requested work once")
             // assert each requested work once, checked in an alternative way
-            assert(workRequests.map(_.fromActor).toSet.size == workRequests.size)
+            assert(workRequests.map(_.fromActor).toSet.size == workRequests.size, "each requested work once, checked in an alternative way")
 
             // Do neighbour discovery / update neighbour tables
             // this is a convenient, but not 100% correct place to execute this type of functionality
             val priorityWorkRequest = workRequests.head
             if (new org.joda.time.Duration(lastNeighbourDiscoveryDate, priorityWorkRequest.timestamp)
-                  .isLongerThan(
-                    new org.joda.time.Duration(
-                      lastNeighbourDiscoveryDate,
-                      lastNeighbourDiscoveryDate.plusSeconds(VConf.neighboursDiscoveryInterval))
-                  )) {
+              .isLongerThan(
+                new org.joda.time.Duration(
+                  lastNeighbourDiscoveryDate,
+                  lastNeighbourDiscoveryDate.plusSeconds(VConf.neighboursDiscoveryInterval))
+              ) ) {
               lastNeighbourDiscoveryDate = priorityWorkRequest.timestamp
               discoveryActor ! DiscoveryActions.AnnounceNeighbours
             }
 
             // if simulation over, announce end
             if (VConf.simulateUntil.isBefore(priorityWorkRequest.timestamp)) {
+              logger.debug(s"Announce End ${self.path} ${priorityWorkRequest.timestamp}")
               nodeRepoActor ! NodeRepoActions.AnnounceEnd
             } else if (priorityWorkRequest.executionType == VExecution.ExecutionType.MineBlock) {
               // if mining of a block should be performed,
@@ -160,7 +169,24 @@ class MasterActor extends Actor {
               // interval of mining
               currentNodeActors = Random.shuffle(currentNodeActors)
               val actorsVector = currentNodeActors.toVector
+
+              // checks if flood attack is active
+              if (VConf.floodAttackTransactionFee > 0) {
+                logger.debug(s"VConf.floodTransactionPool... ${VConf.floodAttackTransactionPool}")
+
+                (1 to VConf.floodAttackTransactionPool).foreach { _ =>
+                  val randomActorFrom = actorsVector(Random.nextInt(actorsVector.size))
+                  val randomActorTo = actorsVector(Random.nextInt(actorsVector.size))
+                  val now = priorityWorkRequest.timestamp
+                  randomActorFrom ! NodeActions.IssueTransactionFloodAttack(
+                    randomActorTo,
+                    now.plusMillis(50)
+                  )
+                }
+              }
+
               // distribute randomly requests to NodeActors to create throughput number of transactions within blockTime
+              logger.debug(s"Transactions are requested ${priorityWorkRequest.timestamp}")
               (1 to VConf.throughPut).foreach { index =>
                 val randomActorFrom = actorsVector(Random.nextInt(actorsVector.size))
                 val randomActorTo   = actorsVector(Random.nextInt(actorsVector.size))
@@ -174,7 +200,6 @@ class MasterActor extends Actor {
                   now.plusMillis(VConf.blockTime * 1000 / (index + 1))
                 )
               }
-
               // clear all workRequests
               workRequests = SortedSet.empty
               // let the first actor mine the block
@@ -190,8 +215,11 @@ class MasterActor extends Actor {
               // propagate a block. Imagine now A2 transfers transaction and workRequests with propagate block. Later
               // A2 receives the transaction from A1 and now has in the queue on top of propagate block propagate
               // transaction. Luckily, A2's first workRequest will have been discarded because of numberOfWorkRequests > 1
-              // and now A2 will be able to correctly workRequest with the most recene peace of executable on top
+              // and now A2 will be able to correctly workRequest with the most recent peace of executable on top
               // (which is propagate transaction)
+              if (detailedLoggingEnabled) {
+                logger.debug(s"Transactions are propagated ${priorityWorkRequest.timestamp}")
+              }
               var propagateWorkRequests: List[VExecution.WorkRequest] =
                 List.empty
               while (workRequests.nonEmpty && workRequests.head.executionType == VExecution.ExecutionType.PropagateTransaction) {
@@ -233,6 +261,9 @@ class MasterActor extends Actor {
               // and carry on
               // The "from" actor will propagate the block and then cast a new workRequest, the receiving actor
               // will receive the block and in ReceiveBlock cast a new workRequest as well
+              if (detailedLoggingEnabled) {
+                logger.debug(s"Blocks are propagated ${priorityWorkRequest.timestamp}")
+              }
               workRequests = workRequests.tail
               workRequests = workRequests.filter(_.fromActor != priorityWorkRequest.toActor)
               priorityWorkRequest.fromActor ! NodeActions.ProcessNextExecutable(priorityWorkRequest)

@@ -1,6 +1,7 @@
 .simulation {
   max-width: 1024px;
-  margin: 48px auto auto;
+  margin: 18px auto auto;
+  margin-bottom: 48px;
 
   @media (max-width: 1120px) {
     margin: 48px;
@@ -29,6 +30,29 @@
   height: 205px;
   width: 318px;
   grid-area: summary;
+}
+
+.attack__grid {
+  display: grid;
+  grid-row-gap: 10px;
+  grid-template-columns: 688px 318px;
+  grid-template-rows: auto;
+  grid-template-areas:
+          "block_tree attack_summary"
+}
+
+.attack__summary {
+  padding: 20px;
+  height: 305px;
+  width: 294px;
+  grid-area: attack_summary;
+}
+
+.block__tree {
+  padding: 20px;
+  width: 631px;
+  height: 305px;
+  grid-area: block_tree;
 }
 
 .simulation__events {
@@ -60,6 +84,132 @@
   height: 40px;
   margin: 30px auto;
   font-size: 14px;
+}
 
+.simulation-pending-transactions__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
 
+.simulation-pending-transactions {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-pending-transactions;
+}
+
+.simulation-processed-transactions__grid {
+  margin: 10px auto;
+  display: grid;
+  grid-row-gap: 10px;
+  grid-template-columns: 688px 313px;
+  grid-template-rows: auto;
+  grid-template-areas:
+          "simulation-processed-transactions transaction_summary"
+}
+
+.transaction__summary {
+  padding: 20px;
+  height: 300px;
+  width: 294px;
+  grid-area: transaction_summary;
+}
+
+.simulation-processed-transactions__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-processed-transactions {
+  padding: 20px;
+  width: 631px;
+  height: 300px;
+  grid-area: simulation-processed-transactions;
+}
+
+.simulation-transaction-count-per-fee__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-transaction-count-per-fee {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-transaction-count-per-fee;
+}
+
+.confirmation-time-per-fee__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.confirmation-time-per-fee {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: confirmation-time-per-fee;
+}
+
+.simulation-time-between-blocks__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-time-between-blocks {
+  margin: 10px auto;
+  padding: 20px;
+  width: 982px;
+  height: 264px;
+  grid-area: simulation-time-between-blocks;
+}
+
+.simulation-flood-attack__grid {
+  margin: 10px auto;
+  display: grid;
+  grid-row-gap: 10px;
+  grid-template-columns: 688px 313px;
+  grid-template-rows: auto;
+  grid-template-areas:
+          "simulation-flood-attack flood-attack_summary"
+}
+
+.flood-attack__summary {
+  padding: 20px;
+  height: 300px;
+  width: 294px;
+  grid-area: flood-attack_summary;
+}
+
+.simulation-flood-attack__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+  flex: 1 0 0;
+}
+
+.simulation-flood-attack {
+  padding: 20px;
+  width: 631px;
+  height: 300px;
+  grid-area: simulation-flood-attack;
 }

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import convertTimestampToDate from '../../../common/convertTimestampToDate';
-
 import { ConfigurationKey, ISvg } from '../../../common/types';
 
 
@@ -13,9 +12,23 @@ interface IConfigurationInputProps {
   configurationKey: ConfigurationKey;
   value: number | null;
   title: string;
+  strategy: string;
 }
 
 export default class ConfigurationInput extends React.Component<IConfigurationInputProps, {}> {
+  private static convertValue(value: number | null): string {
+    if (value === null) {
+      return '';
+    }
+
+        // if timestamp, don't judge me, other methods throw warnings
+    if (value > 10000000) {
+      return convertTimestampToDate(value);
+    }
+
+    return String(value);
+  }
+
   constructor(props: IConfigurationInputProps) {
     super(props);
 
@@ -30,12 +43,38 @@ export default class ConfigurationInput extends React.Component<IConfigurationIn
       type,
       value,
       title,
+      strategy,
     } = this.props;
 
     let classNames = 'configuration-input ';
 
     if (className) {
       classNames += className;
+    }
+
+    if (strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
+      return (
+            <div className={classNames} title={title}>
+                <input
+                    className="configuration-bitcoin-input__input"
+                    onChange={this.handleInputChange}
+                    placeholder={placeholder}
+                    type={type}
+                    value={ConfigurationInput.convertValue(value)}
+                    name={placeholder}
+                />
+                <svg
+                    viewBox={icon.viewBox}
+                    className="configuration-bitcoin-input__icon"
+                >
+                    <use xlinkHref={`#${icon.id}`} />
+                </svg>
+                <div className="configuration-bitcoin-input__description">
+                    {placeholder}
+                </div>
+
+            </div>
+      );
     }
 
     return (
@@ -45,7 +84,7 @@ export default class ConfigurationInput extends React.Component<IConfigurationIn
           placeholder={placeholder}
           onChange={this.handleInputChange}
           type={type}
-          value={this.convertValue(value)}
+          value={ConfigurationInput.convertValue(value)}
         />
         <svg
           viewBox={icon.viewBox}
@@ -55,19 +94,6 @@ export default class ConfigurationInput extends React.Component<IConfigurationIn
         </svg>
       </div>
     );
-  }
-
-  private convertValue(value: number | null): string {
-    if (value === null) {
-      return '';
-    }
-
-    // if timestamp, don't judge me, other methods throw warnings
-    if (value > 10000000) {
-      return convertTimestampToDate(value);
-    }
-
-    return String(value);
   }
 
   private handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {

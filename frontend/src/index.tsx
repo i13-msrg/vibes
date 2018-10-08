@@ -1,13 +1,10 @@
 // Externals A-z
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
 // Internals A-z
 import Header from './_patterns/atoms/header/Component';
 import Configuration from './_patterns/pages/configuration/Component';
 import Home from './_patterns/pages/home/Component';
-import convertTimestampToDate from './common/convertTimestampToDate';
-import convertToDisplayTime from './common/convertToDisplayTime';
 import { IConfiguration, Strategies } from './common/types';
 import './styles/vibes.css';
 import Simulation from './_patterns/pages/simulation/Component';
@@ -21,16 +18,17 @@ interface IVibesState {
 }
 
 enum Pages {
-  HOME,
-  CONFIGURATION,
-  SIMULATION,
+    HOME,
+    CONFIGURATION,
+    SIMULATION,
 }
 
 class Vibes extends React.Component<{}, IVibesState> {
   constructor(props: {}) {
     super(props);
 
-    // todo
+        // todo strategy is redundant, move strategy solely to configuration,
+      // since the strategy is needed on the server.
     this.state = {
       strategy: Strategies.GENERIC_SIMULATION,
       page: Pages.HOME,
@@ -40,12 +38,19 @@ class Vibes extends React.Component<{}, IVibesState> {
         numberOfNeighbours: 4,
         numberOfNodes: 10,
         simulateUntil: Date.now() + 3 * 3600000, // 3 hours from now
-        transactionSize: 250, // KB
-        throughput:  10,  // average number of transactions per blockTime
+        transactionSize: 250000, // B
+        throughput: 10,  // average number of transactions per blockTime
         latency: 900, // ms (latency + transfer + verification time),
         neighboursDiscoveryInterval: 3000, // seconds
-          blockSize: 1, // MB
-          networkBandwidth: 1, // MB per second
+        maxBlockSize: 1000, // KB
+        maxBlockWeight: 0, // KB
+        networkBandwidth: 1, // MB per second
+        strategy: Strategies.GENERIC_SIMULATION.toString(),
+        transactionPropagationDelay: 150, // ms
+        hashRate: 0, // Percentage of total network
+        confirmations: 0, // Blocks
+        transactionFee: 0, // target transaction fee of an attacker in Satoshi
+        transactionWeight: 0, // transaction weight of SegWit transaction
       },
     };
     this.handleStrategyChange = this.handleStrategyChange.bind(this);
@@ -56,7 +61,7 @@ class Vibes extends React.Component<{}, IVibesState> {
   }
 
   public componentDidMount() {
-    // prevent FOUC without much effort. IKR...
+        // prevent FOUC without much effort. IKR...
     setTimeout(() => {
       this.setState({ show: true });
     }, 300);
@@ -64,54 +69,120 @@ class Vibes extends React.Component<{}, IVibesState> {
 
   public render() {
     const {
-      page,
-      show,
-      configuration,
-      strategy,
-    } = this.state;
+            page,
+            show,
+            configuration,
+            strategy,
+        } = this.state;
 
     return (
-      <div>
-        {show && (
-          <div className="vibes">
-            <div className="vibes__header">
-              <Header />
+            <div>
+                {show && (
+                    <div className="vibes">
+                        <div className="vibes__header">
+                            <Header/>
+                        </div>
+                        <div className="vibes__content">
+                            {page === Pages.HOME && (
+                                <Home
+                                    onStrategyChange={this.handleStrategyChange}
+                                    onHomeNextClick={this.handleHomeNextClick}
+                                    strategy={strategy}
+                                />
+                            )}
+                            {page === Pages.CONFIGURATION && (
+                                <Configuration
+                                    onConfigurationNextClick={this.handleConfigurationNextClick}
+                                    onConfigurationBackClick={this.handleConfigurationBackClick}
+                                    onConfigurationChange={this.handleConfigurationChange}
+                                    configuration={configuration}
+                                />
+                            )}
+                            {page === Pages.SIMULATION && (
+                                <Simulation
+                                    {...this.state.configuration}
+                                    onNewSimulation={() => this.setState({ page: Pages.HOME })}
+                                />
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
-              <div className="vibes__content">
-                {page === Pages.HOME && (
-                  <Home
-                    onStrategyChange={this.handleStrategyChange}
-                    onHomeNextClick={this.handleHomeNextClick}
-                    strategy={strategy}
-                  />
-                )}
-                {page === Pages.CONFIGURATION && (
-                  <Configuration
-                    onConfigurationNextClick={this.handleConfigurationNextClick}
-                    onConfigurationBackClick={this.handleConfigurationBackClick}
-                    onConfigurationChange={this.handleConfigurationChange}
-                    configuration={configuration}
-                  />
-                )}
-                {page === Pages.SIMULATION && (
-                  <Simulation
-                    {...this.state.configuration}
-                    onNewSimulation={() => this.setState({ page: Pages.HOME })}
-                  />
-                )}
-              </div>
-          </div>
-        )}
-      </div>
     );
   }
 
   private handleStrategyChange(strategy: Strategies) {
-    this.setState({ strategy });
+    if (strategy === Strategies.BITCOIN_LIKE_BLOCKCHAIN) {
+      const configuration: IConfiguration = {
+        // settings for home pc
+        strategy: strategy.toString(),
+        simulateUntil: Date.now() + 6 * 3600000, // 6 hours from now
+        blockTime: 600, // seconds
+        numberOfNeighbours: 4,
+        numberOfNodes: 20,
+        neighboursDiscoveryInterval: 3000, // seconds
+        latency: 900, // ms (latency + transfer + verification time),
+        transactionSize: 1000, // B
+        maxBlockSize: 50000, // B
+        throughput: 50,  // average number of transactions per blockTime
+        transactionWeight: 2000, // transaction weight of SegWit transaction
+        maxBlockWeight: 200000, // weight
+        networkBandwidth: 1, // MB per second
+        transactionPropagationDelay: 150, // ms
+        hashRate: 30, // Percentage of total network
+        confirmations: 4, // Blocks
+        transactionFee: 0, // target transaction fee of an attacker in Satoshi
+
+          // realistic settings
+          /**
+           * blockTime: 600, // seconds
+           * numberOfNeighbours: 10,
+           * numberOfNodes: 10500,
+           * simulateUntil: Date.now() + 0.5 * 3600000, // half hour
+           * transactionSize: 600, // B
+           * throughput: 1300,  // average number of transactions per blockTime
+           * latency: 900, // ms (latency + transfer + verification time),
+           * neighboursDiscoveryInterval: 3000, // seconds
+           * maxBlockSize: 1000000, // B
+           * maxBlockWeight: 4000000, // weight
+           * networkBandwidth: 1, // MB per second
+           * strategy: strategy.toString(),
+           * transactionPropagationDelay: 150, // ms
+           * hashRate: 0, // Percentage of total network
+           * confirmations: 0, // Blocks
+           * transactionFee: 0, // target transaction fee of an attacker in Satoshi
+           * transactionWeight: 1200, // transaction weight of SegWit transaction
+           */
+      };
+      this.setState({ configuration });
+      this.setState({ strategy });
+    } else if (strategy === Strategies.GENERIC_SIMULATION) {
+      const configuration: IConfiguration = {
+        blockTime: 600, // seconds
+        numberOfNeighbours: 4,
+        numberOfNodes: 10,
+        simulateUntil: Date.now() + 3 * 3600000, // 3 hours from now
+        transactionSize: 250000, // B
+        throughput: 10,  // average number of transactions per blockTime
+        latency: 900, // ms (latency + transfer + verification time),
+        neighboursDiscoveryInterval: 3000, // seconds
+        maxBlockSize: 0, // KB
+        maxBlockWeight: 0, // weight
+        networkBandwidth: 1, // MB per second
+        strategy: strategy.toString(),
+        transactionPropagationDelay: 150, // ms
+        hashRate: 0, // Percentage of total network
+        confirmations: 0, // Blocks
+        transactionFee: 0, // target transaction fee of an attacker in Satoshi
+        transactionWeight: 0, // transaction weight of SegWit transaction
+      };
+      this.setState({ configuration });
+      this.setState({ strategy });
+    }
   }
 
   private handleHomeNextClick() {
-    this.setState({ page: Pages.CONFIGURATION  });
+    this.setState({ page: Pages.CONFIGURATION });
   }
 
   private handleConfigurationChange(configuration: IConfiguration) {
@@ -128,6 +199,6 @@ class Vibes extends React.Component<{}, IVibesState> {
 }
 
 ReactDOM.render(
-  <Vibes />,
-  document.getElementById('app'),
+    <Vibes/>,
+    document.getElementById('app'),
 );
