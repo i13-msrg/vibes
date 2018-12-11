@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IBlockMine, IBlockTransfer } from '../simmulation-events/types';
+import { IBlockMine, IBlockTransfer } from '../simulation-events/types';
 
 
 interface IEventsRangeProps {
@@ -13,6 +13,7 @@ export default class EventsRange extends React.Component<IEventsRangeProps, {}> 
 
   public render() {
     const { events, selectedIndex, onSelectIndex } = this.props;
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000; // offset in milliseconds
 
     return (
       <div className="events-range">
@@ -35,10 +36,12 @@ export default class EventsRange extends React.Component<IEventsRangeProps, {}> 
               onChange={e => onSelectIndex(Number(e.target.value), true)}
             />
             <div className="events-range__min-date">
-              {new Date(events[0].timestamp).toISOString().slice(0, -1).replace('T', ' ')}
+              {new Date(new Date(events[0].timestamp).getTime() - tzoffset).toISOString()
+                  .slice(0, -1).replace('T', ' ')}
             </div>
             <div className="events-range__max-date">
-              {new Date(events[events.length - 1].timestamp).toISOString().slice(0, -1).replace('T', ' ')}
+              {new Date(new Date(events[events.length - 1].timestamp).getTime() - tzoffset).toISOString()
+                  .slice(0, -1).replace('T', ' ')}
             </div>
           </div>
         )}

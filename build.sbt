@@ -39,7 +39,12 @@ lazy val server = (project in file("server"))
       Dependencies.scalaTest,
       Dependencies.slf4jApi,
       Dependencies.slf4jLog,
+      Dependencies.scalaLogging,
       Dependencies.logback,
+      Dependencies.breeze,
+      Dependencies.breezeNatives,
+      Dependencies.breezeViz,
+
       "de.heikoseeberger" %% "akka-http-circe" % "1.20.0-RC1",
       "ch.megard" %% "akka-http-cors" % "0.2.2"
     ) ++ Seq(

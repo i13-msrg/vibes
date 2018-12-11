@@ -1,15 +1,15 @@
 // Adopted from https://github.com/markmarkoh/datamaps/pull/409
-declare interface DataMapOptions {
+declare interface IDataMapOptions {
   element: HTMLElement;
   scope?: string;
-  geographyConfig?: DataMapGeographyConfigOptions;
-  bubblesConfig?: DataMapBubblesConfigOptions;
-  arcConfig?: DataMapArcConfigOptions;
-  setProjection?: (element: HTMLElement, options: DataMapOptions) => DataMapProjection;
+  geographyConfig?: IDataMapGeographyConfigOptions;
+  bubblesConfig?: IDataMapBubblesConfigOptions;
+  arcConfig?: IDataMapArcConfigOptions;
+  setProjection?: (element: HTMLElement, options: IDataMapOptions) => IDataMapProjection;
   fills?: { defaultFill: string, [key: string]: string };
   // done?: (datamap: {
   //   svg: d3.Selection<any>,
-  //   options: DataMapOptions,
+  //   options: IDataMapOptions,
   //   path: d3.geo.Path;
   //   projection: d3.geo.Projection;
   // }) => void;
@@ -17,7 +17,7 @@ declare interface DataMapOptions {
   projection?: string;
   height?: null | number;
   width?: null | number;
-  dataType?: "json" | "csv";
+  dataType?: 'json' | 'csv';
   dataUrl?: null | string;
   data?: any;
   filters?: any;
@@ -25,14 +25,14 @@ declare interface DataMapOptions {
   projectionConfig?: { rotation: any[] };
 }
 
-declare interface DataMapGeographyConfigOptions {
+declare interface IDataMapGeographyConfigOptions {
   dataUrl?: null | string;
   hideAntarctica?: boolean;
   hideHawaiiAndAlaska?: boolean;
   borderWidth?: number;
   borderOpacity?: number;
   borderColor?: string;
-  popupTemplate?: (geography: DataMapGeographyData, data: any) => string;
+  popupTemplate?: (geography: IDataMapGeographyData, data: any) => string;
   popupOnHover?: boolean;
   highlightOnHover?: boolean;
   highlightFillColor?: string;
@@ -41,15 +41,15 @@ declare interface DataMapGeographyConfigOptions {
   highlightBorderOpacity?: number;
 }
 
-declare interface DataMapBubblesConfigOptions {
+declare interface IDataMapBubblesConfigOptions {
   borderWidth?: number;
   borderOpacity?: number;
   borderColor?: string;
   popupOnHover?: boolean;
-  radius?: null | number,
-  popupTemplate?: (geography: DataMapGeographyData, data: DataMapBubbleDatum) => string;
+  radius?: null | number;
+  popupTemplate?: (geography: IDataMapGeographyData, data: IDataMapBubbleDatum) => string;
   fillOpacity?: number;
-  animate?: boolean,
+  animate?: boolean;
   highlightOnHover?: boolean;
   highlightFillColor?: string;
   highlightBorderColor?: string;
@@ -57,28 +57,28 @@ declare interface DataMapBubblesConfigOptions {
   highlightBorderOpacity?: number;
   highlightFillOpacity?: number;
   exitDelay?: number;
-  key?: any; //JSON.stringify
+  key?: any; // JSON.stringify
 }
 
-declare interface DataMapArcConfigOptions {
+declare interface IDataMapArcConfigOptions {
   strokeColor?: string;
   strokeWidth?: number;
   arcSharpness?: number;
   animationSpeed?: number;
   popupOnHover?: boolean;
-  popupTemplate?: (geography: DataMapGeographyData, data: any) => string;
+  popupTemplate?: (geography: IDataMapGeographyData, data: any) => string;
 }
 
-declare interface DataMapGeographyData {
+declare interface IDataMapGeographyData {
   properties: { name: string };
 }
 
-declare interface DataMapProjection {
+declare interface IDataMapProjection {
   // path: d3.geo.Path;
   // projection: d3.geo.Projection;
 }
 
-declare interface DataMapBubbleDatum {
+declare interface IDataMapBubbleDatum {
   latitude: number;
   longitude: number;
   radius: number;
@@ -90,7 +90,7 @@ declare interface DataMapBubbleDatum {
   [key: string]: any;
 }
 
-declare interface DataMapLabelOptions {
+declare interface IDataMapLabelOptions {
   labelColor?: string;
   lineWidth?: number;
   fontSize?: number;
@@ -98,12 +98,12 @@ declare interface DataMapLabelOptions {
   customLabelText: any;
 }
 
-declare interface DataMapArcDatum {
+declare interface IDataMapArcDatum {
   origin: string | {
-    latitude: number, longitude: number
+    latitude: number, longitude: number,
   };
   destination: string | {
-    latitude: number, longitude: number
+    latitude: number, longitude: number,
   };
   options?: {
     strokeWidth?: number;
@@ -113,19 +113,19 @@ declare interface DataMapArcDatum {
 }
 
 declare class Datamap {
-  constructor(options: DataMapOptions);
-  legend(): void;
-  updateChoropleth(data: string | any | null, options?: { reset: boolean, data: any }): void;
-  bubbles(data: ReadonlyArray<DataMapBubbleDatum>, opts?: DataMapGeographyConfigOptions): void;
-  labels(options?: DataMapLabelOptions): void;
-  resize(): void;
-  arc(data: ReadonlyArray<DataMapArcDatum>, options?: DataMapArcConfigOptions): void;
-  latLngToXY(lat: number, lng: number): any;
-  addLayer(className: string, id: string, first: boolean): SVGElement;
-  updatePopup(element: HTMLElement, d: DataMapGeographyData, options: DataMapGeographyConfigOptions): string;
-  addPlugin(name: string, pluginFn: Function): void;
+  constructor(options: IDataMapOptions);
+  public legend(): void;
+  public updateChoropleth(data: string | any | null, options?: { reset: boolean, data: any }): void;
+  public bubbles(data: ReadonlyArray<IDataMapBubbleDatum>, opts?: IDataMapGeographyConfigOptions): void;
+  public labels(options?: IDataMapLabelOptions): void;
+  public resize(): void;
+  public arc(data: ReadonlyArray<IDataMapArcDatum>, options?: IDataMapArcConfigOptions): void;
+  public latLngToXY(lat: number, lng: number): any;
+  public addLayer(className: string, id: string, first: boolean): SVGElement;
+  public updatePopup(element: HTMLElement, d: IDataMapGeographyData, options: IDataMapGeographyConfigOptions): string;
+  public addPlugin(name: string, pluginFn: () => void): void;
 }
 
-interface JQuery {
-  datamaps(options: DataMapOptions): void;
+interface IJQuery {
+  datamaps(options: IDataMapOptions): void;
 }

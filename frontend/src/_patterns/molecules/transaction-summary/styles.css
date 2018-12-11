@@ -1,0 +1,30 @@
+.transaction-summary__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #95A4B4;
+  text-transform: uppercase;
+}
+
+.transaction-summary__list {
+  overflow-x: auto;
+  list-style: none;
+  padding-left: 0;
+  height: 280px;
+}
+
+.transaction-summary__list-item {
+  color: #5e6f82;
+  font-size: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.transaction-summary__result {
+  font-weight: 600;
+}
+
+.transaction-summary__text {
+  flex: 1 0 auto;
+}

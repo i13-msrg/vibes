@@ -2,19 +2,31 @@ package com.vibes.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
+import com.typesafe.scalalogging.LazyLogging
 import com.vibes.actions.{DiscoveryActions, NodeActions}
 import com.vibes.models.VNode
-import scala.concurrent.ExecutionContext.Implicits.global
+import com.vibes.utils.VConf
 
 import scala.concurrent.duration._
 import scala.util.Random
 
-class DiscoveryActor(numberOfNeighbours: Int) extends Actor {
+/*
+* The DiscoveryActor updates Nodes’ neighbour tables on regular intervals, based on
+* the configuration parameter - neighbourDiscoveryInterval. The DiscoveryActor simply
+* dispatches a message to each Node with a new set of randomly chosen neighbours every
+* neighbourDiscoveryInterval seconds. I believe there is no specific algorithm or heuristic
+* behind the neighbour discovery in a blockchain based network, but even if there is - it
+* is easy to exchange the current randomized one since the DiscoveryActor is the central
+* authority there. Why don’t Nodes update their own tables instead of being managed by
+* another Actor? Because I wanted to offload work from them firstly, and secondly, it is
+* now very easy to exchange discovery implementation.
+*/
+class DiscoveryActor(numberOfNeighbours: Int) extends Actor with LazyLogging {
   private var currentNodes: List[VNode] = List.empty
   implicit private val timeout: Timeout = Timeout(20.seconds)
 
   override def preStart(): Unit = {
-    println(s"DisoveryActor started ${self.path}")
+    logger.debug(s"DiscoveryActor started ${self.path}")
   }
 
   override def receive: Receive = {
@@ -26,18 +38,24 @@ class DiscoveryActor(numberOfNeighbours: Int) extends Actor {
   }
 }
 
-object DiscoveryActor {
+object DiscoveryActor extends LazyLogging {
   def props(numberOfNeighbours: Int): Props = Props(new DiscoveryActor(numberOfNeighbours))
 
   def announceNeighbours(currentNodes: List[VNode], numberOfNeighbours: Int): Unit = {
-    println("Update neighbours table...")
+    logger.debug("Update neighbours table...")
     currentNodes.foreach(node =>
       node.actor ! NodeActions.ReceiveNeighbours(discoverNeighbours(currentNodes, node, numberOfNeighbours)))
   }
 
   def discoverNeighbours(currentNodes: List[VNode], node: VNode, numberOfNeighbours: Int): Set[ActorRef] = {
-    val nodes = currentNodes.filter(_ != node)
-    Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
+      if (VConf.isAlternativeHistoryAttack && !VConf.attackSuccessful && !VConf.attackFailed && (VConf.evilChainLength > 0 || VConf.goodChainLength > 0)) {
+        var nodes = currentNodes.filter(_.isMalicious == node.isMalicious)
+        nodes = nodes.filter(_ != node)
+        Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
+      } else {
+        val nodes = currentNodes.filter(_ != node)
+        Random.shuffle(nodes).take(numberOfNeighbours).map(_.actor).toSet
+      }
   }
 
   def updateCurrentNodes(currentNodes: List[VNode], node: VNode): List[VNode] = {

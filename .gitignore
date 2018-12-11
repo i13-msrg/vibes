@@ -1,7 +1,6 @@
 .idea
 *.class
-*.log
-logs
+logfile.log
 dist/
 target/
 node_modules/
@@ -19,10 +18,16 @@ npm-debug.log*
 Thumbs.db
 .vscode
 .sbtrc
-
+docs/ThesisTemplate
 
 # Frontend
 frontend/node_modules
 frontend/yarn.lock
 
 output.txt
+
+# Latex
+*.slg
+*.syg
+*.syi 
+docs/

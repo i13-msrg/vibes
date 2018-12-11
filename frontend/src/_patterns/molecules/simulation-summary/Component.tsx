@@ -12,9 +12,12 @@ interface ISimulationSummaryProps {
   timesNoOutliers10: number | null;
   timesNoOutliers50: number | null;
   timesNoOutliers90: number | null;
-  firstBlockNumberOfRecipents: number;
-  lastBlockNumberOfRecipents: number;
+  firstBlockNumberOfRecipients: number;
+  lastBlockNumberOfRecipients: number;
   totalNumberOfNodes: number;
+  staleBlocks: number;
+  strategy: string;
+  avgBlockTime: number;
 }
 
 export default class SimulationSummary extends React.Component<ISimulationSummaryProps, {}> {
@@ -23,9 +26,10 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
     const {
       duration,
       longestChainLength,
+      staleBlocks,
       longestChainSize,
-      firstBlockNumberOfRecipents,
-      lastBlockNumberOfRecipents,
+      firstBlockNumberOfRecipients,
+      lastBlockNumberOfRecipients,
       totalNumberOfNodes,
       timesWithOutliers10,
       timesWithOutliers50,
@@ -33,9 +37,124 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
       timesNoOutliers10,
       timesNoOutliers50,
       timesNoOutliers90,
+      strategy,
+      avgBlockTime,
     } = this.props;
 
     // map(() => ... yep)
+    if (strategy === 'BITCOIN_LIKE_BLOCKCHAIN') {
+      return (
+            <div className="simulation-summary">
+                <ul className="simulation-summary__list">
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Simulation duration
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(duration)}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Blockchain length
+                        </div>
+                        <div className="simulation-summary__result">
+                            {longestChainLength} Blocks
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Average block time
+                        </div>
+                        <div className="simulation-summary__result">
+                            {avgBlockTime} seconds
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Total number of stale blocks
+                        </div>
+                        <div className="simulation-summary__result">
+                            {staleBlocks}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Total number of nodes
+                        </div>
+                        <div className="simulation-summary__result">
+                            {totalNumberOfNodes}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            First block received by
+                        </div>
+                        <div className="simulation-summary__result">
+                            {firstBlockNumberOfRecipients} nodes
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Last block received by
+                        </div>
+                        <div className="simulation-summary__result">
+                            {lastBlockNumberOfRecipients} nodes
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Propagation delay 10%
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(timesWithOutliers10)}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Propagation delay 50%
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(timesWithOutliers50)}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Propagation delay 90%
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(timesWithOutliers90)}
+                        </div>
+                    </li>
+
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Propagation delay (NOOUTL.) 10%
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(timesNoOutliers10)}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Propagation delay (NOOUTL.) 50%
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(timesNoOutliers50)}
+                        </div>
+                    </li>
+                    <li className="simulation-summary__list-item">
+                        <div className="simulation-summary__text">
+                            Propagation delay (NOOUTL.) 90%
+                        </div>
+                        <div className="simulation-summary__result">
+                            {convertToDisplayTime(timesNoOutliers90)}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+      );
+    }
     return (
       <div className="simulation-summary">
         <ul className="simulation-summary__list">
@@ -76,7 +195,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
               First block received by
             </div>
             <div className="simulation-summary__result">
-              {firstBlockNumberOfRecipents} nodes
+              {firstBlockNumberOfRecipients} nodes
             </div>
           </li>
           <li className="simulation-summary__list-item">
@@ -84,7 +203,7 @@ export default class SimulationSummary extends React.Component<ISimulationSummar
               Last block received by
             </div>
             <div className="simulation-summary__result">
-              {lastBlockNumberOfRecipents} nodes
+              {lastBlockNumberOfRecipients} nodes
             </div>
           </li>
           <li className="simulation-summary__list-item">

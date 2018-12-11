@@ -17,10 +17,17 @@ import 'whatwg-fetch';
  * err.status or err.response fields.
  */
 export default function fetchCustom(url: string, options?: any): any {
+  console.log(url);
   document.dispatchEvent(new CustomEvent('fetch:start'));
 
   return (
-    fetch(url, options)
+    fetch(url, {
+      headers : {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+
+    })
       .then(response => response.json().then((body) => {
         if (response.status >= 400) {
           // it's payload: body.error instead of error: body.error in order to avoid

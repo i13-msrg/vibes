@@ -8,7 +8,8 @@
     "strictNullChecks": true,
     "jsx": "react",
     "allowJs": true,
-    "lib": ["es2017", "dom"]
+    "lib": ["es2017", "dom"],
+    "moduleResolution": "node"
   },
   "include": [
     "./src/**/*"

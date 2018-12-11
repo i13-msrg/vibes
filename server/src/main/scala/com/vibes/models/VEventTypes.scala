@@ -1,7 +1,6 @@
 package com.vibes.models
 
-import com.vibes.utils.VExecution.WorkRequest
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Encoder, Json}
 import io.circe.generic.semiauto._
 import org.joda.time.DateTime
 import io.circe.syntax._
@@ -16,14 +15,18 @@ object VEventType {
   implicit val OrderingVEventType: Ordering[VEventType] = Ordering.by(vote => (vote.timestamp, vote.eventType))
 }
 
-case class MinedBlock(origin: VNode, timestamp: DateTime, eventType: String = "MinedBlock") extends VEventType
+case class MinedBlock(origin: VNode, timestamp: DateTime, transactionPoolSize: Int, eventType: String = "MinedBlock", level: Int, transactions: Set[VTransaction], isMalicious: Option[Boolean]) extends VEventType
 
 object MinedBlock {
   implicit val minedBlockEncoder: Encoder[MinedBlock] = new Encoder[MinedBlock] {
     override def apply(minedBlock: MinedBlock): Json = Json.obj(
       ("timestamp", Json.fromString(minedBlock.timestamp.toString())),
       ("eventType", Json.fromString(minedBlock.eventType)),
-      ("origin", minedBlock.origin.asJson)
+      ("transactionPoolSize", Json.fromInt(minedBlock.transactionPoolSize)),
+      ("origin", minedBlock.origin.asJson),
+      ("level", Json.fromInt(minedBlock.level)),
+      ("processedTransactions", Json.fromInt(minedBlock.transactions.size)),
+      ("isMalicious", Json.fromBoolean(minedBlock.isMalicious.contains(true))),
     )
   }
 }
@@ -32,14 +35,12 @@ case class TransferBlock(from: VNode, to: VNode, timestamp: DateTime, eventType:
   extends VEventType
 
 object TransferBlock {
-  implicit val transferBlockEncoder: Encoder[TransferBlock] = new Encoder[TransferBlock] {
-    override def apply(transferBlock: TransferBlock): Json = Json.obj(
-      ("timestamp", Json.fromString(transferBlock.timestamp.toString())),
-      ("eventType", Json.fromString(transferBlock.eventType)),
-      ("toNode", transferBlock.to.asJson),
-      ("fromNode", transferBlock.from.asJson)
-    )
-  }
+  implicit val transferBlockEncoder: Encoder[TransferBlock] = (transferBlock: TransferBlock) => Json.obj(
+    ("timestamp", Json.fromString(transferBlock.timestamp.toString())),
+    ("eventType", Json.fromString(transferBlock.eventType)),
+    ("toNode", transferBlock.to.asJson),
+    ("fromNode", transferBlock.from.asJson)
+  )
 }
 
 case class ReducerResult(
@@ -54,9 +55,33 @@ case class ReducerResult(
   timesNoOutliers10: Float,
   timesNoOutliers50: Float,
   timesNoOutliers90: Float,
-  firstBlockNumberOfRecipents: Int,
-  lastBlockNumberOfRecipents: Int,
+  firstBlockNumberOfRecipients: Int,
+  lastBlockNumberOfRecipients: Int,
+  nonSegWitMaxTransactionsPerBlock: Int,
+  segWitMaxTransactionsPerBlock: Int,
+  nonSegWitMaxTPS: Double,
+  segWitMaxTPS: Double,
+  segWitMaxBlockWeight: Int,
+  transactions: List[Json],
   totalNumberOfNodes: Int,
+  staleBlocks: Int,
+  attackSucceeded: Int,
+  successfulAttackInBlocks: Int,
+  probabilityOfSuccessfulAttack: Double,
+  maximumSafeTransactionValue: Int,
+  maliciousBlockchainLength: Int,
+  goodBlockchainLength: Int,
+  attackDuration: Int,
+  B: Double,
+  o: Int,
+  alpha: Int,
+  k: Int,
+  tps: Double,
+  avgBlockTime: Int,
+  simulationStart: String,
+  confirmedFloodAttackTransactions: Int,
+  floodAttackSpentTransactionFees: Int,
+  confirmedTransactionsBelowTargetTransactionFee: Int
 )
 
 object ReducerResult {

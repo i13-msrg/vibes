@@ -3,8 +3,11 @@ package com.vibes.models
 import java.util.UUID
 
 import akka.actor.ActorRef
-import com.vibes.utils.VExecution
+import com.typesafe.scalalogging.LazyLogging
+import com.vibes.utils.{VConf, VExecution}
+import io.circe.{Encoder, Json}
 import org.joda.time.DateTime
+import io.circe.syntax._
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
@@ -15,9 +18,14 @@ class VTransaction(
   val origin: ActorRef,
   val recipient: ActorRef,
   val amount: Int,
-  private val recipients: ListBuffer[VRecipient] // maybe use mutable sorted set instead
+  val transactionFee: Int, //  satoshi per byte
+  var confirmation: Boolean,
+  var creationLevel: Int,
+  var confirmationLevel: Int,
+  var isFloodAttack: Boolean,
+  private val recipients: ListBuffer[VRecipient]
 ) {
-  def canEqual(a: Any) = a.isInstanceOf[VTransaction]
+  def canEqual(a: Any): Boolean = a.isInstanceOf[VTransaction]
   override def equals(that: Any): Boolean =
     that match {
       case that: VTransaction =>
@@ -35,9 +43,14 @@ class VTransaction(
     origin: ActorRef = origin,
     recipient: ActorRef = recipient,
     amount: Int = amount,
+    transactionFee: Int = transactionFee,
+    confirmation: Boolean = confirmation,
+    creationLevel: Int = creationLevel,
+    confirmationLevel: Int = confirmationLevel,
+    isFloodAttack: Boolean = isFloodAttack,
     recipients: ListBuffer[VRecipient] = recipients,
   ): VTransaction = {
-    new VTransaction(id, origin, recipient, amount, recipients)
+    new VTransaction(id, origin, recipient, amount, transactionFee, confirmation, creationLevel, confirmationLevel, isFloodAttack, recipients)
   }
 
   def createExecutableWorkRequest(
@@ -59,7 +72,17 @@ class VTransaction(
   }
 }
 
-object VTransaction {
+object VTransaction extends LazyLogging{
+  implicit val transactionEncoder: Encoder[VTransaction] = new Encoder[VTransaction] {
+    override def apply(transaction: VTransaction): Json = Json.obj(
+      ("transactionFee", transaction.transactionFee.asJson),
+      ("confirmation", transaction.confirmation.asJson),
+      ("confirmationLevel", transaction.confirmationLevel.asJson),
+      ("creationLevel", transaction.creationLevel.asJson),
+      ("isFloodAttack", transaction.isFloodAttack.asJson),
+    )
+  }
+
   def createNewTransactionPool(
     longerBlockchain: List[VBlock],
     tail: List[VBlock],
@@ -73,15 +96,25 @@ object VTransaction {
     potentialTransactions.diff(confirmedTransactions)
   }
 
-  def createOne(from: ActorRef, to: ActorRef, timestamp: DateTime): VTransaction = {
+  def createOne(from: ActorRef, to: ActorRef, timestamp: DateTime, creationLevel: Int, isFloodAttack: Boolean): VTransaction = {
     val amount = Random.nextInt(1000)
+    var transactionFee = Random.nextInt(125)
+    if (isFloodAttack) {
+      transactionFee = VConf.floodAttackTransactionFee
+    }
+    val confirmation = false
+    val confirmationLevel: Int = -1
     new VTransaction(
       UUID.randomUUID().toString,
       from,
       to,
       amount,
+      transactionFee,
+      confirmation,
+      creationLevel,
+      confirmationLevel,
+      isFloodAttack,
       ListBuffer.empty
     )
   }
-
 }

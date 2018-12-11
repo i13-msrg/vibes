@@ -15,6 +15,7 @@ object NodeActions {
   case class CastNextWorkRequestAndMine(timestamp: DateTime, sender: ActorRef)                       extends Action
   case class IssueTransaction(toActor: ActorRef, time: DateTime)                                     extends Action
   case class ReceiveTransaction(origin: VNode, transaction: VTransaction, time: DateTime)            extends Action
+  case class IssueTransactionFloodAttack(toActor: ActorRef, time: DateTime)                          extends Action
 
   case object CastNextWorkRequestOnly extends Action
   case object End                     extends Action
