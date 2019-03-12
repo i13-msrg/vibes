@@ -6,3 +6,7 @@ Following the success of Bitcoin, Ethereum and Hyperledger, Blockchain technolog
 
 [Attack and Vulnerability Simulation Framework for Bitcoin-like Blockchain Technologies](https://dl.acm.org/citation.cfm?id=3284017)
 
+# Installation 
+
+[Please follow the Appendix A (Page 82) in the documentation](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
+
