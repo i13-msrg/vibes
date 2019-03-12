@@ -6,7 +6,12 @@ Following the success of Bitcoin, Ethereum and Hyperledger, Blockchain technolog
 
 [Attack and Vulnerability Simulation Framework for Bitcoin-like Blockchain Technologies](https://dl.acm.org/citation.cfm?id=3284017)
 
-# Installation 
+# Installation & Documentation
 
 [Please follow the Appendix A (Page 82) in this documentation](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
 
+For detailed documentation, please review these two Master Theses:
+
+[VIBES: Fast Blockchain Simulations for Large-scale Peer-to-Peer Networks](https://github.com/i13-msrg/vibes/blob/master/docs/Master_Thesis_VIBES.pdf)
+
+[Bitcoin-like Blockchain Simulation System](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
