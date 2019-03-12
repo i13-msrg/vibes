@@ -8,5 +8,5 @@ Following the success of Bitcoin, Ethereum and Hyperledger, Blockchain technolog
 
 # Installation 
 
-[Please follow the Appendix A (Page 82) in the documentation](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
+[Please follow the Appendix A (Page 82) in this documentation](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
 
