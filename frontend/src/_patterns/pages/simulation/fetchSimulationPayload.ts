@@ -49,7 +49,7 @@ export default function fetchSimulationPayload(configuration: IConfiguration): P
   const { onNewSimulation, ...rest } = configuration;
 
   if (configuration) {
-    params = Object.entries(rest).map(([key, value]) => key + '=' + value).join('&');
+    params = Object.entries(rest).map(([key, value]) => `${key}=${value}`).join('&');
   }
 
   return _fetch(`http://localhost:8082/vibe?${params}`);

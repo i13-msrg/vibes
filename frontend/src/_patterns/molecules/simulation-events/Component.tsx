@@ -69,11 +69,10 @@ const renderEvent = (
             </svg>
             <span>
                 {(event.isMalicious && strategy === 'BITCOIN_LIKE_BLOCKCHAIN') ?
-                    'Block at level ' + (event.level + 1) + ' mined from \n' +
-                    ' malicious node ' + event.origin.id.slice(0, 8)
+                    `Block at level ${event.level + 1} mined from malicious node ${event.origin.id.slice(0, 8)}`
                     : strategy === 'BITCOIN_LIKE_BLOCKCHAIN' ?
-                        'Block at level ' + (event.level + 1) + ' mined from node ' + event.origin.id.slice(0, 8)
-                        : 'Block mined from node ' + event.origin.id.slice(0, 8)}
+                        `Block at level ${event.level + 1} mined from node ${event.origin.id.slice(0, 8)}`
+                        : `Block mined from node ${event.origin.id.slice(0, 8)}`}
             </span>
           </span>
           <div className="simulation-events__list-time">

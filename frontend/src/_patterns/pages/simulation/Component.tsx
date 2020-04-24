@@ -356,7 +356,8 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                     nonSegWitMaxTPS={simulationPayload.nonSegWitMaxTPS}
                                     actualTPS={simulationPayload.tps}
                                     blockchainSize={simulationPayload.longestChainSize}
-                                    totalNumberOfProcessedTransactions={simulationPayload.longestChainNumberTransactions}
+                                    totalNumberOfProcessedTransactions={simulationPayload.
+                                        longestChainNumberTransactions}
                                     blockchainLength={simulationPayload.longestChainLength}
                                 />
                             )}
@@ -410,9 +411,12 @@ export default class Simulation extends React.Component<ISimulationProps, ISimul
                                 </div>
                                 {simulationPayload && (
                                     <FloodAttackSummary
-                                      confirmedFloodAttackTransactions={simulationPayload.confirmedFloodAttackTransactions}
-                                      floodAttackSpentTransactionFees={simulationPayload.floodAttackSpentTransactionFees}
-                                      confirmedTransactionsBelowTargetTransactionFee={simulationPayload.confirmedTransactionsBelowTargetTransactionFee}
+                                      confirmedFloodAttackTransactions={simulationPayload.
+                                          confirmedFloodAttackTransactions}
+                                      floodAttackSpentTransactionFees={simulationPayload.
+                                          floodAttackSpentTransactionFees}
+                                      confirmedTransactionsBelowTargetTransactionFee={simulationPayload.
+                                          confirmedTransactionsBelowTargetTransactionFee}
                                     />
                                   )
                                 }
