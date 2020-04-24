@@ -80,7 +80,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
         if (goodBlockchainLength > i && maliciousBlockchainLength > i) {
           if (i === 1) {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td>{downToRightArrow}</td>
                                 <td>{downToLeftArrow}</td>
                                 <td/>
@@ -89,7 +89,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td>{downArrow}</td>
                                 <td>{downArrow}</td>
                                 <td/>
@@ -98,7 +98,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           }
           const row = (
-                        <tr key={i + '-row'}>
+                        <tr key={`${i}-row`}>
                             <td>{validBlock}</td>
                             <td>{invalidBlock}</td>
                             <td>{i + 1}</td>
@@ -108,7 +108,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
         } else if (maliciousBlockchainLength > i) {
           if (i === 1) {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td/>
                                 <td>{downToLeftArrow}</td>
                                 <td/>
@@ -117,7 +117,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td/>
                                 <td>{downArrow}</td>
                                 <td/>
@@ -126,7 +126,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           }
           const row = (
-                        <tr key={i + '-row'}>
+                        <tr key={`${i}-row`}>
                             <td/>
                             <td>{invalidBlock}</td>
                             <td>{i + 1}</td>
@@ -136,7 +136,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
         } else if (goodBlockchainLength > i) {
           if (i === 1) {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td>{downToRightArrow}</td>
                                 <td/>
                                 <td/>
@@ -145,7 +145,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td>{downArrow}</td>
                                 <td/>
                                 <td/>
@@ -155,7 +155,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
           }
 
           const row = (
-                        <tr key={i + '-row'}>
+                        <tr key={`${i}-row`}>
                             <td>{validBlock}</td>
                             <td/>
                             <td>{i + 1}</td>
@@ -167,7 +167,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
         if (goodBlockchainLength > i && maliciousBlockchainLength > i) {
           if (i === 1) {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td>{downToRightArrow}</td>
                                 <td>{downToLeftArrow}</td>
                                 <td/>
@@ -176,7 +176,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td>{downArrow}</td>
                                 <td>{downArrow}</td>
                                 <td/>
@@ -185,7 +185,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           }
           const row = (
-                        <tr key={i + '-row'}>
+                        <tr key={`${i}-row`}>
                             <td>{invalidBlock}</td>
                             <td>{validBlock}</td>
                             <td>{i + 1}</td>
@@ -195,7 +195,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
         } else {
           if (i === 1) {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td/>
                                 <td>{downToLeftArrow}</td>
                                 <td/>
@@ -204,7 +204,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           } else {
             const arrow = (
-                            <tr key={i + '-arrow'}>
+                            <tr key={`${i}-arrow`}>
                                 <td/>
                                 <td>{downArrow}</td>
                                 <td/>
@@ -213,7 +213,7 @@ export default class BlockTree extends React.Component<IBlockTreeProps, {}> {
             blockTreeBuffer.unshift(arrow);
           }
           const row = (
-                        <tr key={i + '-row'}>
+                        <tr key={`${i}-row`}>
                             <td/>
                             <td>{validBlock}</td>
                             <td>{i + 1}</td>

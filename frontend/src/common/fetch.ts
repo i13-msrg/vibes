@@ -17,7 +17,6 @@ import 'whatwg-fetch';
  * err.status or err.response fields.
  */
 export default function fetchCustom(url: string, options?: any): any {
-  console.log(url);
   document.dispatchEvent(new CustomEvent('fetch:start'));
 
   return (

@@ -8,8 +8,22 @@ Following the success of Bitcoin, Ethereum and Hyperledger, Blockchain technolog
 
 [For installation, Please follow the Appendix A (Page 82) in this documentation](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
 
+Hint: Using IntelliJ IDEA might make the setup with Scala/sbt easier.
+
 For detailed documentation, please review these two Master Theses:
 
 [VIBES: Fast Blockchain Simulations for Large-scale Peer-to-Peer Networks](https://github.com/i13-msrg/vibes/blob/master/docs/Master_Thesis_VIBES.pdf)
 
 [Bitcoin-like Blockchain Simulation System](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
+
+# Pictures
+
+![simulation](./pictures/DoubleSpendingAttack.png "Simulation - Double-Spending Attack")
+
+![simulation](./pictures/Transactions.png "Simulation - Transactions")
+
+![alt text](./pictures/FloodAttack.png "Simulation - Flood Attack")
+
+## Explanation for the Attack and Vulnerability Simulation Framework for Bitcoin-like Blockchain Technologies (Video)
+
+[![Watch the video](https://img.youtube.com/vi/-I066QuHgUQ/maxresdefault.jpg)](https://youtu.be/-I066QuHgUQ)
