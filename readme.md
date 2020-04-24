@@ -16,12 +16,15 @@ For detailed documentation, please review these two Master Theses:
 
 [Bitcoin-like Blockchain Simulation System](https://github.com/i13-msrg/vibes/blob/master/docs/Attacks-simulation-thesis.pdf)
 
-# Pictures
+## Screenshots
 
+#### First part of the simulation results including Double-Spending Attack
 ![simulation](./pictures/DoubleSpendingAttack.png "Simulation - Double-Spending Attack")
 
+#### Second part of the simulation results showing transaction statistics
 ![simulation](./pictures/Transactions.png "Simulation - Transactions")
 
+#### Second part of the simulation results showing transaction statistics during a Flood Attack
 ![alt text](./pictures/FloodAttack.png "Simulation - Flood Attack")
 
 ## Explanation for the Attack and Vulnerability Simulation Framework for Bitcoin-like Blockchain Technologies (Video)
