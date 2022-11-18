@@ -27,7 +27,7 @@
     "awesome-typescript-loader": "^5.2.1",
     "css-loader": "^3.5.3",
     "extract-text-webpack-plugin": "^3.0.2",
-    "html-webpack-plugin": "^4.2.0",
+    "html-webpack-plugin": "^4.5.2",
     "postcss-each": "^0.10.0",
     "postcss-import": "^12.0.1",
     "postcss-loader": "^3.0.0",
