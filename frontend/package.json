@@ -17,7 +17,7 @@
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-google-charts": "^3.0.15",
-    "webpack-cli": "^3.3.11",
+    "webpack-cli": "^3.3.12",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
@@ -27,7 +27,7 @@
     "awesome-typescript-loader": "^5.2.1",
     "css-loader": "^3.5.3",
     "extract-text-webpack-plugin": "^3.0.2",
-    "html-webpack-plugin": "^4.2.0",
+    "html-webpack-plugin": "^4.5.2",
     "postcss-each": "^0.10.0",
     "postcss-import": "^12.0.1",
     "postcss-loader": "^3.0.0",
@@ -39,7 +39,7 @@
     "tslint-loader": "^3.5.3",
     "tslint-react": "^5.0.0",
     "typescript": "^3.8.3",
-    "webpack": "^4.43.0",
+    "webpack": "^4.46.0",
     "webpack-dev-server": "^3.10.3"
   }
 }
